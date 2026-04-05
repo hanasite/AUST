@@ -14,6 +14,9 @@ https://github.com/TraceRecursion/AUST-ConnectEase   我们参考此文件实现
 我仅做了ui和打包发布工作。
 
 
+gitee仓库链接
+https://gitee.com/yosakun/aust
+
 
 #### 安装教程(可访问gitee快速下载)
 
