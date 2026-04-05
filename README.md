@@ -32,6 +32,12 @@ https://gitee.com/yosakun/aust/releases/download/v1.2-Lite/%E5%AE%89%E7%90%86%E6
 
 
 
+2026/4/6
+####手机版正式上线
+v1.0  链接
+https://gitee.com/yosakun/aust/releases/download/v1.0Pocket/AUST%E6%A0%A1%E5%9B%AD%E8%AE%A4%E8%AF%81%E5%8A%A9%E6%89%8B.apk
+
+
 
 #### 更新使用说明
 
