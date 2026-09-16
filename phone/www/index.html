@@ -234,8 +234,9 @@
   body.v2 .w-input input::placeholder{color:var(--sub);opacity:.75}
   body.v2 .w-input .ic{color:var(--sub)}
   body.v2 .w-eye{width:30px;height:30px;margin-right:-6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:none;border:none;padding:0;color:var(--sub);cursor:pointer;font-family:inherit}
-  body.v2 .w-check{display:flex;align-items:center;gap:9px;padding:14px 0 0;font-size:13px;font-weight:500;color:var(--fg);cursor:pointer;user-select:none}
-  body.v2 .w-check input{display:none}
+  body.v2 .w-check{position:relative;display:flex;align-items:center;gap:9px;padding:14px 0 0;font-size:13px;font-weight:500;color:var(--fg);cursor:pointer;user-select:none}
+  body.v2 .w-check input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+  body.v2 .w-check input:focus-visible+.box{outline:2px solid var(--blue);outline-offset:2px}
   body.v2 .w-check .box{width:19px;height:19px;border-radius:6px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:transparent;transition:background .15s,border-color .15s}
   body.v2 .w-check .box .ic{width:12px;height:12px}
   body.v2 .w-check input:checked+.box{background:var(--blue);border-color:var(--blue);color:var(--on-accent)}
@@ -916,8 +917,9 @@ function renderWifiList(networks){
     const row = document.createElement('div');
     row.className = 'f-row';
     const ric = document.createElement('div');
-    ric.className = 'f-ric' + (connected ? ' ok' : (target ? '' : ' gray'));
-    ric.appendChild(makeIc(connected ? 'ic-check' : (target ? 'ic-signal' : 'ic-lock')));
+    // 图标语义按「是否需要密码」分档（secured → 灰锁），与目标与否无关；已连行保持绿勾
+    ric.className = 'f-ric' + (connected ? ' ok' : (n.secured ? ' gray' : ''));
+    ric.appendChild(makeIc(connected ? 'ic-check' : (n.secured ? 'ic-lock' : 'ic-signal')));
     const info = document.createElement('div');
     info.className = 'f-rinfo';
     const name = document.createElement('div');
@@ -940,7 +942,7 @@ function renderWifiList(networks){
 function renderWifiCount(){
   const el = document.getElementById('wifi-target-count');
   if (!el) return;
-  const n = wifiNetworks.filter(x => wifiIsTarget(x.ssid) && !wifiIsConnected(x.ssid)).length;
+  const n = wifiNetworks.filter(x => wifiIsTarget(x.ssid)).length; // 全部已发现目标（含已连，连接后不回退）
   el.textContent = '已发现 ' + n + ' 个目标';
 }
 function renderWifiFoot(){
@@ -1004,15 +1006,26 @@ const WifiFlow = {
   async refresh(){
     if (this._busy) return;
     this._busy = true;
-    this.state = 'scanning';
+    if (!this.run) this.state = 'scanning';   // 连接 run 存活期间不写状态机（自动扫描会与连接流程抢 state）
     try {
       let err = null, res = null;
       try { res = await Wifi.scan({ targets: wifiCfg.targets }); } catch (e) { err = e; }
-      wifiLastScan = (res && Number(res.ts)) || Date.now();
-      wifiNetworks = (!err && res && Array.isArray(res.networks)) ? res.networks : [];
+      if (!err) {
+        wifiLastScan = (res && Number(res.ts)) || Date.now();   // 仅扫描成功才推进「上次扫描」
+        wifiNetworks = (res && Array.isArray(res.networks)) ? res.networks : [];
+      }
       await this.syncStatus();
-      if (err) { this.state = 'error'; renderWifiNotice(err); }
-      else { this.state = 'found'; renderWifiList(wifiNetworks); renderWifiCount(); }
+      if (this.run) {
+        // 连接 run 存活（含 scan 期间才启动的）：只刷扫描结果，不动 state / 不弹扫描失败行
+        if (!err) { renderWifiList(wifiNetworks); renderWifiCount(); }
+      } else if (err) {
+        wifiNetworks = [];
+        this.state = 'error';
+        renderWifiNotice(err);
+      } else {
+        this.state = 'found';
+        renderWifiList(wifiNetworks); renderWifiCount();
+      }
       renderWifiFoot();
     } finally { this._busy = false; }
   },
@@ -1024,7 +1037,7 @@ const WifiFlow = {
   },
   find(ssid){ return wifiNetworks.find(n => n.ssid === ssid) || null; },
   async onConnect(ssid){
-    if (this.state === 'connecting') return;
+    if (this.run) return;   // 连接 run 是权威守卫（state 会被 refresh 改写，不能只靠 state）
     const n = this.find(ssid);
     if (!n) { showSnack('⚠️ 网络已不在列表中'); await this.refresh(); return; }
     if (n.secured && !wifiHasSaved(ssid)) return this.showPasswordSheet(n);
@@ -1065,7 +1078,9 @@ const WifiFlow = {
     setTimeout(() => inp.focus(), 320);
   },
   async doConnect(opts){
+    if (this.run) return;   // 已有连接 run 进行中：忽略重复发起（双击 / 竞态）
     const run = this.run = { cancelled: false, ssid: opts.ssid };
+    this._runStartedAt = Date.now();
     this.state = 'connecting';
     this.renderConnecting(opts.ssid, 0, !!opts.save);
     this.openSheet();
@@ -1093,7 +1108,11 @@ const WifiFlow = {
       '<p class="w-hint">首次连接时，Android 会弹出系统通知或弹窗请你「允许一次」。之后系统会自动重连，无需再确认——这就是"一键连接"的实现方式（Android 10+ 不允许 App 静默连网，所有同类工具都是这个机制）。</p>' +
       '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-connect-cancel">取消</button></div>';
     this.openSheet();
-    document.getElementById('wifi-connect-cancel').addEventListener('click', () => this.cancel());
+    document.getElementById('wifi-connect-cancel').addEventListener('click', () => {
+      // 防「保存并连接」双击：第二下会落在同一坐标的全宽取消按钮上，run 刚开始 400ms 内的取消一律忽略
+      if (Date.now() - (this._runStartedAt || 0) < 400) return;
+      this.cancel();
+    });
   },
   renderFailed(opts, reason){
     const body = document.getElementById('wifi-sheet-body');
@@ -1134,6 +1153,7 @@ const WifiFlow = {
     await this.refresh();
   },
   failed(opts, reason){
+    this.run = null;   // run 随连接结束而结束（不变量：run 存活 == 连接进行中），重试/取消才能再次发起
     wifiErrors[opts.ssid] = true;
     this.state = 'failed';
     this.renderFailed(opts, reason);
@@ -1170,7 +1190,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // 初始化
-window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); await loadWifiCfg(); await WifiFlow.refresh(); startWifiAutoScan(); });
+window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); try { await loadWifiCfg(); } catch (e) { wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000 }; } await WifiFlow.refresh(); startWifiAutoScan(); });
 window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.openAddForm = openAddForm; window.closeAddForm = closeAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.deleteNavSection = deleteNavSection; window.restoreSection = restoreSection; window.restoreAllSections = restoreAllSections; window.pickNavIcon = pickNavIcon; window.openLink = openLink; window.normalizeUrl = normalizeUrl; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon; window.Wifi = Wifi; window.WifiFlow = WifiFlow; window.NativeProvider = NativeProvider; window.MockProvider = MockProvider;
 </script>
 </body>
