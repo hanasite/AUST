@@ -3,186 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#1565C0">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#15202B">
 <meta name="mobile-web-app-capable" content="yes">
-<title>AUST 校园认证助手 · 深色模式+设备定制</title>
+<title>AUST 认证助手</title>
 <style>
-  /* ========== 浅色主题 (默认) ========== */
-  :root {
-    --primary:#1565C0;
-    --primary-dark:#0D47A1;
-    --primary-light:#E3F2FD;
-    --surface:#FFFFFF;
-    --surface-2:#F5F7FA;
-    --on-surface:#212121;
-    --on-surface-medium:#616161;
-    --on-surface-low:#9E9E9E;
-    --divider:#E0E0E0;
-    --error:#C62828;
-    --error-bg:#FFEBEE;
-    --success:#2E7D32;
-    --success-bg:#E8F5E9;
-    --nav-height:56px;
-    --radius-sm:8px;
-    --radius-md:12px;
-    --shadow-1:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.08);
-    --shadow-2:0 3px 6px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.08);
-    --modal-bg: rgba(0,0,0,0.5);
-    --log-bg:#0D1117;
-    --log-text:#C9D1D9;
-  }
-
-  /* ========== 深色主题 ========== */
-  :root.dark {
-    --primary:#42A5F5;
-    --primary-dark:#1E88E5;
-    --primary-light:#1E3A5F;
-    --surface:#1E1E2E;
-    --surface-2:#2A2A3A;
-    --on-surface:#E4E4E7;
-    --on-surface-medium:#B0B0C0;
-    --on-surface-low:#7A7A8A;
-    --divider:#3A3A4A;
-    --error:#FF8A80;
-    --error-bg:#4A2A2A;
-    --success:#81C784;
-    --success-bg:#2A4A2A;
-    --shadow-1:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.25);
-    --shadow-2:0 3px 6px rgba(0,0,0,.35),0 2px 4px rgba(0,0,0,.3);
-    --log-bg:#0A0C12;
-    --log-text:#E2E4E8;
-  }
-
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{font-family:'Roboto',-apple-system,'PingFang SC','Noto Sans SC',sans-serif;background:var(--surface-2);color:var(--on-surface);min-height:100dvh;overscroll-behavior:none}
+  body{font-family:'Roboto',-apple-system,'PingFang SC','Noto Sans SC',sans-serif;background:var(--bg);color:var(--fg);min-height:100dvh;overscroll-behavior:none}
 
-  .app-bar{position:sticky;top:0;z-index:100;background:var(--primary);color:#fff;height:var(--nav-height);display:flex;align-items:center;padding:0 16px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-  .app-bar-title{font-size:19px;font-weight:500;flex:1}
-  .app-bar-sub{font-size:12px;opacity:.75}
-
-  .tab-bar{display:flex;background:var(--primary)}
-  .tab-btn{flex:1;padding:11px 8px;font-size:13px;font-weight:500;color:rgba(255,255,255,.65);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}
-  .tab-btn.active{color:#fff;border-bottom-color:#90CAF9}
   .tab-panel{display:none}.tab-panel.active{display:block}
-  .page{padding:12px 12px 80px;max-width:480px;margin:0 auto}
 
-  .card{background:var(--surface);border-radius:var(--radius-md);box-shadow:var(--shadow-1);margin-bottom:12px;overflow:hidden}
-  .card-header{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--divider)}
+  /* 首页旧卡片区（.f-legacy，令牌已并入 v2 体系；1px 发丝线、无阴影） */
+  .card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-md);margin-bottom:12px;overflow:hidden}
+  .card-header{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
   .card-header.collapsible{cursor:pointer;user-select:none}
-  .card-header.collapsible:active{background:var(--surface-2)}
-  .card-header-icon{width:36px;height:36px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .card-header.collapsible:active{background:var(--graytint)}
+  .card-header-icon{width:36px;height:36px;border-radius:50%;background:var(--tint);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .card-header-text{flex:1;min-width:0}
   .card-title{font-size:15px;font-weight:600}
-  .card-subtitle{font-size:12px;color:var(--on-surface-medium);margin-top:2px}
+  .card-subtitle{font-size:12px;color:var(--sub);margin-top:2px}
   .card-body{padding:14px 16px}
-  .collapse-arrow{font-size:18px;color:var(--on-surface-low);transition:transform .25s cubic-bezier(.4,0,.2,1);flex-shrink:0}
+  .collapse-arrow{font-size:18px;color:var(--sub);transition:transform .25s cubic-bezier(.4,0,.2,1);flex-shrink:0}
   .collapse-arrow.open{transform:rotate(180deg)}
   .collapsible-body{overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.4,0,.2,1)}
   .collapsible-body.open{max-height:700px}
 
   .field{margin-bottom:14px}.field:last-child{margin-bottom:0}
-  .field-label{font-size:12px;font-weight:500;color:var(--primary);margin-bottom:5px;display:block;letter-spacing:.03em}
-  .field-input{width:100%;height:46px;padding:0 14px;font-size:15px;color:var(--on-surface);background:var(--surface-2);border:1.5px solid var(--divider);border-radius:var(--radius-sm);outline:none;font-family:inherit;-webkit-appearance:none;transition:border-color .2s}
-  .field-input:focus{border-color:var(--primary);background:var(--surface)}
-  .field-select{width:100%;height:46px;padding:0 36px 0 14px;font-size:15px;color:var(--on-surface);background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='%231565C0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center;border:1.5px solid var(--divider);border-radius:var(--radius-sm);outline:none;-webkit-appearance:none;font-family:inherit;cursor:pointer}
-  .field-select:focus{border-color:var(--primary)}
-  .preview-chip{display:inline-flex;align-items:center;gap:5px;background:var(--primary-light);border:1px solid #90CAF9;border-radius:20px;padding:3px 10px;font-size:12px;color:var(--primary-dark);font-family:'Roboto Mono',monospace;font-weight:500}
+  .field-label{font-size:12px;font-weight:500;color:var(--blue);margin-bottom:5px;display:block;letter-spacing:.03em}
+  .field-input{width:100%;height:46px;padding:0 14px;font-size:15px;color:var(--fg);background:var(--graytint);border:1.5px solid var(--line);border-radius:var(--radius-sm);outline:none;font-family:inherit;-webkit-appearance:none;transition:border-color .2s}
+  .field-input:focus{border-color:var(--blue);background:var(--bg)}
+  .field-select{width:100%;height:46px;padding:0 36px 0 14px;font-size:15px;color:var(--fg);background:var(--graytint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='%231D9BF0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center;border:1.5px solid var(--line);border-radius:var(--radius-sm);outline:none;-webkit-appearance:none;font-family:inherit;cursor:pointer}
+  .field-select:focus{border-color:var(--blue)}
+  .preview-chip{display:inline-flex;align-items:center;gap:5px;background:var(--tint);border:1px solid var(--blue);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--blue-d);font-family:'Roboto Mono',monospace;font-weight:500}
+  body.v2 .preview-chip .ic{width:12px;height:12px}
 
-  .switch-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--divider)}
+  .switch-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
   .switch-row:last-child{border-bottom:none}
-  .switch-label{font-size:14px}.switch-desc{font-size:12px;color:var(--on-surface-medium);margin-top:2px}
+  .switch-label{font-size:14px}.switch-desc{font-size:12px;color:var(--sub);margin-top:2px}
   .switch{position:relative;width:46px;height:26px;flex-shrink:0}
   .switch input{display:none}
-  .switch-track{position:absolute;inset:0;background:#B0BEC5;border-radius:13px;cursor:pointer;transition:background .2s}
-  .switch input:checked+.switch-track{background:var(--primary)}
-  .switch-thumb{position:absolute;left:3px;top:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s cubic-bezier(.4,0,.2,1);pointer-events:none}
+  .switch-track{position:absolute;inset:0;background:var(--sub);border-radius:13px;cursor:pointer;transition:background .2s}
+  .switch input:checked+.switch-track{background:var(--blue)}
+  .switch-thumb{position:absolute;left:3px;top:3px;width:20px;height:20px;background:var(--bg);border-radius:50%;transition:transform .2s cubic-bezier(.4,0,.2,1);pointer-events:none}
   .switch input:checked~.switch-thumb{transform:translateX(20px)}
 
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.04em;font-family:inherit;transition:opacity .15s,transform .1s}
   .btn:active{opacity:.85;transform:scale(.98)}
-  .btn-primary{background:var(--primary);color:#fff;box-shadow:var(--shadow-2)}
-  .btn-secondary{background:var(--surface);color:var(--primary);border:1.5px solid var(--primary)}
+  .btn-secondary{background:var(--bg);color:var(--blue);border:1.5px solid var(--blue)}
   .btn-sm{width:auto;padding:8px 16px;font-size:13px;border-radius:var(--radius-sm)}
   .btn:disabled{opacity:.45;pointer-events:none}
 
-  .status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500}
-  .badge-idle{background:#F5F5F5;color:#757575}.badge-loading{background:var(--primary-light);color:var(--primary)}
-  .badge-success{background:var(--success-bg);color:var(--success)}.badge-error{background:var(--error-bg);color:var(--error)}
-  .badge-skip{background:#F5F5F5;color:#9E9E9E}
-
   .log-box{background:var(--log-bg);border-radius:var(--radius-sm);padding:12px;font-family:'Roboto Mono',monospace;font-size:12px;line-height:1.7;color:var(--log-text);min-height:80px;max-height:160px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
-  .log-box:empty::before{content:"等待操作…";color:#484F58}
-  .log-success{color:#3FB950}.log-error{color:#F85149}.log-info{color:#79C0FF}
+  .log-box:empty::before{content:"等待操作…";color:var(--log-dim)}
+  .log-success{color:var(--log-ok)}.log-error{color:var(--log-err)}.log-info{color:var(--log-info)}
 
-  .info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--divider);font-size:14px}
-  .info-row:last-child{border-bottom:none}
-  .info-key{color:var(--on-surface-medium)}.info-val{font-weight:500}
-
-  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .stat-item{background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 8px;text-align:center}
-  .stat-value{font-size:18px;font-weight:700;color:var(--primary)}.stat-unit{font-size:10px;color:var(--on-surface-medium)}
-  .stat-label{font-size:11px;color:var(--on-surface-medium);margin-top:3px}
-
-  /* 设备列表增强 */
-  .device-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--divider)}
-  .device-item:last-child{border-bottom:none}
-  .device-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-  .device-info{flex:1;min-width:0}.device-name{font-size:14px;font-weight:500}
-  .device-meta{font-size:12px;color:var(--on-surface-medium);margin-top:2px}
-  .device-actions{display:flex;gap:6px;align-items:center}
-  .device-edit-btn{background:var(--surface-2);border:none;border-radius:20px;padding:6px 10px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--primary);font-weight:500}
-  .device-offline-btn{background:var(--error-bg);color:var(--error);border:none;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
-
-  /* 导航区样式 */
-  .nav-section-title{font-size:11px;font-weight:600;color:var(--on-surface-low);letter-spacing:.08em;text-transform:uppercase;padding:8px 4px 6px}
-  .nav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
-  .nav-item{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface);border-radius:var(--radius-md);padding:12px 8px;text-decoration:none;box-shadow:var(--shadow-1);cursor:pointer;border:none;font-family:inherit;position:relative;transition:background .15s,box-shadow .15s,transform .15s;touch-action:none;user-select:none}
-  .nav-item:not(.dragging):active{background:var(--primary-light);transform:scale(.96)}
-  .nav-item-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;pointer-events:none}
-  .nav-item-name{font-size:11.5px;font-weight:500;text-align:center;line-height:1.3;color:var(--on-surface);pointer-events:none}
-  .nav-delete-btn{display:none;position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--error);color:#fff;border:none;border-radius:50%;font-size:12px;line-height:20px;text-align:center;cursor:pointer;z-index:5;pointer-events:auto}
-  body.edit-mode .nav-delete-btn{display:block}
-  .nav-drag-handle{display:none;position:absolute;top:-6px;left:-6px;width:20px;height:20px;background:var(--primary);color:#fff;border-radius:50%;font-size:11px;line-height:20px;text-align:center;cursor:grab;z-index:5}
-  body.edit-mode .nav-drag-handle{display:block}
-  body.edit-mode .nav-item:not(.drag-over){animation:wobble .4s ease infinite alternate}
-  @keyframes wobble{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
-  .nav-item.dragging{opacity:.35;transform:scale(.95)!important;animation:none!important;box-shadow:none}
-  .nav-item.drag-over{box-shadow:0 0 0 2.5px var(--primary);animation:none!important;transform:scale(1.04)!important}
-  #drag-ghost{position:fixed;z-index:9999;pointer-events:none;display:none;width:90px;background:var(--surface);border-radius:var(--radius-md);padding:12px 8px;box-shadow:0 8px 24px rgba(0,0,0,.22);flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,-50%) scale(1.08)}
+  #drag-ghost{position:fixed;z-index:9999;pointer-events:none;display:none;width:90px;background:var(--bg);border-radius:var(--radius-md);padding:12px 8px;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,-50%) scale(1.08)}
   #drag-ghost.active{display:flex}
-  .nav-add-card{background:var(--surface);border-radius:var(--radius-md);box-shadow:var(--shadow-1);margin-bottom:12px;overflow:hidden;display:none}
-  .nav-add-card.show{display:block}
-  .star-card{background:linear-gradient(135deg,#1565C0 0%,#0288D1 100%);border-radius:var(--radius-md);padding:18px 16px 20px;margin-bottom:12px;box-shadow:var(--shadow-2);text-align:center}
-  .star-kaomoji{font-size:17px;color:#fff;display:block;line-height:1.6;margin-bottom:10px}
-  .star-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .star-link{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.4);border-radius:20px;padding:7px 16px;color:#fff;text-decoration:none;font-size:13px;font-weight:500}
 
-  /* 模态窗 */
-  .modal-overlay{position:fixed;inset:0;background:var(--modal-bg);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
-  .modal-overlay.show{opacity:1;pointer-events:all}
-  .modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:20px 20px 32px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-  .modal-overlay.show .modal-sheet{transform:translateY(0)}
-  .modal-handle{width:40px;height:4px;background:var(--divider);border-radius:2px;margin:0 auto 18px}
-  .modal-title{font-size:17px;font-weight:600;text-align:center;margin-bottom:18px}
-  .emoji-picker{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:12px 0}
-  .emoji-opt{font-size:28px;background:var(--surface-2);border-radius:40px;padding:8px 12px;cursor:pointer;transition:transform .1s;border:1px solid var(--divider)}
-  .emoji-opt:active{transform:scale(.94)}
-  .captcha-img-box{background:var(--surface-2);border-radius:var(--radius-sm);border:1px solid var(--divider);height:72px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden}
   .snackbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#323232;color:#fff;border-radius:var(--radius-sm);padding:12px 20px;font-size:13px;z-index:999;max-width:calc(100vw - 32px);transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none}
   .snackbar.show{transform:translateX(-50%) translateY(0)}
   @keyframes spin{to{transform:rotate(360deg)}}
   .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
-  .c-blue{background:#E3F2FD;color:#1565C0}.c-green{background:#E8F5E9;color:#2E7D32}
-  .c-purple{background:#EDE7F6;color:#512DA8}.c-teal{background:#E0F2F1;color:#00695C}
-  .c-orange{background:#FFF3E0;color:#E65100}.c-red{background:#FFEBEE;color:#C62828}
-  .c-indigo{background:#E8EAF6;color:#283593}.c-amber{background:#FFF8E1;color:#F57F17}
-  .c-cyan{background:#E0F7FA;color:#006064}.c-gray{background:#F5F5F5;color:#424242}
-  .c-pink{background:#FCE4EC;color:#880E4F}
 
-  /* ============ v2 tokens ============ */
+  /* ============ v2 tokens（唯一令牌体系；旧 --primary/--surface 系列已随 Task 6 删除） ============ */
   :root{
     --bg:#fff;--fg:#0F1419;--sub:#536471;--line:#EFF3F4;--blue:#1D9BF0;--blue-d:#1A8CD8;
     --tint:#E8F5FE;--ok:#068A5F;--okbg:#E8F8F2;--graytint:#F7F9F9;--red:#F4212E;--redtint:#FDECEE;
+    --radius-sm:8px;--radius-md:12px;
+    /* 运行日志面板：终端配色，不随深浅主题切换 */
+    --log-bg:#0D1117;--log-text:#C9D1D9;--log-dim:#484F58;--log-ok:#3FB950;--log-err:#F85149;--log-info:#79C0FF;
   }
   :root.dark{
     --bg:#15202B;--fg:#F7F9F9;--sub:#8B98A5;--line:#38444D;--tint:rgba(29,155,240,.14);
@@ -326,6 +215,14 @@
   body.v2 #drag-ghost .ic{width:21px;height:21px;color:var(--blue)}
   body.v2 #drag-ghost #dg-icon{display:flex;align-items:center;justify-content:center}
   body.v2 #drag-ghost #dg-name{font-size:11px;font-weight:600;color:var(--fg)}
+
+  /* ============ v2 收尾（Task 6）：状态药丸变体 / 旋转 / snackbar 停靠 / 账号名尺寸 ============ */
+  body.v2 .f-pill.loading{background:var(--tint);color:var(--blue)}
+  body.v2 .f-pill.err{background:var(--redtint);color:var(--red)}
+  body.v2 .spin{animation:spin .9s linear infinite}
+  body.v2 .f-acct .f-name{font-size:14px}
+  body.v2 .snackbar{transform:translateX(-50%) translateY(120px);max-width:calc(100vw - 48px);width:max-content;white-space:normal;text-align:center}
+  body.v2 .snackbar.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body class="v2">
@@ -370,6 +267,7 @@
   <path d="M7 11V7a5 5 0 0 1 10 0v4" /></symbol>
   <symbol id="ic-mail" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
   <rect x="2" y="4" width="20" height="16" rx="2" /></symbol>
+  <symbol id="ic-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></symbol>
   <symbol id="ic-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
   <path d="m15 5 4 4" /></symbol>
   <symbol id="ic-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
@@ -394,6 +292,15 @@
   <path d="M17 20V8" />
   <path d="M22 4v16" /></symbol>
   <symbol id="ic-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></symbol>
+  <symbol id="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" />
+  <path d="M12 2v2" />
+  <path d="M12 20v2" />
+  <path d="m4.93 4.93 1.41 1.41" />
+  <path d="m17.66 17.66 1.41 1.41" />
+  <path d="M2 12h2" />
+  <path d="M20 12h2" />
+  <path d="m6.34 17.66-1.41 1.41" />
+  <path d="m19.07 4.93-1.41 1.41" /></symbol>
   <symbol id="ic-wifi" viewBox="0 0 24 24"><path d="M12 20h.01" />
   <path d="M2 8.82a15 15 0 0 1 20 0" />
   <path d="M5 12.859a10 10 0 0 1 14 0" />
@@ -426,10 +333,10 @@
 </div>
 <div class="f-foot">每 30 秒自动扫描 · 上次扫描 21:15</div>
 <div class="f-legacy">
-  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('account-body','account-arrow')"><div class="card-header-icon">👤</div><div class="card-header-text"><div class="card-title">账号信息</div><div class="card-subtitle"><span class="preview-chip">📡 <span id="preview">学号@aust</span></span></div></div><span class="collapse-arrow" id="account-arrow">▾</span></div><div class="collapsible-body" id="account-body"><div class="card-body"><div class="field"><label class="field-label">学号 / 工号</label><input class="field-input" type="text" id="username" placeholder="请输入学号或工号" inputmode="numeric" autocomplete="username" oninput="updatePreview()"></div><div class="field"><label class="field-label">登录密码</label><input class="field-input" type="password" id="password" placeholder="请输入密码" autocomplete="current-password"></div></div></div></div>
-  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('net-body','net-arrow')"><div class="card-header-icon">🌐</div><div class="card-header-text"><div class="card-title">校园网设置</div><div class="card-subtitle">运营商 · 网络类型 · 服务器地址</div></div><span class="collapse-arrow" id="net-arrow">▾</span></div><div class="collapsible-body" id="net-body"><div class="card-body"><div class="field"><label class="field-label">运营商</label><select class="field-select" id="isp" onchange="updatePreview()"><option value="aust">电信 (@aust)</option><option value="unicom">联通 (@unicom)</option><option value="cmcc">移动 (@cmcc)</option><option value="jzg">教职工 (@jzg)</option></select></div><div class="field"><label class="field-label">网络类型</label><select class="field-select" id="nettype"><option value="post">宽带（POST）</option><option value="get">WiFi（GET）</option></select></div><div class="field"><label class="field-label">认证服务器地址</label><input class="field-input" type="url" id="drcom-url" value="http://10.255.0.19/drcom/login"></div></div></div></div>
-  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('opt-body','opt-arrow')"><div class="card-header-icon">⚙️</div><div class="card-header-text"><div class="card-title">选项</div></div><span class="collapse-arrow" id="opt-arrow">▾</span></div><div class="collapsible-body" id="opt-body"><div class="card-body"><div class="switch-row"><div><div class="switch-label">校园网认证</div><div class="switch-desc">连接 DrCOM 校园网认证服务</div></div><label class="switch"><input type="checkbox" id="do-net" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div><div class="switch-row"><div><div class="switch-label">记住账号密码</div><div class="switch-desc">存于本机，不上传</div></div><label class="switch"><input type="checkbox" id="save-cfg" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div></div></div></div>
-  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('log-body','log-arrow')"><div class="card-header-icon">📋</div><div class="card-header-text"><div class="card-title">运行日志</div></div><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();clearLog()" style="width:auto;margin-right:6px">清空</button><span class="collapse-arrow" id="log-arrow">▾</span></div><div class="collapsible-body" id="log-body"><div class="card-body"><div class="log-box" id="log-box"></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('account-body','account-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-lock"/></svg></div><div class="card-header-text"><div class="card-title">账号信息</div><div class="card-subtitle"><span class="preview-chip"><svg class="ic"><use href="#ic-signal"/></svg><span id="preview">学号@aust</span></span></div></div><span class="collapse-arrow" id="account-arrow">▾</span></div><div class="collapsible-body" id="account-body"><div class="card-body"><div class="field"><label class="field-label">学号 / 工号</label><input class="field-input" type="text" id="username" placeholder="请输入学号或工号" inputmode="numeric" autocomplete="username" oninput="updatePreview()"></div><div class="field"><label class="field-label">登录密码</label><input class="field-input" type="password" id="password" placeholder="请输入密码" autocomplete="current-password"></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('net-body','net-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-globe"/></svg></div><div class="card-header-text"><div class="card-title">校园网设置</div><div class="card-subtitle">运营商 · 网络类型 · 服务器地址</div></div><span class="collapse-arrow" id="net-arrow">▾</span></div><div class="collapsible-body" id="net-body"><div class="card-body"><div class="field"><label class="field-label">运营商</label><select class="field-select" id="isp" onchange="updatePreview()"><option value="aust">电信 (@aust)</option><option value="unicom">联通 (@unicom)</option><option value="cmcc">移动 (@cmcc)</option><option value="jzg">教职工 (@jzg)</option></select></div><div class="field"><label class="field-label">网络类型</label><select class="field-select" id="nettype"><option value="post">宽带（POST）</option><option value="get">WiFi（GET）</option></select></div><div class="field"><label class="field-label">认证服务器地址</label><input class="field-input" type="url" id="drcom-url" value="http://10.255.0.19/drcom/login"></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('opt-body','opt-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-power"/></svg></div><div class="card-header-text"><div class="card-title">选项</div></div><span class="collapse-arrow" id="opt-arrow">▾</span></div><div class="collapsible-body" id="opt-body"><div class="card-body"><div class="switch-row"><div><div class="switch-label">校园网认证</div><div class="switch-desc">连接 DrCOM 校园网认证服务</div></div><label class="switch"><input type="checkbox" id="do-net" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div><div class="switch-row"><div><div class="switch-label">记住账号密码</div><div class="switch-desc">存于本机，不上传</div></div><label class="switch"><input type="checkbox" id="save-cfg" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('log-body','log-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-code"/></svg></div><div class="card-header-text"><div class="card-title">运行日志</div></div><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();clearLog()" style="width:auto;margin-right:6px">清空</button><span class="collapse-arrow" id="log-arrow">▾</span></div><div class="collapsible-body" id="log-body"><div class="card-body"><div class="log-box" id="log-box"></div></div></div></div>
 </div>
 <div class="f-foot">安徽理工大学 · v2.0</div>
 </div>
@@ -448,7 +355,7 @@
   <div id="portal-logged-section" style="display:none">
     <div class="f-acct">
       <div class="f-avatar" id="portal-avatar">?</div>
-      <div class="f-main"><div class="f-name" style="font-size:14px" id="portal-username-display">--</div><div class="f-rmeta" id="portal-acct-meta">在线设备 -- 台</div></div>
+      <div class="f-main"><div class="f-name" id="portal-username-display">--</div><div class="f-rmeta" id="portal-acct-meta">在线设备 -- 台</div></div>
       <button class="f-act ghost" onclick="portalLogout()">退出</button>
     </div>
     <div class="f-stats">
@@ -522,8 +429,10 @@
 // ======================= 纯函数（常用链接 URL 规范化 / 转义 / 分类合并；Task 5 接口） =======================
 function normalizeUrl(input){
   const s=(input||'').trim();
-  if(!s) return null;
-  if(/^https?:\/\//i.test(s)) return s;
+  if(!s||/\s/.test(s)) return null;
+  if(/^https?:\/\/.+/i.test(s)) return s;
+  if(/^(\d{1,3}\.){3}\d{1,3}(:\d+)?(\/[^\s]*)?$/.test(s)) return 'http://'+s;
+  if(/^localhost(:\d+)?(\/[^\s]*)?$/i.test(s)) return 'http://'+s;
   if(/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(s)) return 'https://'+s;
   return null;
 }
@@ -540,11 +449,15 @@ function initDarkMode() {
   const stored = localStorage.getItem('aust_darkmode');
   const dark = stored === 'true' || (stored === null && window.matchMedia('(prefers-color-scheme: dark)').matches);
   if (dark) document.documentElement.classList.add('dark');
-  btn.textContent = dark ? '☀️' : '🌙';
+  const paint = d => {
+    btn.innerHTML = '<svg class="ic"><use href="#' + (d ? 'ic-sun' : 'ic-moon') + '"/></svg>';
+    btn.setAttribute('aria-label', d ? '切换到浅色模式' : '切换到深色模式');
+  };
+  paint(dark);
   btn.onclick = () => {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('aust_darkmode', isDark);
-    btn.textContent = isDark ? '☀️' : '🌙';
+    paint(isDark);
   };
 }
 
@@ -558,8 +471,9 @@ function getCustomDisplay(dev) { const id = getDeviceId(dev); const custom = dev
 // 当前编辑的设备引用
 let editingDevice = null;
 let editingDeviceId = null;
-// 设备图标可选集（lucide sprite id）
+// 设备图标可选集（lucide sprite id）及无障碍中文名
 const DEVICE_ICONS = ['ic-phone','ic-laptop','ic-router','ic-bot','ic-globe','ic-mail','ic-lock','ic-signal','ic-wifi','ic-star','ic-home','ic-power'];
+const DEVICE_ICON_LABEL = { 'ic-phone':'手机','ic-laptop':'电脑','ic-router':'路由器','ic-bot':'机器人','ic-globe':'地球','ic-mail':'邮箱','ic-lock':'锁','ic-signal':'信号','ic-wifi':'WiFi','ic-star':'星标','ic-home':'主页','ic-power':'电源' };
 
 function openDeviceEditModal(device, idx) {
   editingDevice = device;
@@ -570,7 +484,7 @@ function openDeviceEditModal(device, idx) {
   document.getElementById('device-custom-icon').value = curIcon;
   // 渲染常用图标选择器（lucide sprite，旧 emoji 数据回退 ic-phone）
   const picker = document.getElementById('device-emoji-picker');
-  picker.innerHTML = DEVICE_ICONS.map(ic => `<button type="button" class="f-icopt${ic === curIcon ? ' on' : ''}" data-icon="${ic}" onclick="pickDeviceIcon('${ic}')" aria-label="${ic}"><svg class="ic"><use href="#${ic}"/></svg></button>`).join('');
+  picker.innerHTML = DEVICE_ICONS.map(ic => `<button type="button" class="f-icopt${ic === curIcon ? ' on' : ''}" data-icon="${ic}" onclick="pickDeviceIcon('${ic}')" aria-label="${DEVICE_ICON_LABEL[ic] || '图标'}"><svg class="ic"><use href="#${ic}"/></svg></button>`).join('');
   document.getElementById('device-edit-modal').classList.add('show');
 }
 function closeDeviceEditModal() { document.getElementById('device-edit-modal').classList.remove('show'); editingDevice = null; }
@@ -613,20 +527,22 @@ function switchTab(name) { ['home','portal','links'].forEach((t,i) => document.q
 function toggleCollapse(bodyId, arrowId) { document.getElementById(bodyId).classList.toggle('open'); const a = document.getElementById(arrowId); if (a) a.classList.toggle('open'); }
 function updatePreview() { const uid = document.getElementById('username').value.trim() || '学号'; document.getElementById('preview').textContent = `${uid}@${document.getElementById('isp').value}`; }
 function updatePortalBaseDisplay() { try { const u = new URL(document.getElementById('portal-url').value.trim()); document.getElementById('portal-base-display').textContent = u.hostname; } catch {} }
-let _snackT; function showSnack(msg, actionLabel, onAction, duration) { const el = document.getElementById('snackbar'); el.textContent = ''; const txt = document.createElement('span'); txt.textContent = msg; el.appendChild(txt); el.classList.toggle('has-act', !!actionLabel); if (actionLabel) { const act = document.createElement('button'); act.type = 'button'; act.className = 'snack-act'; act.textContent = actionLabel; act.addEventListener('click', () => { clearTimeout(_snackT); el.classList.remove('show'); el.classList.remove('has-act'); if (typeof onAction === 'function') onAction(); }); el.appendChild(act); } el.classList.add('show'); clearTimeout(_snackT); _snackT = setTimeout(() => { el.classList.remove('show'); el.classList.remove('has-act'); }, duration || 2800); }
+let _snackT; function showSnack(msg, actionLabel, onAction, duration) { const el = document.getElementById('snackbar'); el.textContent = ''; const txt = document.createElement('span'); txt.textContent = msg; el.appendChild(txt); el.classList.toggle('has-act', !!actionLabel); if (actionLabel) { const act = document.createElement('button'); act.type = 'button'; act.className = 'snack-act'; act.textContent = actionLabel; act.addEventListener('click', () => { act.disabled = true; clearTimeout(_snackT); el.classList.remove('show'); el.classList.remove('has-act'); if (typeof onAction === 'function') onAction(); }); el.appendChild(act); } el.classList.add('show'); clearTimeout(_snackT); _snackT = setTimeout(() => { el.classList.remove('show'); el.classList.remove('has-act'); }, duration || 2800); }
 function log(msg, type='') { const box = document.getElementById('log-box'); const span = document.createElement('span'); span.textContent = msg + '\n'; if (type) span.className = 'log-' + type; box.appendChild(span); box.scrollTop = box.scrollHeight; if (!document.getElementById('log-body').classList.contains('open')) toggleCollapse('log-body','log-arrow'); }
 function clearLog() { document.getElementById('log-box').innerHTML = ''; }
-function setNetStatus(t, c) { const el = document.getElementById('net-status'); el.textContent = t; el.className = 'status-badge ' + c; }
+// 网络状态药丸（v2）：variant = ok | err | loading | idle
+const NET_STATUS_ICON = { ok:'ic-check', err:'ic-alert', loading:'ic-refresh' };
+function setNetStatus(text, variant) { const el = document.getElementById('net-status'); el.className = 'f-pill ' + variant; el.textContent = ''; const id = NET_STATUS_ICON[variant]; if (id) { const ic = makeIc(id); if (variant === 'loading') ic.classList.add('spin'); el.appendChild(ic); } el.appendChild(document.createTextNode(text)); }
 
 // 认证流程
-async function doAuth() { if (state.authing) return; const username = document.getElementById('username').value.trim(); const password = document.getElementById('password').value.trim(); const isp = document.getElementById('isp').value; const nettype = document.getElementById('nettype').value; const doNet = document.getElementById('do-net').checked; const saveCfg = document.getElementById('save-cfg').checked; if (!username || !password) { showSnack('⚠️ 请填写账号和密码'); toggleCollapse('account-body','account-arrow'); return; } if (saveCfg) await Store.set('aust_cfg', { username, password, isp, nettype, doNet, drcomUrl: document.getElementById('drcom-url').value.trim(), portalUrl: document.getElementById('portal-url').value.trim() }); state.authing = true; const btn = document.getElementById('auth-btn'); btn.innerHTML = '<span class="spinner"></span> 认证中…'; btn.disabled = true; if (doNet) { setNetStatus('⏳ 认证中…', 'badge-loading'); log(`→ ${username}@${isp} [${nettype}]`, 'info'); const r = await loginDrcom(username, password, isp, nettype); if (r.success) { setNetStatus(`✅ 成功 ${r.note||''}`.trim(),'badge-success'); log(`✅ 认证成功 ${r.note||''}`.trim(),'success'); showSnack('✅ 校园网认证成功'); } else { setNetStatus('❌ 失败','badge-error'); log(`❌ ${r.error}`,'error'); showSnack('❌ '+r.error); } } else { setNetStatus('⬛ 已跳过','badge-skip'); log('⬛ 校园网认证已跳过'); } btn.innerHTML = 'Σ&gt;―(〃°ω°〃)♡→ 一键认证'; btn.disabled = false; state.authing = false; }
+async function doAuth() { if (state.authing) return; const username = document.getElementById('username').value.trim(); const password = document.getElementById('password').value.trim(); const isp = document.getElementById('isp').value; const nettype = document.getElementById('nettype').value; const doNet = document.getElementById('do-net').checked; const saveCfg = document.getElementById('save-cfg').checked; if (!username || !password) { showSnack('⚠️ 请填写账号和密码'); toggleCollapse('account-body','account-arrow'); return; } if (saveCfg) await Store.set('aust_cfg', { username, password, isp, nettype, doNet, drcomUrl: document.getElementById('drcom-url').value.trim(), portalUrl: document.getElementById('portal-url').value.trim() }); state.authing = true; const btn = document.getElementById('auth-btn'); btn.innerHTML = '<span class="spinner"></span> 认证中…'; btn.disabled = true; if (doNet) { setNetStatus('认证中…', 'loading'); log(`→ ${username}@${isp} [${nettype}]`, 'info'); const r = await loginDrcom(username, password, isp, nettype); if (r.success) { setNetStatus(`成功 ${r.note||''}`.trim(), 'ok'); log(`✅ 认证成功 ${r.note||''}`.trim(),'success'); showSnack('✅ 校园网认证成功'); } else { setNetStatus('失败', 'err'); log(`❌ ${r.error}`,'error'); showSnack('❌ '+r.error); } } else { setNetStatus('已跳过', 'idle'); log('⬛ 校园网认证已跳过'); } btn.innerHTML = '<svg class="ic"><use href="#ic-zap"/></svg>一键认证'; btn.disabled = false; state.authing = false; }
 
 // Portal 登录/刷新
 const PORTAL_LOGIN_LABEL = '<svg class="ic"><use href="#ic-lock"/></svg>登录自助系统';
-async function portalLogin() { const user = document.getElementById('portal-user').value.trim() || document.getElementById('username').value.trim(); const pass = document.getElementById('portal-pass').value.trim() || document.getElementById('password').value.trim(); if (!user || !pass) { showSnack('⚠️ 请填写账号和密码'); return; } try { CookieJar.clear(new URL(getPortalBase()).hostname); } catch {} const btn = document.getElementById('portal-login-btn'); btn.innerHTML = '<span class="spinner"></span> 获取验证码…'; btn.disabled = true; try { state.portalCheckcode = await portalGetCheckcode(); if (!state.portalCheckcode) throw new Error('获取checkcode失败'); const imgB64 = await portalFetchCaptchaImage(); showCaptchaImg(imgB64); btn.innerHTML = '⏳ 等待验证码…'; const code = await askCaptcha(); if (!code) { btn.innerHTML = PORTAL_LOGIN_LABEL; btn.disabled = false; return; } btn.innerHTML = '<span class="spinner"></span> 登录中…'; const ok = await portalDoLogin(user, pass, code, state.portalCheckcode); if (!ok) throw new Error('登录失败（验证码有误）'); state.portalLoggedIn = true; document.getElementById('portal-login-section').style.display = 'none'; document.getElementById('portal-logged-section').style.display = 'block'; document.getElementById('portal-username-display').textContent = user; document.getElementById('portal-avatar').textContent = (user[0] || '?').toUpperCase(); document.getElementById('portal-devices-card').style.display = 'block'; log('✅ 自助系统登录成功', 'success'); showSnack('✅ 登录成功'); await refreshPortalData(); } catch (e) { showSnack('❌ '+e.message); log('❌ '+e.message,'error'); } btn.innerHTML = PORTAL_LOGIN_LABEL; btn.disabled = false; }
+async function portalLogin() { const user = document.getElementById('portal-user').value.trim() || document.getElementById('username').value.trim(); const pass = document.getElementById('portal-pass').value.trim() || document.getElementById('password').value.trim(); if (!user || !pass) { showSnack('⚠️ 请填写账号和密码'); return; } try { CookieJar.clear(new URL(getPortalBase()).hostname); } catch {} const btn = document.getElementById('portal-login-btn'); btn.innerHTML = '<span class="spinner"></span> 获取验证码…'; btn.disabled = true; try { state.portalCheckcode = await portalGetCheckcode(); if (!state.portalCheckcode) throw new Error('获取checkcode失败'); const imgB64 = await portalFetchCaptchaImage(); showCaptchaImg(imgB64); btn.innerHTML = '<svg class="ic spin"><use href="#ic-refresh"/></svg>等待验证码…'; const code = await askCaptcha(); if (!code) { btn.innerHTML = PORTAL_LOGIN_LABEL; btn.disabled = false; return; } btn.innerHTML = '<span class="spinner"></span> 登录中…'; const ok = await portalDoLogin(user, pass, code, state.portalCheckcode); if (!ok) throw new Error('登录失败（验证码有误）'); state.portalLoggedIn = true; document.getElementById('portal-login-section').style.display = 'none'; document.getElementById('portal-logged-section').style.display = 'block'; document.getElementById('portal-username-display').textContent = user; document.getElementById('portal-avatar').textContent = (user[0] || '?').toUpperCase(); document.getElementById('portal-devices-card').style.display = 'block'; log('✅ 自助系统登录成功', 'success'); showSnack('✅ 登录成功'); await refreshPortalData(); } catch (e) { showSnack('❌ '+e.message); log('❌ '+e.message,'error'); } btn.innerHTML = PORTAL_LOGIN_LABEL; btn.disabled = false; }
 async function refreshPortalData() { if (!state.portalLoggedIn) { showSnack('请先登录自助系统'); return; } const r = await portalGetDashboard(); if (r.ok) { const d = r.data; document.getElementById('stat-time').textContent = d.usedTimeMin ?? '--'; const mb = parseFloat(d.usedFlowMb); document.getElementById('stat-flow').textContent = isNaN(mb) ? '--' : (mb / 1024).toFixed(2); document.getElementById('portal-expiry').textContent = d.expiryDate ?? '--'; document.getElementById('portal-realname').textContent = d.realName ?? '--'; if (d.realName) document.getElementById('portal-avatar').textContent = String(d.realName).trim()[0].toUpperCase(); } else if (r.expired) { showSnack('⚠️ 登录已过期'); portalLogout(); return; } const dr = await portalGetDevices(); if (dr.ok) { state.devices = dr.devices; document.getElementById('stat-devices').textContent = state.devices.length; renderDevices(); } }
 function portalLogout() { state.portalLoggedIn = false; state.devices = []; try { CookieJar.clear(new URL(getPortalBase()).hostname); } catch {} document.getElementById('portal-login-section').style.display = 'block'; document.getElementById('portal-logged-section').style.display = 'none'; document.getElementById('portal-devices-card').style.display = 'none'; showSnack('已退出登录'); }
-function renderDevices() { const list = document.getElementById('device-list'); const cnt = document.getElementById('device-count'); cnt.textContent = `共 ${state.devices.length} 台设备在线`; const acct = document.getElementById('portal-acct-meta'); if (acct) acct.textContent = `在线设备 ${state.devices.length} 台`; if (!state.devices.length) { list.innerHTML = '<div class="f-empty">暂无在线设备</div>'; return; } list.innerHTML = state.devices.map((d,i) => { const custom = getCustomDisplay(d); const displayName = custom.name || (d.terminalType || '设备'); const displayIcon = custom.icon || (() => { const t = (d.terminalType||'').toLowerCase(); if(t.includes('router')) return 'ic-router'; if(t.includes('windows')||t.includes('pc')) return 'ic-laptop'; return 'ic-phone'; })(); const flowMB = parseFloat(d.downFlow||d.down_flow||0); const flowStr = flowMB >= 1024 ? (flowMB/1024).toFixed(2) + ' GB' : flowMB.toFixed(1) + ' MB'; return `<div class="f-row" id="ditem-${i}"><div class="f-ric"><svg class="ic"><use href="#${displayIcon}"/></svg></div><div class="f-rinfo"><div class="f-rname">${displayName}</div><div class="f-rmeta">${d.ip||''} · ↓${flowStr} · ${d.useTime||d.use_time||'--'} min</div></div><button class="f-iconbtn" onclick="openDeviceEditModal(state.devices[${i}], ${i})" aria-label="编辑设备"><svg class="ic"><use href="#ic-pencil"/></svg></button><button class="f-act ghost" onclick="offlineOne(${i})">下线</button></div>`; }).join(''); }
+function renderDevices() { const list = document.getElementById('device-list'); const cnt = document.getElementById('device-count'); cnt.textContent = `共 ${state.devices.length} 台设备在线`; const acct = document.getElementById('portal-acct-meta'); if (acct) acct.textContent = `在线设备 ${state.devices.length} 台`; if (!state.devices.length) { list.innerHTML = '<div class="f-empty">暂无在线设备</div>'; return; } list.innerHTML = state.devices.map((d,i) => { const custom = getCustomDisplay(d); const displayName = custom.name || (d.terminalType || '设备'); const displayIcon = custom.icon || (() => { const t = (d.terminalType||'').toLowerCase(); if(t.includes('router')) return 'ic-router'; if(t.includes('windows')||t.includes('pc')) return 'ic-laptop'; return 'ic-phone'; })(); const flowMB = parseFloat(d.downFlow||d.down_flow||0); const flowStr = flowMB >= 1024 ? (flowMB/1024).toFixed(2) + ' GB' : flowMB.toFixed(1) + ' MB'; return `<div class="f-row" id="ditem-${i}"><div class="f-ric"><svg class="ic"><use href="#${escHtml(displayIcon)}"/></svg></div><div class="f-rinfo"><div class="f-rname">${escHtml(displayName)}</div><div class="f-rmeta">${escHtml(d.ip||'')} · ↓${escHtml(flowStr)} · ${escHtml(d.useTime||d.use_time||'--')} min</div></div><button class="f-iconbtn" onclick="openDeviceEditModal(state.devices[${i}], ${i})" aria-label="编辑设备"><svg class="ic"><use href="#ic-pencil"/></svg></button><button class="f-act ghost" onclick="offlineOne(${i})">下线</button></div>`; }).join(''); }
 async function offlineOne(idx) { const d = state.devices[idx]; if (!d) return; const r = await portalOfflineDevice(d.sessionId||d.session_id||d.id||'', d.ip, d.mac||''); if (r.ok) { state.devices.splice(idx,1); renderDevices(); showSnack('✅ 已下线'); } else showSnack('❌ 下线失败'); }
 async function offlineAll() { for (const d of state.devices) await portalOfflineDevice(d.sessionId||d.session_id||d.id||'', d.ip, d.mac||''); state.devices=[]; renderDevices(); showSnack('✅ 已全部下线'); }
 
@@ -638,20 +554,22 @@ function closeCaptchaModal() { document.getElementById('captcha-modal').classLis
 function submitCaptcha() { const val = document.getElementById('captcha-input').value.trim(); if (!val) { showSnack('⚠️ 请输入验证码'); return; } document.getElementById('captcha-modal').classList.remove('show'); if (state.captchaResolve) { state.captchaResolve(val); state.captchaResolve = null; } }
 
 // ======================= 常用链接（v2 扁平重建） =======================
-const DEFAULT_NAV = [ { section:'🏫 校园官方', items:[ {name:'AUST 官网',url:'http://www.aust.edu.cn',icon:'ic-gradcap',color:'c-blue'},{name:'教务处',url:'http://jwc.aust.edu.cn',icon:'ic-book',color:'c-green'},{name:'网络自助',url:'https://xgmm.aust.edu.cn',icon:'ic-globe',color:'c-purple'},{name:'DrCOM',url:'http://10.255.0.19/drcom/login',icon:'ic-router',color:'c-teal'},{name:'图书馆',url:'http://lib.aust.edu.cn',icon:'ic-library',color:'c-amber'},{name:'校园邮箱',url:'https://mail.aust.edu.cn',icon:'ic-mail',color:'c-red'} ] }, { section:'📖 学习科研', items:[ {name:'知网 CNKI',url:'https://www.cnki.net',icon:'ic-search',color:'c-blue'},{name:'GitHub',url:'https://github.com',icon:'ic-code',color:'c-gray'},{name:'DeepSeek',url:'https://www.deepseek.com',icon:'ic-bot',color:'c-indigo'},{name:'arXiv',url:'https://arxiv.org',icon:'ic-book',color:'c-orange'},{name:'Overleaf',url:'https://www.overleaf.com',icon:'ic-pencil',color:'c-green'},{name:'力扣',url:'https://leetcode.cn',icon:'ic-code',color:'c-orange'} ] }, { section:'🍜 生活服务', items:[ {name:'美团外卖',url:'https://www.meituan.com',icon:'ic-globe',color:'c-amber'},{name:'12306',url:'https://www.12306.cn',icon:'ic-globe',color:'c-red'},{name:'百度地图',url:'https://map.baidu.com',icon:'ic-globe',color:'c-blue'} ] } ];
+const DEFAULT_NAV = [ { section:'🏫 校园官方', items:[ {name:'AUST 官网',url:'http://www.aust.edu.cn',icon:'ic-gradcap'},{name:'教务处',url:'http://jwc.aust.edu.cn',icon:'ic-book'},{name:'网络自助',url:'https://xgmm.aust.edu.cn',icon:'ic-globe'},{name:'DrCOM',url:'http://10.255.0.19/drcom/login',icon:'ic-router'},{name:'图书馆',url:'http://lib.aust.edu.cn',icon:'ic-library'},{name:'校园邮箱',url:'https://mail.aust.edu.cn',icon:'ic-mail'} ] }, { section:'📖 学习科研', items:[ {name:'知网 CNKI',url:'https://www.cnki.net',icon:'ic-search'},{name:'GitHub',url:'https://github.com',icon:'ic-code'},{name:'DeepSeek',url:'https://www.deepseek.com',icon:'ic-bot'},{name:'arXiv',url:'https://arxiv.org',icon:'ic-book'},{name:'Overleaf',url:'https://www.overleaf.com',icon:'ic-pencil'},{name:'力扣',url:'https://leetcode.cn',icon:'ic-code'} ] }, { section:'🍜 生活服务', items:[ {name:'美团外卖',url:'https://www.meituan.com',icon:'ic-globe'},{name:'12306',url:'https://www.12306.cn',icon:'ic-globe'},{name:'百度地图',url:'https://map.baidu.com',icon:'ic-globe'} ] } ];
 const MINE_SECTION = '⭐ 我的链接';
 // 图标选择器（lucide sprite id，新增只存这个集合内的 id）与旧 emoji 数据回退映射
 const LUCIDE_NAV_ICONS = ['ic-globe','ic-gradcap','ic-book','ic-library','ic-router','ic-mail','ic-search','ic-code','ic-bot','ic-star','ic-home','ic-chart','ic-pencil'];
 const NAV_EMOJI_ICON = { '🎓':'ic-gradcap','📚':'ic-book','🌐':'ic-globe','📡':'ic-router','📖':'ic-library','✉':'ic-mail','🐙':'ic-code','🤖':'ic-bot','🔬':'ic-search','📰':'ic-book','📝':'ic-pencil','💻':'ic-code','🛵':'ic-globe','🚄':'ic-globe','🗺':'ic-globe' };
 const SVG_NS = 'http://www.w3.org/2000/svg';
-function navIconId(v) { const s = String(v == null ? '' : v).trim().split('').filter(c => c.codePointAt(0) !== 0xFE0F).join(''); return LUCIDE_NAV_ICONS.indexOf(s) >= 0 ? s : (NAV_EMOJI_ICON[s] || 'ic-globe'); }
-function secLabel(name) { return String(name).replace(/^[^\p{L}\p{N}_]+/u, '').trim() || String(name); }
+function navIconId(v) { const s = String(v == null ? '' : v).trim().split('').filter(c => c.codePointAt(0) !== 0xFE0F).join(''); const mapped = Object.prototype.hasOwnProperty.call(NAV_EMOJI_ICON, s) ? NAV_EMOJI_ICON[s] : null; return LUCIDE_NAV_ICONS.indexOf(s) >= 0 ? s : (mapped || 'ic-globe'); }
+function secLabel(name) { return String(name).replace(/^[^一-龥A-Za-z0-9]+/, '').trim() || String(name); }
 function makeIc(id) { const svg = document.createElementNS(SVG_NS, 'svg'); svg.setAttribute('class', 'ic'); const use = document.createElementNS(SVG_NS, 'use'); use.setAttribute('href', '#' + id); svg.appendChild(use); return svg; }
 async function saveNav() { await Store.set('aust_nav', state.navData); }
-function openLink(raw) {
-  const url = normalizeUrl(raw);
-  if (!url) { showSnack('⚠️ 链接格式不对，请检查'); return; }
-  window.open(url, '_blank');
+function openLink(raw){
+  const url=normalizeUrl(raw);
+  if(!url){showSnack('⚠️ 链接格式不对，请检查');return;}
+  const a=document.createElement('a');
+  a.href=url;a.target='_blank';a.rel='noopener';
+  document.body.appendChild(a);a.click();a.remove();
 }
 function renderNav() {
   const container = document.getElementById('nav-dynamic');
@@ -851,9 +769,10 @@ async function deleteNavSection(si) {
   if (!sec) return;
   if (!confirm('删除分类「' + secLabel(sec.section) + '」及其 ' + sec.items.length + ' 个链接？')) return;
   const label = secLabel(sec.section);
+  const recoverable = DEFAULT_NAV.some(d => d.section === sec.section);
   state.navData.splice(si, 1);
   await saveNav(); renderNav();
-  showSnack('已删除分类「' + label + '」· 编辑模式可恢复');
+  showSnack('已删除分类「' + label + '」· ' + (recoverable ? '下次启动自动恢复' : '不可恢复'));
 }
 async function restoreSection(name) {
   const sec = state.navData.find(s => s.section === name);
