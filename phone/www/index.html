@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#FFFFFF">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#15202B">
 <meta name="mobile-web-app-capable" content="yes">
 <title>AUST 认证助手</title>
 <style>
@@ -60,16 +59,18 @@
   #drag-ghost{position:fixed;z-index:9999;pointer-events:none;display:none;width:90px;background:var(--bg);border-radius:var(--radius-md);padding:12px 8px;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,-50%) scale(1.08)}
   #drag-ghost.active{display:flex}
 
-  .snackbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#323232;color:#fff;border-radius:var(--radius-sm);padding:12px 20px;font-size:13px;z-index:999;max-width:calc(100vw - 32px);transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none}
+  .snackbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--toast-bg);color:var(--on-accent);border-radius:var(--radius-sm);padding:12px 20px;font-size:13px;z-index:999;max-width:calc(100vw - 32px);transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none}
   .snackbar.show{transform:translateX(-50%) translateY(0)}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+  .spinner{width:16px;height:16px;border:2px solid var(--hairline-accent);border-top-color:var(--on-accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 
   /* ============ v2 tokens（唯一令牌体系；旧 --primary/--surface 系列已随 Task 6 删除） ============ */
   :root{
     --bg:#fff;--fg:#0F1419;--sub:#536471;--line:#EFF3F4;--blue:#1D9BF0;--blue-d:#1A8CD8;
     --tint:#E8F5FE;--ok:#068A5F;--okbg:#E8F8F2;--graytint:#F7F9F9;--red:#F4212E;--redtint:#FDECEE;
     --radius-sm:8px;--radius-md:12px;
+    /* 主题无关常量：toast 底色、蓝/红底上的前景、spinner 环、sheet 遮罩 */
+    --toast-bg:#323232;--on-accent:#fff;--hairline-accent:rgba(255,255,255,.4);--scrim:rgba(15,20,25,.45);
     /* 运行日志面板：终端配色，不随深浅主题切换 */
     --log-bg:#0D1117;--log-text:#C9D1D9;--log-dim:#484F58;--log-ok:#3FB950;--log-err:#F85149;--log-info:#79C0FF;
   }
@@ -109,7 +110,7 @@
   body.v2 .f-pill .ic{width:13px;height:13px}
   body.v2 .f-pill.idle{background:var(--graytint);color:var(--sub)}
   body.v2 .f-btnwrap{padding:14px 16px;border-bottom:1px solid var(--line)}
-  body.v2 .f-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;background:var(--blue);color:#fff;font-size:15px;font-weight:700;padding:14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s,transform .12s}
+  body.v2 .f-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;background:var(--blue);color:var(--on-accent);font-size:15px;font-weight:700;padding:14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s,transform .12s}
   body.v2 .f-btn:hover{background:var(--blue-d)}
   body.v2 .f-btn:active{transform:scale(.98)}
   body.v2 .f-btn .ic{width:17px;height:17px}
@@ -158,7 +159,7 @@
   body.v2 .f-input::placeholder{color:var(--sub);opacity:.75}
 
   /* ============ v2 底部 sheet（自 docs/design/wifi-flow.html .w-sheet 系列；Task 7 WiFi 流程复用 .sheet-ol/.sheet） ============ */
-  body.v2 .sheet-ol{position:fixed;inset:0;background:rgba(15,20,25,.45);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+  body.v2 .sheet-ol{position:fixed;inset:0;background:var(--scrim);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
   body.v2 .sheet-ol.show{opacity:1;pointer-events:all}
   body.v2 .sheet{width:100%;max-width:480px;max-height:92dvh;overflow-y:auto;background:var(--bg);border-top:1px solid var(--line);border-radius:24px 24px 0 0;padding:10px 16px 18px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
   body.v2 .sheet-ol.show .sheet{transform:translateY(0)}
@@ -187,7 +188,7 @@
   body.v2 .f-tile span{font-size:11px;font-weight:600;color:var(--fg);text-align:center;line-height:1.3;overflow-wrap:anywhere}
   body.v2 .f-tile.dragging{opacity:.35;transform:scale(.95)!important}
   body.v2 .f-tile.drag-over{box-shadow:0 0 0 2.5px var(--blue);transform:scale(1.04)}
-  body.v2 .f-tiledel{display:none;position:absolute;top:-7px;right:-7px;width:20px;height:20px;align-items:center;justify-content:center;border-radius:999px;background:var(--red);color:#fff;border:2px solid var(--bg);font-size:10px;line-height:1;cursor:pointer;padding:0;font-family:inherit;z-index:5}
+  body.v2 .f-tiledel{display:none;position:absolute;top:-7px;right:-7px;width:20px;height:20px;align-items:center;justify-content:center;border-radius:999px;background:var(--red);color:var(--on-accent);border:2px solid var(--bg);font-size:10px;line-height:1;cursor:pointer;padding:0;font-family:inherit;z-index:5}
   body.v2.edit-mode .f-tiledel{display:flex}
   body.v2 .f-tilehandle{display:none;position:absolute;top:-7px;left:-7px;width:20px;height:20px;align-items:center;justify-content:center;border-radius:999px;background:var(--bg);color:var(--sub);border:1px solid var(--line);font-size:11px;line-height:1;cursor:grab;padding:0;font-family:inherit;touch-action:none;z-index:5}
   body.v2.edit-mode .f-tilehandle{display:flex}
@@ -452,8 +453,16 @@ function initDarkMode() {
   const paint = d => {
     btn.innerHTML = '<svg class="ic"><use href="#' + (d ? 'ic-sun' : 'ic-moon') + '"/></svg>';
     btn.setAttribute('aria-label', d ? '切换到浅色模式' : '切换到深色模式');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', d ? '#15202B' : '#FFFFFF');
   };
   paint(dark);
+  // 无手动覆盖时跟随系统深浅色（同步类名与 theme-color）
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if (localStorage.getItem('aust_darkmode') === null) {
+      document.documentElement.classList.toggle('dark', e.matches);
+      paint(e.matches);
+    }
+  });
   btn.onclick = () => {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('aust_darkmode', isDark);
