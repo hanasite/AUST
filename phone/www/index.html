@@ -241,6 +241,11 @@
   body.v2 .f-foot{font-size:11px;color:var(--sub);opacity:.8;padding:9px 16px;border-bottom:1px solid var(--line)}
   body.v2 .f-stat,body.v2 .f-name,body.v2 .f-meta,body.v2 .f-rname,body.v2 .f-rmeta,body.v2 .f-act,body.v2 .f-sechead span{font-variant-numeric:tabular-nums}
   body.v2 .f-meta,body.v2 .f-rmeta{letter-spacing:.005em}
+
+  /* ============ v2 review fixes ============ */
+  body.v2 .snackbar{bottom:78px}
+  body.v2 .f-stat .ic{width:13px;height:13px}
+  body.v2 .tabbar button:active{opacity:.6}
 </style>
 </head>
 <body class="v2">
@@ -318,7 +323,7 @@
 
 <div id="page-home" class="tab-panel active">
 <div class="f-page">
-<div class="f-stat"><span>21:16</span><span class="f-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+<div class="f-stat"><span>21:16</span><span class="f-bat"><svg class="ic"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
 <div class="f-head"><div class="f-title">AUST 认证助手</div><div class="f-headactions"><button class="f-iconbtn" id="dark-mode-toggle" aria-label="切换深色模式"></button><button class="f-iconbtn" aria-label="刷新"><svg class="ic"><use href="#ic-refresh"/></svg></button></div></div>
 <div class="f-status">
   <div class="f-icirc"><svg class="ic"><use href="#ic-wifi"/></svg></div>
