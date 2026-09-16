@@ -16,6 +16,14 @@
   - `scan({targets:string[]}) -> Promise<{networks:[{ssid:string, level:0-4, secured:boolean}], ts:number}>`
   - `connect({ssid:string, password?:string, secured:boolean, save:boolean}) -> Promise<{ok:boolean, status?:string, error?:string}>`
   - `getStatus() -> Promise<{connected:boolean, ssid:string|null}>`
+- **v2 现状：JS 侧已实现（Plan 2 必须适配而非重写）**（2026-09-17 终审修订）：`phone/www/index.html` 已有全套 `Wifi`/`NativeProvider`/`MockProvider`/`WifiFlow`（带 typeof 守卫、run 重入守卫）。本计划允许的 JS 改动仅限：
+  (a) `checkPermissions` 门：把 `st.granted === false`（布尔）也视为未授权（现仅识别字符串状态值）；
+  (b) 失败 sheet 增加「打开系统 WiFi 设置」次要按钮（调 `Wifi.provider.openSettings()`）；
+  (c) `waitConnected` 成功判定放宽为 `st.connected && (!st.ssid || st.ssid === ssid)`（Android 13+ neverForLocation 下 SSID 可能被脱敏为 `<unknown ssid>`）；
+  (d) 目标 SSID 编辑 UI（用户 2026-09-17 决定：「可配置」要做进 Plan 2）；
+  (e) 扫描结果缓存语义：provider 返回 `cached:boolean` 时 JS 不推进「上次扫描」时间戳。
+  **不得替换既有 provider 代码块**（旧计划文本里的简化版 NativeProvider 已废弃）。
+- **允许的清单/配置改动**：`android:allowBackup="false"`（用户 2026-09-17 决定，随 Task 1 manifest 编辑一起加）；`webContentsDebuggingEnabled` 已在 Plan 1 移除（debug 自动开 inspect），不要再加回。
 - 构建命令同 Plan 1：`cd phone/android && JAVA_HOME="D:/AndroidStudio/jbr" ./gradlew assembleDebug`
 - **Android 10+ 现实约束（写进所有文案与代码注释，不得承诺静默连接）**：第三方 App 只能投递"网络建议"，首次需用户在系统弹窗/通知中允许一次；之后由系统自动重连
 - 所有用户可见文案沿用 v2 扁平语言（中英标点统一，无 emoji）
@@ -45,6 +53,8 @@
 <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
     android:usesPermissionFlags="neverForLocation" tools:targetApi="tiramisu" />
 ```
+
+同时在 `<application>` 标签加 `android:allowBackup="false"`（用户 2026-09-17 决定：学号密码 / WiFi 密码仅存本机，不进云备份与 adb backup）。
 
 - [ ] **Step 2: MainActivity 注册插件**
 
@@ -187,7 +197,7 @@ public class WifiPlugin extends Plugin {
             public void onReceive(Context context, Intent intent) {
                 if (done.compareAndSet(false, true)) {
                     try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                    resolveScan(pending, wm);
+                    resolveScan(pending, wm, false);
                 }
             }
         };
@@ -196,22 +206,22 @@ public class WifiPlugin extends Plugin {
                 ContextCompat.RECEIVER_NOT_EXPORTED);
         boolean started = wm.startScan();
         if (!started) {
-            // 系统节流中：立即用缓存结果返回
+            // 系统节流中：立即用缓存结果返回（带 cached 标记，JS 侧不推进"上次扫描"时间戳）
             if (done.compareAndSet(false, true)) {
                 try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                resolveScan(pending, wm);
+                resolveScan(pending, wm, true);
             }
             return;
         }
         getBridge().getActivity().getWindow().getDecorView().postDelayed(() -> {
             if (done.compareAndSet(false, true)) {
                 try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                resolveScan(pending, wm);
+                resolveScan(pending, wm, true); // 12s 未收到广播：结果可能是系统缓存，标记 cached
             }
         }, 12000);
     }
 
-    private void resolveScan(PluginCall call, WifiManager wm) {
+    private void resolveScan(PluginCall call, WifiManager wm, boolean cached) {
         List<ScanResult> results;
         try {
             results = wm.getScanResults();
@@ -237,6 +247,7 @@ public class WifiPlugin extends Plugin {
         JSObject ret = new JSObject();
         ret.put("networks", arr);
         ret.put("ts", System.currentTimeMillis());
+        ret.put("cached", cached);
         call.resolve(ret);
     }
 
@@ -409,45 +420,17 @@ cd "F:/kakuns开源项目/AUST/phone" && npx cap sync android && cd android && J
 
 Expected: `BUILD SUCCESSFUL`。
 
-- [ ] **Step 3: JS 侧接入原生 provider（替换 mock）**
+- [ ] **Step 3: JS 侧适配（不替换既有实现）**
 
-`phone/www/index.html` 中（Plan 1 Task 7 的 Wifi 模块处）：
+**注意（2026-09-17 终审修订）**：`phone/www/index.html` 的 `NativeProvider`/`Wifi`/`WifiFlow` 已在 Plan 1 Task 7 完整实现（含 typeof 守卫、run 重入守卫、错误码分支）。本步骤**不做替换**，只做以下五处小改（全部先 grep 定位再改）：
 
-```js
-const NativeProvider = {
-  _p(){ return window.Capacitor?.Plugins?.Wifi; },
-  async checkPermissions(){ return this._p().checkPermissions(); },
-  async requestPermissions(){ return this._p().requestPermissions(); },
-  async scan(opts){ return this._p().scan(opts||{}); },
-  async connect(o){ return this._p().connect(o); },
-  async getStatus(){ return this._p().getStatus(); },
-  async openSettings(){ return this._p().openSettings(); }
-};
-const Wifi = {
-  provider: (typeof window!=='undefined' && window.Capacitor?.Plugins?.Wifi) ? NativeProvider : MockProvider,
-  setProvider(p){ this.provider=p; },
-  scan(o){ return this.provider.scan(o); },
-  connect(o){ return this.provider.connect(o); },
-  getStatus(){ return this.provider.getStatus(); }
-};
-```
+1. **`checkPermissions` 门**：找到以"非 granted 字符串值视为未授权"为门槛的判断，扩展为同时接受布尔：`if (st && (st.granted === false || Object.values(st).some(v => typeof v === 'string' && v !== 'granted')))`（具体写法按现有代码风格对齐；目的：兼容 Java 端 `{granted:boolean, locationServiceOn:boolean}` 契约）
+2. **失败 sheet 增加次要按钮「打开系统 WiFi 设置」**：在失败 sheet 的按钮行（取消/重试）加第三个按钮，点击调 `Wifi.provider.openSettings()`（该代理方法已存在）；仅当 provider 有该方法时显示（`typeof Wifi.provider.openSettings === 'function'`）
+3. **`waitConnected` 成功判定放宽**：`wifiConnected.ssid === ssid` 改为 `wifiConnected.connected && (!wifiConnected.ssid || wifiConnected.ssid === ssid)`（Android 13+ `neverForLocation` 下 `getSSID()` 可能返回 `<unknown ssid>`，插件已过滤为 null；此时以 connected 为准）
+4. **扫描缓存语义**：`refresh()` 中扫描结果 `res.cached === true` 时**不推进**"上次扫描"时间戳（列表照常刷新）
+5. **目标 SSID 编辑 UI（用户决定）**：首页 WiFi 卡 `f-sechead` 右侧计数（`#wifi-target-count`）改为可点按（加 chevron 提示或小图标），点击打开一个小 sheet：列出当前 `wifiCfg.targets`，支持增删（输入框 + 添加按钮；行内删除），保存写入 `aust_wifi.targets` 并立即 `WifiFlow.refresh()`；文案「目标网络：SSID 包含以下关键字的网络」（默认 `AUST`）。同时把 `renderWifiCount` 文案微调为「已发现 N 个目标」不变、sheet 里提示「修改后自动重新扫描」
 
-`WifiFlow.refresh()` 的错误分支补齐（依赖错误 code 字符串，Plan 1 已有状态渲染点）：
-
-```js
-catch(e){
-  const code = e?.code || e?.message || '';
-  if (String(code).includes('PERM_DENIED')) {
-    this.renderNotice('需要 WiFi 权限才能扫描','去授权', ()=>Wifi.provider.requestPermissions().then(()=>this.refresh()));
-  } else if (String(code).includes('LOCATION_OFF')) {
-    this.renderNotice('请打开系统定位开关（Android 12 及以下扫描 WiFi 所需）','去设置', ()=>Wifi.provider.openSettings());
-  } else {
-    this.renderNotice('扫描失败，稍后自动重试','重试', ()=>this.refresh());
-  }
-}
-```
-
-连接超时（`waitConnected` 20s 未连上）的失败 sheet 增加次要按钮「打开系统 WiFi 设置」（调用 `Wifi.provider.openSettings()`）——对应设计文档 §4.1 兜底。
+验证（headless Edge + CDP）：用 MockProvider 验证 1-5 全部路径：`checkPermissions` 布尔假值走「去授权」；失败 sheet 出现第三个按钮且点击调用 openSettings（mock 打桩计数）；`waitConnected` 在 `{connected:true, ssid:null}` 下判定成功；`cached:true` 时时间戳不变；targets 编辑 sheet 增删后 `aust_wifi.targets` 持久化且模拟扫描按新列表匹配。
 
 - [ ] **Step 4: 真机全流程验证（用户执行）**
 
@@ -455,7 +438,10 @@ catch(e){
 1. 点目标网络（首次，需密码）→ 输密码 → 保存并连接 → 系统通知/弹窗出现"允许连接到 AUST-xx"→ 允许 → 步骤条走到"已连接" → snackbar「已连接并保存，下次一键即连」
 2. 关闭手机 WiFi → 再打开 → 观察**系统自动重连**（无需打开 App）——即"真一键"
 3. 离开信号范围点连接 → 20s 超时 → 失败 sheet → 「打开系统 WiFi 设置」按钮能拉起系统面板
-4. 回归：DrCOM 认证、自助系统功能不受影响
+4. **SSID 脱敏专项（Android 13+ neverForLocation）**：确认连接成功判定不依赖明文 SSID（若 `getStatus().ssid` 为 null 仍应判定成功）；若该机型 `getSSID()` 持续返回 `<unknown ssid>`，记录机型与行为以备发布说明
+5. **扫描节流专项**：快速连点「刷新」5 次 → 观察不崩溃；节流时列表保留 + 「上次扫描」时间戳不前进（cached 语义）
+6. 目标 SSID 编辑：把关键字改为别的串 → 列表目标高亮随之变化 → 改回 `AUST`
+7. 回归：DrCOM 认证、自助系统功能不受影响
 
 - [ ] **Step 5: Commit**
 
