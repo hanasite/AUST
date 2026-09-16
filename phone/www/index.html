@@ -224,6 +224,35 @@
   body.v2 .f-acct .f-name{font-size:14px}
   body.v2 .snackbar{transform:translateX(-50%) translateY(120px);max-width:calc(100vw - 48px);width:max-content;white-space:normal;text-align:center}
   body.v2 .snackbar.show{transform:translateX(-50%) translateY(0)}
+
+  /* ============ v2 WiFi 卡片 + 连接流程（Task 7；自 docs/design/wifi-flow.html .w-* 移植，作用域 body.v2） ============ */
+  body.v2 .f-ric.ok{background:var(--okbg);color:var(--ok)}
+  body.v2 .w-net{display:flex;align-items:center;gap:10px;padding:2px 0 14px}
+  body.v2 .w-input{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;transition:border-color .15s}
+  body.v2 .w-input:focus-within{border-color:var(--blue)}
+  body.v2 .w-input input{flex:1;min-width:0;border:none;outline:none;font:inherit;font-size:14px;background:transparent;color:var(--fg)}
+  body.v2 .w-input input::placeholder{color:var(--sub);opacity:.75}
+  body.v2 .w-input .ic{color:var(--sub)}
+  body.v2 .w-eye{width:30px;height:30px;margin-right:-6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:none;border:none;padding:0;color:var(--sub);cursor:pointer;font-family:inherit}
+  body.v2 .w-check{display:flex;align-items:center;gap:9px;padding:14px 0 0;font-size:13px;font-weight:500;color:var(--fg);cursor:pointer;user-select:none}
+  body.v2 .w-check input{display:none}
+  body.v2 .w-check .box{width:19px;height:19px;border-radius:6px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:transparent;transition:background .15s,border-color .15s}
+  body.v2 .w-check .box .ic{width:12px;height:12px}
+  body.v2 .w-check input:checked+.box{background:var(--blue);border-color:var(--blue);color:var(--on-accent)}
+  body.v2 .w-hint{font-size:11.5px;color:var(--sub);margin-top:8px;line-height:1.6}
+  body.v2 .w-step{display:flex;align-items:center;gap:10px;padding:8px 0}
+  body.v2 .w-stepic{width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  body.v2 .w-stepic.done{background:var(--okbg);color:var(--ok)}
+  body.v2 .w-stepic.done .ic{width:13px;height:13px}
+  body.v2 .w-stepic.cur{background:var(--tint);color:var(--blue)}
+  body.v2 .w-stepic.cur .ic{width:14px;height:14px}
+  body.v2 .w-stepic.wait{border:1.5px solid var(--line)}
+  body.v2 .w-stept{font-size:13.5px;color:var(--sub)}
+  body.v2 .w-stept.cur{color:var(--fg);font-weight:700}
+  body.v2 .w-failic{width:46px;height:46px;border-radius:999px;background:var(--redtint);color:var(--red);display:flex;align-items:center;justify-content:center;margin:2px auto 10px}
+  body.v2 .w-failic .ic{width:22px;height:22px}
+  body.v2 .w-failsub{font-size:13px;color:var(--sub);text-align:center;line-height:1.6;margin-bottom:4px}
+  body.v2 .w-failtitle{margin-bottom:6px}
 </style>
 </head>
 <body class="v2">
@@ -316,23 +345,14 @@
 <div class="f-status">
   <div class="f-icirc"><svg class="ic"><use href="#ic-wifi"/></svg></div>
   <div class="f-main">
-    <div class="f-name">AUST-Student</div>
-    <div class="f-meta"><span class="f-pill idle" id="net-status">待认证</span></div>
+    <div class="f-name" id="wifi-current-ssid">未连接</div>
+    <div class="f-meta"><span class="f-pill idle" id="net-status">待认证</span><span id="wifi-current-meta"></span></div>
   </div>
 </div>
 <div class="f-btnwrap"><button class="f-btn" id="auth-btn" onclick="doAuth()"><svg class="ic"><use href="#ic-zap"/></svg>一键认证</button></div>
-<div class="f-sechead"><h4>校园 WiFi</h4><span>已发现 2 个目标</span></div>
-<div class="f-row">
-  <div class="f-ric"><svg class="ic"><use href="#ic-signal"/></svg></div>
-  <div class="f-rinfo"><div class="f-rname">AUST-Dorm</div><div class="f-rmeta">信号强 · 已保存</div></div>
-  <button class="f-act">一键连接</button>
-</div>
-<div class="f-row">
-  <div class="f-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
-  <div class="f-rinfo"><div class="f-rname">AUST-Teacher</div><div class="f-rmeta">需密码 · 未保存</div></div>
-  <button class="f-act ghost">连接</button>
-</div>
-<div class="f-foot">每 30 秒自动扫描 · 上次扫描 21:15</div>
+<div class="f-sechead"><h4>校园 WiFi</h4><span id="wifi-target-count">扫描中…</span></div>
+<div id="wifi-list"></div>
+<div class="f-foot" id="wifi-scan-info">每 30 秒自动扫描 · 上次扫描 --:--</div>
 <div class="f-legacy">
   <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('account-body','account-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-lock"/></svg></div><div class="card-header-text"><div class="card-title">账号信息</div><div class="card-subtitle"><span class="preview-chip"><svg class="ic"><use href="#ic-signal"/></svg><span id="preview">学号@aust</span></span></div></div><span class="collapse-arrow" id="account-arrow">▾</span></div><div class="collapsible-body" id="account-body"><div class="card-body"><div class="field"><label class="field-label">学号 / 工号</label><input class="field-input" type="text" id="username" placeholder="请输入学号或工号" inputmode="numeric" autocomplete="username" oninput="updatePreview()"></div><div class="field"><label class="field-label">登录密码</label><input class="field-input" type="password" id="password" placeholder="请输入密码" autocomplete="current-password"></div></div></div></div>
   <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('net-body','net-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-globe"/></svg></div><div class="card-header-text"><div class="card-title">校园网设置</div><div class="card-subtitle">运营商 · 网络类型 · 服务器地址</div></div><span class="collapse-arrow" id="net-arrow">▾</span></div><div class="collapsible-body" id="net-body"><div class="card-body"><div class="field"><label class="field-label">运营商</label><select class="field-select" id="isp" onchange="updatePreview()"><option value="aust">电信 (@aust)</option><option value="unicom">联通 (@unicom)</option><option value="cmcc">移动 (@cmcc)</option><option value="jzg">教职工 (@jzg)</option></select></div><div class="field"><label class="field-label">网络类型</label><select class="field-select" id="nettype"><option value="post">宽带（POST）</option><option value="get">WiFi（GET）</option></select></div><div class="field"><label class="field-label">认证服务器地址</label><input class="field-input" type="url" id="drcom-url" value="http://10.255.0.19/drcom/login"></div></div></div></div>
@@ -422,6 +442,12 @@
   <div class="f-field"><div class="f-label">图标</div><input type="hidden" id="new-nav-icon" value="ic-globe"><div class="f-icopts" id="nav-icon-picker"></div></div>
   <div class="f-hint-err" id="link-add-hint"></div>
   <div class="sheet-btns"><button class="f-btn ghost2" type="button" onclick="closeAddForm()">取消</button><button class="f-btn" type="button" onclick="addNavItem()">添加</button></div>
+</div></div>
+
+<!-- WiFi 连接 sheet（复用同一容器，内容按状态渲染：密码 / 连接中 / 失败） -->
+<div class="sheet-ol" id="wifi-sheet"><div class="sheet">
+  <div class="sheet-handle"></div>
+  <div id="wifi-sheet-body"></div>
 </div></div>
 
 <div class="snackbar" id="snackbar"></div>
@@ -799,9 +825,353 @@ async function restoreAllSections() {
   showSnack(state.navData.length > before ? '✅ 已补回 ' + (state.navData.length - before) + ' 个默认分类' : '默认分类都在');
 }
 
+// ======================= WiFi provider（接口冻结，Plan 2 原生插件只替换 provider） =======================
+// 契约：scan({targets}) -> Promise<{networks:[{ssid,level:0-4,secured:boolean}],ts:number}>
+//       connect({ssid,password,secured,save}) -> Promise<{ok:boolean,error?:string}>
+//       getStatus() -> Promise<{connected:boolean,ssid:string|null}>
+const MockProvider = {
+  connectedSsid: 'AUST-Student', // 浏览器里的假连接状态（4 个 mock 网络覆盖：已连/开放目标/加密目标/非目标）
+  _nets: [
+    { ssid:'AUST-Student', level:4, secured:false },
+    { ssid:'AUST-Dorm',    level:4, secured:false },
+    { ssid:'AUST-Teacher', level:3, secured:true  },
+    { ssid:'CMCC-EDU',     level:2, secured:true  }
+  ],
+  async scan(){ return { networks: this._nets.map(n => ({ ssid:n.ssid, level:n.level, secured:n.secured })), ts: Date.now() }; },
+  async connect(o = {}){ await new Promise(r => setTimeout(r, 1500)); if (o.secured && o.password === 'wrong') return { ok:false, error:'密码错误' }; this.connectedSsid = o.ssid || null; return { ok:true }; },
+  async getStatus(){ return { connected: !!this.connectedSsid, ssid: this.connectedSsid }; }
+};
+
+const NativeProvider = {
+  _p(){ const p = window.Capacitor?.Plugins?.Wifi; if (!p) throw new Error('Wifi 插件不可用'); return p; },
+  async checkPermissions(){ const p = this._p(); return (typeof p.checkPermissions === 'function') ? p.checkPermissions() : null; },
+  async requestPermissions(){ const p = this._p(); return (typeof p.requestPermissions === 'function') ? p.requestPermissions() : null; },
+  async openSettings(){ const p = this._p(); return (typeof p.openSettings === 'function') ? p.openSettings() : null; },
+  async scan(o = {}){
+    const p = this._p();
+    const st = (await this.checkPermissions()) || {};
+    const vals = Object.values(st).filter(v => typeof v === 'string');
+    if (vals.length && vals.some(v => v !== 'granted')) { const e = new Error('未授予定位权限'); e.code = 'PERM_DENIED'; throw e; }
+    if (typeof p.scan !== 'function') { const e = new Error('Wifi 插件不支持扫描'); e.code = 'UNSUPPORTED'; throw e; }
+    const r = await p.scan({ targets: o.targets || [] });
+    return r || { networks: [], ts: Date.now() };
+  },
+  async connect(o = {}){ const p = this._p(); if (typeof p.connect !== 'function') return { ok:false, error:'Wifi 插件不支持连接' }; return (await p.connect(o)) || { ok:false, error:'插件无响应' }; },
+  async getStatus(){ const p = this._p(); if (typeof p.getStatus !== 'function') return { connected:false, ssid:null }; return (await p.getStatus()) || { connected:false, ssid:null }; }
+};
+
+const Wifi = {
+  provider: (window.Capacitor?.Plugins?.Wifi) ? NativeProvider : MockProvider,
+  setProvider(p){ if (p) this.provider = p; },
+  scan(o){ const p = this.provider || {}; return (typeof p.scan === 'function') ? Promise.resolve(p.scan(o || {})) : Promise.resolve({ networks: [], ts: Date.now() }); },
+  connect(o){ const p = this.provider || {}; return (typeof p.connect === 'function') ? Promise.resolve(p.connect(o)) : Promise.resolve({ ok:false, error:'当前环境不支持连接' }); },
+  getStatus(){ const p = this.provider || {}; return (typeof p.getStatus === 'function') ? Promise.resolve(p.getStatus()) : Promise.resolve({ connected:false, ssid:null }); },
+  requestPermissions(){ const p = this.provider || {}; return (typeof p.requestPermissions === 'function') ? Promise.resolve(p.requestPermissions()) : Promise.resolve(null); },
+  openSettings(){ const p = this.provider || {}; return (typeof p.openSettings === 'function') ? Promise.resolve(p.openSettings()) : Promise.resolve(null); }
+};
+
+// ======================= WiFi 配置 + 首页卡片 + 连接流程状态机 =======================
+const WIFI_CONNECT_TIMEOUT_MS = 20000; // 轮询 getStatus 上限（每 2s 一次）
+let wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000 };
+let wifiNetworks = [];                    // 最近一次扫描结果
+let wifiConnected = { connected:false, ssid:null };
+let wifiErrors = {};                      // { ssid: true } 行内失败态（成功连接后清除）
+let wifiScanTimer = null;
+let wifiLastScan = null;
+
+async function loadWifiCfg(){
+  const c = await Store.get('aust_wifi');
+  const targets = Array.isArray(c?.targets) ? c.targets.filter(t => typeof t === 'string' && t.trim()).map(t => t.trim()) : [];
+  const saved = (c && typeof c.saved === 'object' && c.saved) ? c.saved : {};
+  const iv = Number(c?.scanIntervalMs);
+  wifiCfg = { targets: targets.length ? targets : ['AUST'], saved, scanIntervalMs: (isFinite(iv) && iv >= 1000) ? iv : 30000 };
+}
+async function saveWifiCfg(){ await Store.set('aust_wifi', wifiCfg); }
+function wifiHasSaved(ssid){ return Object.prototype.hasOwnProperty.call(wifiCfg.saved, ssid); }
+function wifiIsTarget(ssid){ const s = String(ssid == null ? '' : ssid).toUpperCase(); return (wifiCfg.targets || []).some(t => s.indexOf(String(t).toUpperCase()) >= 0); }
+function wifiIsConnected(ssid){ return !!(wifiConnected.connected && wifiConnected.ssid === ssid); }
+function wifiIsOneClick(n){ return wifiIsTarget(n.ssid) && (wifiHasSaved(n.ssid) || wifiIsConnected(n.ssid)); }
+function wifiSignalLabel(level){ const l = Number(level) || 0; return l >= 4 ? '信号强' : (l >= 3 ? '信号中' : '信号弱'); }
+function wifiMetaFor(n){
+  if (wifiErrors[n.ssid]) return wifiSignalLabel(n.level) + ' · 连接失败';
+  const state = wifiIsConnected(n.ssid) ? '已连接' : (wifiHasSaved(n.ssid) ? '已保存' : (n.secured ? '需密码' : '未保存'));
+  return wifiSignalLabel(n.level) + ' · ' + state;
+}
+function fmtClock(ts){ const d = new Date(ts || Date.now()); const p = n => String(n).padStart(2, '0'); return p(d.getHours()) + ':' + p(d.getMinutes()); }
+
+function renderWifiList(networks){
+  const list = document.getElementById('wifi-list');
+  if (!list) return;
+  list.textContent = '';
+  if (!networks.length) {
+    const empty = document.createElement('div');
+    empty.className = 'f-empty';
+    empty.textContent = '未发现 WiFi 网络';
+    list.appendChild(empty);
+    return;
+  }
+  networks.forEach(n => {
+    const target = wifiIsTarget(n.ssid);
+    const connected = wifiIsConnected(n.ssid);
+    const row = document.createElement('div');
+    row.className = 'f-row';
+    const ric = document.createElement('div');
+    ric.className = 'f-ric' + (connected ? ' ok' : (target ? '' : ' gray'));
+    ric.appendChild(makeIc(connected ? 'ic-check' : (target ? 'ic-signal' : 'ic-lock')));
+    const info = document.createElement('div');
+    info.className = 'f-rinfo';
+    const name = document.createElement('div');
+    name.className = 'f-rname';
+    name.textContent = String(n.ssid == null ? '' : n.ssid);
+    const meta = document.createElement('div');
+    meta.className = 'f-rmeta';
+    meta.textContent = wifiMetaFor(n);
+    info.appendChild(name); info.appendChild(meta);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'f-act' + (target ? '' : ' ghost');
+    btn.textContent = wifiIsOneClick(n) ? '一键连接' : '连接';
+    btn.setAttribute('aria-label', btn.textContent + ' ' + name.textContent);
+    btn.addEventListener('click', () => WifiFlow.onConnect(n.ssid));
+    row.appendChild(ric); row.appendChild(info); row.appendChild(btn);
+    list.appendChild(row);
+  });
+}
+function renderWifiCount(){
+  const el = document.getElementById('wifi-target-count');
+  if (!el) return;
+  const n = wifiNetworks.filter(x => wifiIsTarget(x.ssid) && !wifiIsConnected(x.ssid)).length;
+  el.textContent = '已发现 ' + n + ' 个目标';
+}
+function renderWifiFoot(){
+  const el = document.getElementById('wifi-scan-info');
+  if (!el) return;
+  el.textContent = '每 ' + Math.round(wifiCfg.scanIntervalMs / 1000) + ' 秒自动扫描 · 上次扫描 ' + fmtClock(wifiLastScan);
+}
+// 扫描失败（权限/定位关闭等）：卡内一行提示 + 对应动作（Plan 2 的 PERM_DENIED / LOCATION_OFF 码）
+function renderWifiNotice(err){
+  const list = document.getElementById('wifi-list');
+  if (!list) return;
+  list.textContent = '';
+  const code = err && err.code;
+  const kind = code === 'PERM_DENIED' ? 'auth' : (code === 'LOCATION_OFF' ? 'settings' : 'retry');
+  const row = document.createElement('div');
+  row.className = 'f-row';
+  const ric = document.createElement('div');
+  ric.className = 'f-ric gray';
+  ric.appendChild(makeIc('ic-alert'));
+  const info = document.createElement('div');
+  info.className = 'f-rinfo';
+  const name = document.createElement('div');
+  name.className = 'f-rname';
+  name.textContent = '无法扫描 WiFi';
+  const meta = document.createElement('div');
+  meta.className = 'f-rmeta';
+  meta.textContent = (err && err.message) ? String(err.message) : '扫描失败';
+  info.appendChild(name); info.appendChild(meta);
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'f-act';
+  btn.textContent = kind === 'auth' ? '去授权' : (kind === 'settings' ? '去设置' : '重试');
+  btn.addEventListener('click', () => {
+    const act = kind === 'auth' ? Wifi.requestPermissions() : (kind === 'settings' ? Wifi.openSettings() : Promise.resolve(null));
+    Promise.resolve(act).then(() => WifiFlow.refresh()).catch(() => {});
+  });
+  row.appendChild(ric); row.appendChild(info); row.appendChild(btn);
+  list.appendChild(row);
+  const cnt = document.getElementById('wifi-target-count');
+  if (cnt) cnt.textContent = '扫描失败';
+}
+function paintWifiStatus(){
+  const nameEl = document.getElementById('wifi-current-ssid');
+  const metaEl = document.getElementById('wifi-current-meta');
+  if (!nameEl) return;
+  if (wifiConnected.connected && wifiConnected.ssid) {
+    nameEl.textContent = wifiConnected.ssid;
+    const n = wifiNetworks.find(x => x.ssid === wifiConnected.ssid);
+    if (metaEl) metaEl.textContent = n ? '已连接 · ' + wifiSignalLabel(n.level) : '已连接';
+  } else {
+    nameEl.textContent = '未连接';
+    if (metaEl) metaEl.textContent = '';
+  }
+}
+
+// 状态机：idle → scanning → found → password(可选) → connecting(steps) → success|failed
+const WifiFlow = {
+  state: 'idle',
+  run: null,
+  _busy: false,
+  async refresh(){
+    if (this._busy) return;
+    this._busy = true;
+    this.state = 'scanning';
+    try {
+      let err = null, res = null;
+      try { res = await Wifi.scan({ targets: wifiCfg.targets }); } catch (e) { err = e; }
+      wifiLastScan = (res && Number(res.ts)) || Date.now();
+      wifiNetworks = (!err && res && Array.isArray(res.networks)) ? res.networks : [];
+      await this.syncStatus();
+      if (err) { this.state = 'error'; renderWifiNotice(err); }
+      else { this.state = 'found'; renderWifiList(wifiNetworks); renderWifiCount(); }
+      renderWifiFoot();
+    } finally { this._busy = false; }
+  },
+  async syncStatus(){
+    let st = null;
+    try { st = await Wifi.getStatus(); } catch (e) { st = null; }
+    wifiConnected = { connected: !!(st && st.connected), ssid: (st && st.ssid) || null };
+    paintWifiStatus();
+  },
+  find(ssid){ return wifiNetworks.find(n => n.ssid === ssid) || null; },
+  async onConnect(ssid){
+    if (this.state === 'connecting') return;
+    const n = this.find(ssid);
+    if (!n) { showSnack('⚠️ 网络已不在列表中'); await this.refresh(); return; }
+    if (n.secured && !wifiHasSaved(ssid)) return this.showPasswordSheet(n);
+    return this.doConnect({ ssid, password: wifiCfg.saved[ssid], secured: !!n.secured, save: true });
+  },
+  showPasswordSheet(n, pref){
+    this.state = 'password';
+    const pre = pref || {};
+    const body = document.getElementById('wifi-sheet-body');
+    body.innerHTML =
+      '<div class="sheet-title">连接到 ' + escHtml(n.ssid) + '</div>' +
+      '<div class="w-net"><div class="f-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>' +
+      '<div class="f-rinfo"><div class="f-rname">' + escHtml(n.ssid) + '</div>' +
+      '<div class="f-rmeta">' + (n.secured ? 'WPA2 加密 · 首次连接需输入密码' : '开放网络 · 无需密码') + '</div></div></div>' +
+      '<div class="w-input"><input type="password" id="wifi-pass-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="输入 WiFi 密码" aria-label="WiFi 密码">' +
+      '<button type="button" class="w-eye" id="wifi-pass-eye" aria-label="显示密码"><svg class="ic"><use href="#ic-eye"/></svg></button></div>' +
+      '<label class="w-check"><input type="checkbox" id="wifi-save-check"' + ((pre.save === undefined || pre.save) ? ' checked' : '') + '>' +
+      '<span class="box"><svg class="ic"><use href="#ic-check"/></svg></span>保存此网络，下次一键连接</label>' +
+      '<p class="w-hint">密码只保存在本机。首次连接时系统会弹出一次确认，之后自动重连。</p>' +
+      '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-pass-cancel">取消</button>' +
+      '<button type="button" class="f-btn" id="wifi-pass-ok">保存并连接</button></div>';
+    this.openSheet();
+    const inp = document.getElementById('wifi-pass-input');
+    const eye = document.getElementById('wifi-pass-eye');
+    const chk = document.getElementById('wifi-save-check');
+    const ok = document.getElementById('wifi-pass-ok');
+    inp.value = pre.password || '';
+    const syncOk = () => { ok.textContent = chk.checked ? '保存并连接' : '直接连接'; };
+    syncOk();
+    chk.addEventListener('change', syncOk);
+    eye.addEventListener('click', () => {
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      eye.setAttribute('aria-label', show ? '隐藏密码' : '显示密码');
+    });
+    document.getElementById('wifi-pass-cancel').addEventListener('click', () => this.cancel());
+    ok.addEventListener('click', () => this.doConnect({ ssid: n.ssid, password: inp.value, secured: !!n.secured, save: chk.checked }));
+    setTimeout(() => inp.focus(), 320);
+  },
+  async doConnect(opts){
+    const run = this.run = { cancelled: false, ssid: opts.ssid };
+    this.state = 'connecting';
+    this.renderConnecting(opts.ssid, 0, !!opts.save);
+    this.openSheet();
+    let res;
+    try { res = await Wifi.connect({ ssid: opts.ssid, password: opts.password, secured: !!opts.secured, save: !!opts.save }); }
+    catch (e) { res = { ok:false, error: (e && e.message) ? String(e.message) : '连接失败' }; }
+    if (run.cancelled) return;
+    if (!res || !res.ok) { this.failed(opts, (res && res.error) || '连接失败'); return; }
+    this.renderConnecting(opts.ssid, 1, !!opts.save);
+    const ok = await this.waitConnected(opts.ssid, WIFI_CONNECT_TIMEOUT_MS, run);
+    if (run.cancelled) return;
+    if (ok) await this.success(opts);
+    else this.failed(opts, '未找到网络或系统未确认');
+  },
+  renderConnecting(ssid, phase, save){
+    const steps = [
+      { t: save ? '已保存网络配置' : '读取网络配置', s: 'done' },
+      { t: '等待系统确认（首次连接）', s: phase >= 1 ? 'done' : 'cur' },
+      { t: '获取 IP 地址', s: phase >= 1 ? 'cur' : 'wait' }
+    ];
+    const body = document.getElementById('wifi-sheet-body');
+    body.innerHTML =
+      '<div class="sheet-title">正在连接 ' + escHtml(ssid) + '</div>' +
+      steps.map(st => '<div class="w-step">' + wifiStepIcon(st.s) + '<span class="w-stept' + (st.s === 'cur' ? ' cur' : '') + '">' + st.t + '</span></div>').join('') +
+      '<p class="w-hint">首次连接时，Android 会弹出系统通知或弹窗请你「允许一次」。之后系统会自动重连，无需再确认——这就是"一键连接"的实现方式（Android 10+ 不允许 App 静默连网，所有同类工具都是这个机制）。</p>' +
+      '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-connect-cancel">取消</button></div>';
+    this.openSheet();
+    document.getElementById('wifi-connect-cancel').addEventListener('click', () => this.cancel());
+  },
+  renderFailed(opts, reason){
+    const body = document.getElementById('wifi-sheet-body');
+    const sub = (reason === '密码错误') ? '密码错误，请重新输入。<br>已保存的配置不会丢失。'
+      : (reason === '未找到网络或系统未确认' ? '未找到 ' + escHtml(opts.ssid) + '，可能不在信号范围内。<br>已保存的配置不会丢失。'
+      : escHtml(reason) + '。<br>已保存的配置不会丢失。');
+    body.innerHTML =
+      '<div class="w-failic"><svg class="ic"><use href="#ic-alert"/></svg></div>' +
+      '<div class="sheet-title w-failtitle">连接失败</div>' +
+      '<p class="w-failsub">' + sub + '</p>' +
+      '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-fail-cancel">取消</button>' +
+      '<button type="button" class="f-btn" id="wifi-fail-retry"><svg class="ic"><use href="#ic-refresh"/></svg>重试</button></div>';
+    this.openSheet();
+    document.getElementById('wifi-fail-cancel').addEventListener('click', () => this.cancel());
+    document.getElementById('wifi-fail-retry').addEventListener('click', () => {
+      const n = this.find(opts.ssid);
+      // 已加密网络重试一律回到密码 sheet（存量密码可能本身就错，必须可改）
+      if (n && n.secured) return this.showPasswordSheet(n, { password: opts.password, save: opts.save });
+      this.doConnect(opts);
+    });
+  },
+  async waitConnected(ssid, timeoutMs, run){
+    const t0 = Date.now();
+    for (;;) {
+      let st = null;
+      try { st = await Wifi.getStatus(); } catch (e) { st = null; }
+      if (st && st.connected && st.ssid === ssid) return true;
+      if (Date.now() - t0 >= timeoutMs) return false;
+      await new Promise(r => setTimeout(r, 2000));
+      if (run && run.cancelled) return false;
+    }
+  },
+  async success(opts){
+    if (opts.save) { wifiCfg.saved[opts.ssid] = opts.password || ''; await saveWifiCfg(); }
+    delete wifiErrors[opts.ssid];
+    this.closeSheet();
+    showSnack(opts.save ? '✅ 已连接并保存，下次一键即连' : '✅ 已连接');
+    await this.refresh();
+  },
+  failed(opts, reason){
+    wifiErrors[opts.ssid] = true;
+    this.state = 'failed';
+    this.renderFailed(opts, reason);
+    renderWifiList(wifiNetworks); // 行内状态跟着变（连接失败）
+    showSnack('❌ 连接失败');
+  },
+  cancel(){ this.closeSheet(); },
+  openSheet(){ const el = document.getElementById('wifi-sheet'); if (el) el.classList.add('show'); },
+  closeSheet(){
+    const r = this.run;
+    if (r) r.cancelled = true;
+    this.run = null;
+    this.state = 'idle';
+    const el = document.getElementById('wifi-sheet');
+    if (el) el.classList.remove('show');
+  }
+};
+function wifiStepIcon(state){
+  if (state === 'done') return '<span class="w-stepic done"><svg class="ic"><use href="#ic-check"/></svg></span>';
+  if (state === 'cur') return '<span class="w-stepic cur"><svg class="ic spin"><use href="#ic-refresh"/></svg></span>';
+  return '<span class="w-stepic wait"></span>';
+}
+// 自动扫描：页面隐藏时停表，回到前台先同步一次连接状态再刷新
+function startWifiAutoScan(){
+  stopWifiAutoScan();
+  if (document.hidden) return;
+  wifiScanTimer = setInterval(() => WifiFlow.refresh(), wifiCfg.scanIntervalMs);
+}
+function stopWifiAutoScan(){ if (wifiScanTimer) { clearInterval(wifiScanTimer); wifiScanTimer = null; } }
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { stopWifiAutoScan(); return; }
+  startWifiAutoScan();
+  WifiFlow.refresh();
+});
+
 // 初始化
-window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); });
-window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.openAddForm = openAddForm; window.closeAddForm = closeAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.deleteNavSection = deleteNavSection; window.restoreSection = restoreSection; window.restoreAllSections = restoreAllSections; window.pickNavIcon = pickNavIcon; window.openLink = openLink; window.normalizeUrl = normalizeUrl; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon;
+window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); await loadWifiCfg(); await WifiFlow.refresh(); startWifiAutoScan(); });
+window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.openAddForm = openAddForm; window.closeAddForm = closeAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.deleteNavSection = deleteNavSection; window.restoreSection = restoreSection; window.restoreAllSections = restoreAllSections; window.pickNavIcon = pickNavIcon; window.openLink = openLink; window.normalizeUrl = normalizeUrl; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon; window.Wifi = Wifi; window.WifiFlow = WifiFlow; window.NativeProvider = NativeProvider; window.MockProvider = MockProvider;
 </script>
 </body>
 </html>
