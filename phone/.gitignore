@@ -1,0 +1,19 @@
+# Node
+node_modules/
+
+# Capacitor 生成物
+android/app/src/main/assets/public/
+android/capacitor-cordova-android-plugins/
+android/capacitor.settings.gradle
+
+# Android 构建
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.apk
+*.aab
+
+# 工具
+.superpowers/

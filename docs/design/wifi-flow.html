@@ -1,0 +1,299 @@
+<h2>WiFi 连接流程 + 分类空状态（收尾屏）</h2>
+<p class="subtitle">左侧三台是 WiFi 连接的三个状态（首次输密码 → 连接中 → 失败重试；成功态用底部提示条展示）。最右是分类删空后的新状态——分类保留不消失，可一键恢复默认。全部沿用扁平语言。</p>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ic-wifi" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></symbol>
+  <symbol id="ic-signal" viewBox="0 0 24 24"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></symbol>
+  <symbol id="ic-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="ic-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="ic-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="ic-chart" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></symbol>
+  <symbol id="ic-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></symbol>
+  <symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="ic-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
+  <symbol id="ic-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="m15 13-.01.01"/><path d="m9 13-.01.01"/></symbol>
+</svg>
+
+<style>
+  .phW{
+    position:relative;width:292px;height:620px;border-radius:30px;overflow:hidden;box-sizing:border-box;
+    display:flex;flex-direction:column;flex-shrink:0;text-align:left;
+    --bg:#FFFFFF;--fg:#0F1419;--sub:#536471;--line:#EFF3F4;--blue:#1D9BF0;--blue-d:#1A8CD8;
+    --tint:#E8F5FE;--ok:#068A5F;--okbg:#E8F8F2;--graytint:#F7F9F9;--red:#F4212E;--redtint:#FDECEE;
+    background:var(--bg);color:var(--fg);border:1px solid var(--line);
+    font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei','Roboto',sans-serif;
+  }
+  .phW *{box-sizing:border-box}
+  .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .w-stat{display:flex;justify-content:space-between;align-items:center;padding:8px 18px 0;font-size:11px;font-weight:600;flex-shrink:0}
+  .w-bat{display:inline-flex;align-items:center;gap:5px}
+  .w-bat .bat{width:20px;height:10px;border:1.5px solid currentColor;border-radius:3.5px;position:relative;display:inline-block;opacity:.9}
+  .w-bat .bat::after{content:"";position:absolute;right:-3.5px;top:2.5px;width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0}
+  .w-bat .bat::before{content:"";position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:12px;background:currentColor;border-radius:1.5px}
+  .w-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid var(--line);flex-shrink:0}
+  .w-title{font-size:19px;font-weight:800;letter-spacing:-.2px}
+  .w-status{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .w-icirc{width:44px;height:44px;border-radius:999px;background:var(--tint);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .w-icirc .ic{width:22px;height:22px}
+  .w-main{flex:1;min-width:0}
+  .w-name{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .w-meta{font-size:12.5px;color:var(--sub);margin-top:3px;display:flex;align-items:center;gap:6px}
+  .w-pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--okbg);color:var(--ok);flex-shrink:0}
+  .w-pill .ic{width:13px;height:13px}
+  .w-btnwrap{padding:14px 16px;border-bottom:1px solid var(--line)}
+  .w-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;background:var(--blue);color:#fff;font-size:15px;font-weight:700;padding:14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s,transform .12s}
+  .w-btn:hover{background:var(--blue-d)}
+  .w-btn:active{transform:scale(.98)}
+  .w-btn .ic{width:17px;height:17px}
+  .w-btn.ghost2{background:transparent;color:var(--fg);border:1px solid var(--line)}
+  .w-sechead{display:flex;align-items:baseline;justify-content:space-between;padding:13px 16px 9px;border-bottom:1px solid var(--line)}
+  .w-sechead h4{font-size:15px;font-weight:800;margin:0}
+  .w-sechead span{font-size:12px;color:var(--sub)}
+  .w-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .w-ric{width:38px;height:38px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--tint);color:var(--blue)}
+  .w-ric.gray{background:var(--graytint);color:var(--sub)}
+  .w-rinfo{flex:1;min-width:0}
+  .w-rname{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .w-rmeta{font-size:12px;color:var(--sub);margin-top:1px}
+  .w-act{border:1px solid var(--blue);background:transparent;color:var(--blue);font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s;flex-shrink:0}
+  .w-act.ghost{border-color:var(--line);color:var(--sub)}
+  .w-nav{margin-top:auto;display:flex;border-top:1px solid var(--line);background:var(--bg);flex-shrink:0}
+  .w-navitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 0 11px;font-size:10px;font-weight:600;color:var(--sub)}
+  .w-navitem .ic{width:22px;height:22px}
+  .w-navitem.on{color:var(--blue)}
+
+  /* 底部弹窗（扁平） */
+  .w-sheet-ol{position:absolute;inset:0;background:rgba(15,20,25,.45);display:flex;align-items:flex-end;z-index:10}
+  .w-sheet{width:100%;background:var(--bg);border-top:1px solid var(--line);border-radius:24px 24px 0 0;padding:10px 16px 18px}
+  .w-handle{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+  .w-stitle{font-size:17px;font-weight:800;text-align:center;margin-bottom:14px}
+  .w-net{display:flex;align-items:center;gap:10px;padding:2px 0 14px}
+  .w-sbtns{display:flex;gap:10px;margin-top:16px}
+  .w-sbtns .w-btn{flex:1;padding:12px;font-size:14px}
+  .w-input{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;padding:0 12px;height:46px;gap:8px;transition:border-color .15s}
+  .w-input:focus-within{border-color:var(--blue)}
+  .w-input input{flex:1;border:none;outline:none;font:inherit;font-size:14px;background:transparent;color:var(--fg)}
+  .w-input .ic{color:var(--sub);cursor:pointer}
+  .w-check{display:flex;align-items:center;gap:9px;padding:14px 0 0;font-size:13px;font-weight:500;color:var(--fg)}
+  .w-check .box{width:19px;height:19px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .w-check .box .ic{width:12px;height:12px;color:#fff}
+  .w-hint{font-size:11.5px;color:var(--sub);margin-top:8px;line-height:1.6}
+
+  /* 步骤条（连接中） */
+  .w-step{display:flex;align-items:center;gap:10px;padding:8px 0}
+  .w-stepic{width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .w-stepic.done{background:var(--okbg);color:var(--ok)}
+  .w-stepic.done .ic{width:13px;height:13px}
+  .w-stepic.cur{background:var(--tint);color:var(--blue)}
+  .w-stepic.cur .ic{width:14px;height:14px;animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .w-stepic.wait{border:1.5px solid var(--line)}
+  .w-stept{font-size:13.5px;color:var(--sub)}
+  .w-stept.cur{color:var(--fg);font-weight:700}
+
+  /* 失败 */
+  .w-fail-ic{width:46px;height:46px;border-radius:999px;background:var(--redtint);color:var(--red);display:flex;align-items:center;justify-content:center;margin:2px auto 10px}
+  .w-fail-ic .ic{width:22px;height:22px}
+  .w-fail-sub{font-size:13px;color:var(--sub);text-align:center;line-height:1.6;margin-bottom:4px}
+
+  /* 成功提示条 */
+  .w-snack{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:#0F1419;color:#fff;font-size:12.5px;font-weight:600;padding:11px 18px;border-radius:999px;white-space:nowrap;z-index:11;display:flex;align-items:center;gap:7px}
+  .w-snack .ic{width:14px;height:14px}
+
+  /* 空分类 */
+  .w-seclabel{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.04em;padding:14px 16px 8px}
+  .w-tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 16px}
+  .w-tile{border:1px solid var(--line);border-radius:14px;padding:13px 6px 11px;display:flex;flex-direction:column;align-items:center;gap:7px;background:var(--bg)}
+  .w-tile .ic{width:21px;height:21px;color:var(--blue)}
+  .w-tile span{font-size:11px;font-weight:600}
+  .w-empty{border:1px solid var(--line);border-radius:14px;margin:0 16px;padding:18px 12px;text-align:center}
+  .w-empty-ic{width:40px;height:40px;border-radius:999px;background:var(--graytint);color:var(--sub);display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+  .w-empty-t{font-size:13.5px;font-weight:700}
+  .w-empty-s{font-size:11.5px;color:var(--sub);margin:4px 0 12px;line-height:1.6}
+</style>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phW">
+        <div class="w-stat"><span>21:16</span><span class="w-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="w-head"><div class="w-title">AUST 认证助手</div></div>
+        <div class="w-status">
+          <div class="w-icirc"><svg class="ic"><use href="#ic-wifi"/></svg></div>
+          <div class="w-main"><div class="w-name">AUST-Student</div><div class="w-meta"><span class="w-pill"><svg class="ic"><use href="#ic-check"/></svg>认证有效</span></div></div>
+        </div>
+        <div class="w-btnwrap"><button class="w-btn"><svg class="ic"><use href="#ic-zap"/></svg>一键认证</button></div>
+        <div class="w-sechead"><h4>校园 WiFi</h4><span>已发现 2 个目标</span></div>
+        <div class="w-row">
+          <div class="w-ric"><svg class="ic"><use href="#ic-signal"/></svg></div>
+          <div class="w-rinfo"><div class="w-rname">AUST-Dorm</div><div class="w-rmeta">信号强 · 已保存</div></div>
+          <button class="w-act">一键连接</button>
+        </div>
+        <div class="w-row">
+          <div class="w-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
+          <div class="w-rinfo"><div class="w-rname">AUST-Teacher</div><div class="w-rmeta">需密码 · 未保存</div></div>
+          <button class="w-act ghost">连接</button>
+        </div>
+        <div class="w-nav">
+          <div class="w-navitem on"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="w-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="w-navitem"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+        <div class="w-sheet-ol">
+          <div class="w-sheet">
+            <div class="w-handle"></div>
+            <div class="w-stitle">连接到 AUST-Teacher</div>
+            <div class="w-net">
+              <div class="w-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
+              <div class="w-rinfo"><div class="w-rname">AUST-Teacher</div><div class="w-rmeta">WPA2 加密 · 首次连接需输入密码</div></div>
+            </div>
+            <div class="w-input">
+              <input type="password" value="12345678" readonly>
+              <svg class="ic"><use href="#ic-eye"/></svg>
+            </div>
+            <div class="w-check"><span class="box"><svg class="ic"><use href="#ic-check"/></svg></span>保存此网络，下次一键连接</div>
+            <p class="w-hint">密码只保存在本机。首次连接时系统会弹出一次确认，之后自动重连。</p>
+            <div class="w-sbtns">
+              <button class="w-btn ghost2">取消</button>
+              <button class="w-btn">保存并连接</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>① 首次连接 · 输密码</h3>
+      <p>点"连接"弹底部卡片：网络信息 + 密码框（可切换明文）+「保存此网络」勾选（默认开）。勾选即"先连接、后配置为下一次一键连接"。密码只存本机。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phW">
+        <div class="w-stat"><span>21:16</span><span class="w-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="w-head"><div class="w-title">AUST 认证助手</div></div>
+        <div class="w-status">
+          <div class="w-icirc"><svg class="ic"><use href="#ic-wifi"/></svg></div>
+          <div class="w-main"><div class="w-name">AUST-Student</div><div class="w-meta"><span class="w-pill"><svg class="ic"><use href="#ic-check"/></svg>认证有效</span></div></div>
+        </div>
+        <div class="w-btnwrap"><button class="w-btn"><svg class="ic"><use href="#ic-zap"/></svg>一键认证</button></div>
+        <div class="w-sechead"><h4>校园 WiFi</h4><span>已发现 2 个目标</span></div>
+        <div class="w-row">
+          <div class="w-ric"><svg class="ic"><use href="#ic-signal"/></svg></div>
+          <div class="w-rinfo"><div class="w-rname">AUST-Dorm</div><div class="w-rmeta">信号强 · 已保存</div></div>
+          <button class="w-act">一键连接</button>
+        </div>
+        <div class="w-row">
+          <div class="w-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
+          <div class="w-rinfo"><div class="w-rname">AUST-Teacher</div><div class="w-rmeta">正在连接…</div></div>
+          <button class="w-act ghost">连接</button>
+        </div>
+        <div class="w-nav">
+          <div class="w-navitem on"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="w-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="w-navitem"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+        <div class="w-sheet-ol">
+          <div class="w-sheet">
+            <div class="w-handle"></div>
+            <div class="w-stitle">正在连接 AUST-Teacher</div>
+            <div class="w-step"><span class="w-stepic done"><svg class="ic"><use href="#ic-check"/></svg></span><span class="w-stept">已保存网络配置</span></div>
+            <div class="w-step"><span class="w-stepic cur"><svg class="ic"><use href="#ic-refresh"/></svg></span><span class="w-stept cur">等待系统确认（首次连接）</span></div>
+            <div class="w-step"><span class="w-stepic wait"></span><span class="w-stept">获取 IP 地址</span></div>
+            <p class="w-hint">首次连接时，Android 会弹出系统通知或弹窗请你「允许一次」。之后系统会自动重连，无需再确认——这就是"一键连接"的实现方式（Android 10+ 不允许 App 静默连网，所有同类工具都是这个机制）。</p>
+            <div class="w-sbtns">
+              <button class="w-btn ghost2">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>② 连接中 · 步骤条</h3>
+      <p>三步进度：保存配置 ✓ → 等待系统确认（转圈）→ 获取 IP。首次连接需在系统通知里允许一次（Android 10+ 的硬性限制，无法绕过），之后自动重连。完成后底部弹提示条"已连接并保存，下次一键即连"。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phW">
+        <div class="w-stat"><span>21:16</span><span class="w-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="w-head"><div class="w-title">AUST 认证助手</div></div>
+        <div class="w-status">
+          <div class="w-icirc"><svg class="ic"><use href="#ic-wifi"/></svg></div>
+          <div class="w-main"><div class="w-name">AUST-Student</div><div class="w-meta"><span class="w-pill"><svg class="ic"><use href="#ic-check"/></svg>认证有效</span></div></div>
+        </div>
+        <div class="w-btnwrap"><button class="w-btn"><svg class="ic"><use href="#ic-zap"/></svg>一键认证</button></div>
+        <div class="w-sechead"><h4>校园 WiFi</h4><span>已发现 2 个目标</span></div>
+        <div class="w-row">
+          <div class="w-ric"><svg class="ic"><use href="#ic-signal"/></svg></div>
+          <div class="w-rinfo"><div class="w-rname">AUST-Dorm</div><div class="w-rmeta">信号强 · 已保存</div></div>
+          <button class="w-act">一键连接</button>
+        </div>
+        <div class="w-row">
+          <div class="w-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
+          <div class="w-rinfo"><div class="w-rname">AUST-Teacher</div><div class="w-rmeta">连接失败</div></div>
+          <button class="w-act ghost">连接</button>
+        </div>
+        <div class="w-nav">
+          <div class="w-navitem on"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="w-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="w-navitem"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+        <div class="w-sheet-ol">
+          <div class="w-sheet">
+            <div class="w-handle"></div>
+            <div class="w-fail-ic"><svg class="ic"><use href="#ic-alert"/></svg></div>
+            <div class="w-stitle" style="margin-bottom:6px">连接失败</div>
+            <p class="w-fail-sub">未找到 AUST-Teacher，可能不在信号范围内。<br>已保存的配置不会丢失。</p>
+            <div class="w-sbtns">
+              <button class="w-btn ghost2">取消</button>
+              <button class="w-btn"><svg class="ic"><use href="#ic-refresh"/></svg>重试</button>
+            </div>
+          </div>
+        </div>
+        <div class="w-snack"><svg class="ic"><use href="#ic-check"/></svg>连接失败 · 已保留配置</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>③ 连接失败 · 重试</h3>
+      <p>失败卡片给出原因（不在范围 / 超时 / 系统拒绝），保留已存配置，一步重试。底部深色提示条同步提醒，列表行状态跟着变。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phW">
+        <div class="w-stat"><span>21:16</span><span class="w-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="w-head"><div class="w-title">常用链接</div><button class="w-act ghost" style="padding:6px 12px">编辑</button></div>
+        <div class="w-seclabel">校园官方</div>
+        <div class="w-empty">
+          <div class="w-empty-ic"><svg class="ic"><use href="#ic-globe"/></svg></div>
+          <div class="w-empty-t">这个分类还是空的</div>
+          <div class="w-empty-s">清空后分类不会消失，随时可以恢复</div>
+          <button class="w-act" style="padding:8px 16px">恢复默认链接</button>
+        </div>
+        <div class="w-seclabel">学习科研</div>
+        <div class="w-tiles">
+          <div class="w-tile"><svg class="ic"><use href="#ic-search"/></svg><span>知网 CNKI</span></div>
+          <div class="w-tile"><svg class="ic"><use href="#ic-code"/></svg><span>GitHub</span></div>
+          <div class="w-tile"><svg class="ic"><use href="#ic-bot"/></svg><span>DeepSeek</span></div>
+        </div>
+        <div class="w-nav">
+          <div class="w-navitem"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="w-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="w-navitem on"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>④ 分类删空 · 不再消失</h3>
+      <p>你说的那个 bug 的修复态：分类清空后保留标题，显示空状态和「恢复默认链接」入口。其他分类不受影响。编辑入口也从顶部两个按钮精简为一个。</p>
+    </div>
+  </div>
+</div>

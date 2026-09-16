@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1565C0">
+<meta name="mobile-web-app-capable" content="yes">
+<title>AUST 校园认证助手 · 深色模式+设备定制</title>
+<style>
+  /* ========== 浅色主题 (默认) ========== */
+  :root {
+    --primary:#1565C0;
+    --primary-dark:#0D47A1;
+    --primary-light:#E3F2FD;
+    --surface:#FFFFFF;
+    --surface-2:#F5F7FA;
+    --on-surface:#212121;
+    --on-surface-medium:#616161;
+    --on-surface-low:#9E9E9E;
+    --divider:#E0E0E0;
+    --error:#C62828;
+    --error-bg:#FFEBEE;
+    --success:#2E7D32;
+    --success-bg:#E8F5E9;
+    --nav-height:56px;
+    --radius-sm:8px;
+    --radius-md:12px;
+    --shadow-1:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.08);
+    --shadow-2:0 3px 6px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.08);
+    --modal-bg: rgba(0,0,0,0.5);
+    --log-bg:#0D1117;
+    --log-text:#C9D1D9;
+  }
+
+  /* ========== 深色主题 ========== */
+  :root.dark {
+    --primary:#42A5F5;
+    --primary-dark:#1E88E5;
+    --primary-light:#1E3A5F;
+    --surface:#1E1E2E;
+    --surface-2:#2A2A3A;
+    --on-surface:#E4E4E7;
+    --on-surface-medium:#B0B0C0;
+    --on-surface-low:#7A7A8A;
+    --divider:#3A3A4A;
+    --error:#FF8A80;
+    --error-bg:#4A2A2A;
+    --success:#81C784;
+    --success-bg:#2A4A2A;
+    --shadow-1:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.25);
+    --shadow-2:0 3px 6px rgba(0,0,0,.35),0 2px 4px rgba(0,0,0,.3);
+    --log-bg:#0A0C12;
+    --log-text:#E2E4E8;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Roboto',-apple-system,'PingFang SC','Noto Sans SC',sans-serif;background:var(--surface-2);color:var(--on-surface);min-height:100dvh;overscroll-behavior:none}
+
+  .app-bar{position:sticky;top:0;z-index:100;background:var(--primary);color:#fff;height:var(--nav-height);display:flex;align-items:center;padding:0 16px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+  .app-bar-title{font-size:19px;font-weight:500;flex:1}
+  .app-bar-sub{font-size:12px;opacity:.75}
+
+  .tab-bar{display:flex;background:var(--primary)}
+  .tab-btn{flex:1;padding:11px 8px;font-size:13px;font-weight:500;color:rgba(255,255,255,.65);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s}
+  .tab-btn.active{color:#fff;border-bottom-color:#90CAF9}
+  .tab-panel{display:none}.tab-panel.active{display:block}
+  .page{padding:12px 12px 80px;max-width:480px;margin:0 auto}
+
+  .card{background:var(--surface);border-radius:var(--radius-md);box-shadow:var(--shadow-1);margin-bottom:12px;overflow:hidden}
+  .card-header{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--divider)}
+  .card-header.collapsible{cursor:pointer;user-select:none}
+  .card-header.collapsible:active{background:var(--surface-2)}
+  .card-header-icon{width:36px;height:36px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .card-header-text{flex:1;min-width:0}
+  .card-title{font-size:15px;font-weight:600}
+  .card-subtitle{font-size:12px;color:var(--on-surface-medium);margin-top:2px}
+  .card-body{padding:14px 16px}
+  .collapse-arrow{font-size:18px;color:var(--on-surface-low);transition:transform .25s cubic-bezier(.4,0,.2,1);flex-shrink:0}
+  .collapse-arrow.open{transform:rotate(180deg)}
+  .collapsible-body{overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.4,0,.2,1)}
+  .collapsible-body.open{max-height:700px}
+
+  .field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+  .field-label{font-size:12px;font-weight:500;color:var(--primary);margin-bottom:5px;display:block;letter-spacing:.03em}
+  .field-input{width:100%;height:46px;padding:0 14px;font-size:15px;color:var(--on-surface);background:var(--surface-2);border:1.5px solid var(--divider);border-radius:var(--radius-sm);outline:none;font-family:inherit;-webkit-appearance:none;transition:border-color .2s}
+  .field-input:focus{border-color:var(--primary);background:var(--surface)}
+  .field-select{width:100%;height:46px;padding:0 36px 0 14px;font-size:15px;color:var(--on-surface);background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='%231565C0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center;border:1.5px solid var(--divider);border-radius:var(--radius-sm);outline:none;-webkit-appearance:none;font-family:inherit;cursor:pointer}
+  .field-select:focus{border-color:var(--primary)}
+  .preview-chip{display:inline-flex;align-items:center;gap:5px;background:var(--primary-light);border:1px solid #90CAF9;border-radius:20px;padding:3px 10px;font-size:12px;color:var(--primary-dark);font-family:'Roboto Mono',monospace;font-weight:500}
+
+  .switch-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--divider)}
+  .switch-row:last-child{border-bottom:none}
+  .switch-label{font-size:14px}.switch-desc{font-size:12px;color:var(--on-surface-medium);margin-top:2px}
+  .switch{position:relative;width:46px;height:26px;flex-shrink:0}
+  .switch input{display:none}
+  .switch-track{position:absolute;inset:0;background:#B0BEC5;border-radius:13px;cursor:pointer;transition:background .2s}
+  .switch input:checked+.switch-track{background:var(--primary)}
+  .switch-thumb{position:absolute;left:3px;top:3px;width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s cubic-bezier(.4,0,.2,1);pointer-events:none}
+  .switch input:checked~.switch-thumb{transform:translateX(20px)}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:var(--radius-md);font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.04em;font-family:inherit;transition:opacity .15s,transform .1s}
+  .btn:active{opacity:.85;transform:scale(.98)}
+  .btn-primary{background:var(--primary);color:#fff;box-shadow:var(--shadow-2)}
+  .btn-secondary{background:var(--surface);color:var(--primary);border:1.5px solid var(--primary)}
+  .btn-sm{width:auto;padding:8px 16px;font-size:13px;border-radius:var(--radius-sm)}
+  .btn:disabled{opacity:.45;pointer-events:none}
+
+  .status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500}
+  .badge-idle{background:#F5F5F5;color:#757575}.badge-loading{background:var(--primary-light);color:var(--primary)}
+  .badge-success{background:var(--success-bg);color:var(--success)}.badge-error{background:var(--error-bg);color:var(--error)}
+  .badge-skip{background:#F5F5F5;color:#9E9E9E}
+
+  .log-box{background:var(--log-bg);border-radius:var(--radius-sm);padding:12px;font-family:'Roboto Mono',monospace;font-size:12px;line-height:1.7;color:var(--log-text);min-height:80px;max-height:160px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+  .log-box:empty::before{content:"等待操作…";color:#484F58}
+  .log-success{color:#3FB950}.log-error{color:#F85149}.log-info{color:#79C0FF}
+
+  .info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--divider);font-size:14px}
+  .info-row:last-child{border-bottom:none}
+  .info-key{color:var(--on-surface-medium)}.info-val{font-weight:500}
+
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat-item{background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 8px;text-align:center}
+  .stat-value{font-size:18px;font-weight:700;color:var(--primary)}.stat-unit{font-size:10px;color:var(--on-surface-medium)}
+  .stat-label{font-size:11px;color:var(--on-surface-medium);margin-top:3px}
+
+  /* 设备列表增强 */
+  .device-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--divider)}
+  .device-item:last-child{border-bottom:none}
+  .device-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .device-info{flex:1;min-width:0}.device-name{font-size:14px;font-weight:500}
+  .device-meta{font-size:12px;color:var(--on-surface-medium);margin-top:2px}
+  .device-actions{display:flex;gap:6px;align-items:center}
+  .device-edit-btn{background:var(--surface-2);border:none;border-radius:20px;padding:6px 10px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--primary);font-weight:500}
+  .device-offline-btn{background:var(--error-bg);color:var(--error);border:none;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+
+  /* 导航区样式 */
+  .nav-section-title{font-size:11px;font-weight:600;color:var(--on-surface-low);letter-spacing:.08em;text-transform:uppercase;padding:8px 4px 6px}
+  .nav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface);border-radius:var(--radius-md);padding:12px 8px;text-decoration:none;box-shadow:var(--shadow-1);cursor:pointer;border:none;font-family:inherit;position:relative;transition:background .15s,box-shadow .15s,transform .15s;touch-action:none;user-select:none}
+  .nav-item:not(.dragging):active{background:var(--primary-light);transform:scale(.96)}
+  .nav-item-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;pointer-events:none}
+  .nav-item-name{font-size:11.5px;font-weight:500;text-align:center;line-height:1.3;color:var(--on-surface);pointer-events:none}
+  .nav-delete-btn{display:none;position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--error);color:#fff;border:none;border-radius:50%;font-size:12px;line-height:20px;text-align:center;cursor:pointer;z-index:5;pointer-events:auto}
+  body.edit-mode .nav-delete-btn{display:block}
+  .nav-drag-handle{display:none;position:absolute;top:-6px;left:-6px;width:20px;height:20px;background:var(--primary);color:#fff;border-radius:50%;font-size:11px;line-height:20px;text-align:center;cursor:grab;z-index:5}
+  body.edit-mode .nav-drag-handle{display:block}
+  body.edit-mode .nav-item:not(.drag-over){animation:wobble .4s ease infinite alternate}
+  @keyframes wobble{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
+  .nav-item.dragging{opacity:.35;transform:scale(.95)!important;animation:none!important;box-shadow:none}
+  .nav-item.drag-over{box-shadow:0 0 0 2.5px var(--primary);animation:none!important;transform:scale(1.04)!important}
+  #drag-ghost{position:fixed;z-index:9999;pointer-events:none;display:none;width:90px;background:var(--surface);border-radius:var(--radius-md);padding:12px 8px;box-shadow:0 8px 24px rgba(0,0,0,.22);flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,-50%) scale(1.08)}
+  #drag-ghost.active{display:flex}
+  .nav-add-card{background:var(--surface);border-radius:var(--radius-md);box-shadow:var(--shadow-1);margin-bottom:12px;overflow:hidden;display:none}
+  .nav-add-card.show{display:block}
+  .star-card{background:linear-gradient(135deg,#1565C0 0%,#0288D1 100%);border-radius:var(--radius-md);padding:18px 16px 20px;margin-bottom:12px;box-shadow:var(--shadow-2);text-align:center}
+  .star-kaomoji{font-size:17px;color:#fff;display:block;line-height:1.6;margin-bottom:10px}
+  .star-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .star-link{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.4);border-radius:20px;padding:7px 16px;color:#fff;text-decoration:none;font-size:13px;font-weight:500}
+
+  /* 模态窗 */
+  .modal-overlay{position:fixed;inset:0;background:var(--modal-bg);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+  .modal-overlay.show{opacity:1;pointer-events:all}
+  .modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:20px 20px 32px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+  .modal-overlay.show .modal-sheet{transform:translateY(0)}
+  .modal-handle{width:40px;height:4px;background:var(--divider);border-radius:2px;margin:0 auto 18px}
+  .modal-title{font-size:17px;font-weight:600;text-align:center;margin-bottom:18px}
+  .emoji-picker{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:12px 0}
+  .emoji-opt{font-size:28px;background:var(--surface-2);border-radius:40px;padding:8px 12px;cursor:pointer;transition:transform .1s;border:1px solid var(--divider)}
+  .emoji-opt:active{transform:scale(.94)}
+  .captcha-img-box{background:var(--surface-2);border-radius:var(--radius-sm);border:1px solid var(--divider);height:72px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden}
+  .snackbar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#323232;color:#fff;border-radius:var(--radius-sm);padding:12px 20px;font-size:13px;z-index:999;max-width:calc(100vw - 32px);transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none}
+  .snackbar.show{transform:translateX(-50%) translateY(0)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+  .c-blue{background:#E3F2FD;color:#1565C0}.c-green{background:#E8F5E9;color:#2E7D32}
+  .c-purple{background:#EDE7F6;color:#512DA8}.c-teal{background:#E0F2F1;color:#00695C}
+  .c-orange{background:#FFF3E0;color:#E65100}.c-red{background:#FFEBEE;color:#C62828}
+  .c-indigo{background:#E8EAF6;color:#283593}.c-amber{background:#FFF8E1;color:#F57F17}
+  .c-cyan{background:#E0F7FA;color:#006064}.c-gray{background:#F5F5F5;color:#424242}
+  .c-pink{background:#FCE4EC;color:#880E4F}
+</style>
+</head>
+<body>
+
+<div class="app-bar">
+  <span style="font-size:22px">🏫</span>
+  <div><div class="app-bar-title">AUST 校园认证助手</div><div class="app-bar-sub">安徽理工大学 · v1.3 Pocket</div></div>
+</div>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('auth')">🔐 认证</button>
+  <button class="tab-btn" onclick="switchTab('portal')">📊 自助系统</button>
+  <button class="tab-btn" onclick="switchTab('nav')">🔗 常用链接</button>
+</div>
+
+<div class="page">
+<div id="tab-auth" class="tab-panel active">
+  <div class="card">
+    <div class="card-header"><div class="card-header-icon">📶</div><div class="card-header-text"><div class="card-title">认证状态</div></div></div>
+    <div class="card-body">
+      <div class="info-row">
+        <span class="info-key">校园网 DrCOM</span>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <span class="status-badge badge-idle" id="net-status">⚪ 待认证</span>
+          <button id="dark-mode-toggle" style="background:none; border:none; font-size:22px; cursor:pointer; padding:0; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;">🌙</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('account-body','account-arrow')"><div class="card-header-icon">👤</div><div class="card-header-text"><div class="card-title">账号信息</div><div class="card-subtitle"><span class="preview-chip">📡 <span id="preview">学号@aust</span></span></div></div><span class="collapse-arrow" id="account-arrow">▾</span></div><div class="collapsible-body" id="account-body"><div class="card-body"><div class="field"><label class="field-label">学号 / 工号</label><input class="field-input" type="text" id="username" placeholder="请输入学号或工号" inputmode="numeric" autocomplete="username" oninput="updatePreview()"></div><div class="field"><label class="field-label">登录密码</label><input class="field-input" type="password" id="password" placeholder="请输入密码" autocomplete="current-password"></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('net-body','net-arrow')"><div class="card-header-icon">🌐</div><div class="card-header-text"><div class="card-title">校园网设置</div><div class="card-subtitle">运营商 · 网络类型 · 服务器地址</div></div><span class="collapse-arrow" id="net-arrow">▾</span></div><div class="collapsible-body" id="net-body"><div class="card-body"><div class="field"><label class="field-label">运营商</label><select class="field-select" id="isp" onchange="updatePreview()"><option value="aust">电信 (@aust)</option><option value="unicom">联通 (@unicom)</option><option value="cmcc">移动 (@cmcc)</option><option value="jzg">教职工 (@jzg)</option></select></div><div class="field"><label class="field-label">网络类型</label><select class="field-select" id="nettype"><option value="post">宽带（POST）</option><option value="get">WiFi（GET）</option></select></div><div class="field"><label class="field-label">认证服务器地址</label><input class="field-input" type="url" id="drcom-url" value="http://10.255.0.19/drcom/login"></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('opt-body','opt-arrow')"><div class="card-header-icon">⚙️</div><div class="card-header-text"><div class="card-title">选项</div></div><span class="collapse-arrow" id="opt-arrow">▾</span></div><div class="collapsible-body" id="opt-body"><div class="card-body"><div class="switch-row"><div><div class="switch-label">校园网认证</div><div class="switch-desc">连接 DrCOM 校园网认证服务</div></div><label class="switch"><input type="checkbox" id="do-net" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div><div class="switch-row"><div><div class="switch-label">记住账号密码</div><div class="switch-desc">存于本机，不上传</div></div><label class="switch"><input type="checkbox" id="save-cfg" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('log-body','log-arrow')"><div class="card-header-icon">📋</div><div class="card-header-text"><div class="card-title">运行日志</div></div><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();clearLog()" style="width:auto;margin-right:6px">清空</button><span class="collapse-arrow" id="log-arrow">▾</span></div><div class="collapsible-body" id="log-body"><div class="card-body"><div class="log-box" id="log-box"></div></div></div></div>
+  <button class="btn btn-primary" id="auth-btn" onclick="doAuth()">Σ&gt;―(〃°ω°〃)♡→ 一键认证</button>
+</div>
+
+<div id="tab-portal" class="tab-panel">
+  <div class="card"><div class="card-header"><div class="card-header-icon">🔐</div><div class="card-header-text"><div class="card-title">自助系统登录</div><div class="card-subtitle" id="portal-base-display">xgmm.aust.edu.cn</div></div></div><div class="card-body"><div id="portal-login-section"><div class="field"><label class="field-label">账号（留空同认证页）</label><input class="field-input" type="text" id="portal-user" placeholder="留空则使用认证页账号"></div><div class="field"><label class="field-label">密码（留空同认证页）</label><input class="field-input" type="password" id="portal-pass" placeholder="留空则使用认证页密码"></div><div class="field"><label class="field-label">自助系统地址（可修改）</label><input class="field-input" type="url" id="portal-url" value="https://xgmm.aust.edu.cn" oninput="updatePortalBaseDisplay()"></div><button class="btn btn-primary" id="portal-login-btn" onclick="portalLogin()" style="margin-top:4px">🔓 登录自助系统</button></div><div id="portal-logged-section" style="display:none"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span class="status-badge badge-success">✅ 已登录</span><span id="portal-username-display" style="font-size:14px;color:var(--on-surface-medium)"></span><button class="btn btn-secondary btn-sm" onclick="portalLogout()" style="margin-left:auto;width:auto">退出</button></div><div class="stats-row"><div class="stat-item"><div class="stat-value" id="stat-time">--</div><div class="stat-unit">分钟</div><div class="stat-label">已用时长</div></div><div class="stat-item"><div class="stat-value" id="stat-flow">--</div><div class="stat-unit">GB</div><div class="stat-label">已用流量</div></div><div class="stat-item"><div class="stat-value" id="stat-devices">--</div><div class="stat-unit">台</div><div class="stat-label">在线设备</div></div></div><div style="margin-top:12px"><div class="info-row"><span class="info-key">到期日期</span><span class="info-val" id="portal-expiry">--</span></div><div class="info-row"><span class="info-key">姓名</span><span class="info-val" id="portal-realname">--</span></div></div><button class="btn btn-secondary" onclick="refreshPortalData()" style="margin-top:12px">🔄 刷新数据</button></div></div></div>
+  <div class="card" id="portal-devices-card" style="display:none"><div class="card-header"><div class="card-header-icon">📱</div><div class="card-header-text"><div class="card-title">在线设备</div><div class="card-subtitle" id="device-count">加载中…</div></div><button onclick="offlineAll()" style="background:var(--error-bg);color:var(--error);border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">全部下线</button></div><div class="card-body" id="device-list"></div></div>
+  <div class="card"><div class="card-header"><div class="card-header-icon">💡</div><div class="card-header-text"><div class="card-title">说明</div></div></div><div class="card-body" style="font-size:13px;color:var(--on-surface-medium);line-height:1.8">支持设备自定义名称/图标 ✨ 点击设备旁✏️编辑</div></div>
+</div>
+
+<div id="tab-nav" class="tab-panel">
+  <div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn btn-secondary btn-sm" id="edit-nav-btn" onclick="toggleEditMode()" style="flex:1">✏️ 编辑 / 拖拽</button><button class="btn btn-secondary btn-sm" id="add-nav-btn" onclick="toggleAddForm()" style="flex:1">＋ 添加链接</button></div>
+  <div class="nav-add-card" id="nav-add-card"><div class="card-body"><div class="field"><label class="field-label">名称（最多8字）</label><input class="field-input" id="new-nav-name" maxlength="8"></div><div class="field"><label class="field-label">URL</label><input class="field-input" type="url" id="new-nav-url"></div><div class="field"><label class="field-label">图标 Emoji</label><input class="field-input" id="new-nav-icon" maxlength="4" style="font-size:22px;text-align:center" value="🔗"></div><div class="field"><label class="field-label">颜色主题</label><select class="field-select" id="new-nav-color"><option value="c-blue">蓝色</option><option value="c-green">绿色</option><option value="c-purple">紫色</option><option value="c-teal">青绿</option><option value="c-orange">橙色</option><option value="c-red">红色</option><option value="c-indigo">靛蓝</option><option value="c-amber">琥珀</option><option value="c-cyan">天蓝</option><option value="c-gray">灰色</option><option value="c-pink">粉色</option></select></div><div style="display:flex;gap:8px"><button class="btn btn-secondary" onclick="toggleAddForm()">取消</button><button class="btn btn-primary" onclick="addNavItem()">添加</button></div></div></div>
+  <div id="nav-dynamic"></div>
+  <div class="star-card"><span class="star-kaomoji">◝(⑅•ᴗ•⑅)◜..°♡<br><span style="font-size:15px;font-weight:600;opacity:.95">star me！</span></span><div class="star-links"><a class="star-link" href="https://github.com/hanasite/AUST" target="_blank">🐙 GitHub</a><a class="star-link" href="https://gitee.com/yosakun/aust" target="_blank">🔴 Gitee</a></div></div>
+</div>
+</div>
+
+<div id="drag-ghost"><div class="g-icon" id="dg-icon"></div><div class="g-name" id="dg-name"></div></div>
+
+<!-- 验证码模态窗 -->
+<div class="modal-overlay" id="captcha-modal"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">🔐 请输入验证码</div><div class="captcha-img-box"><img id="captcha-img" src="" alt="验证码" style="display:none"><span id="captcha-loading" style="font-size:13px;color:var(--on-surface-low)">加载中…</span></div><button class="btn btn-secondary btn-sm" onclick="refreshCaptcha()" style="margin-bottom:16px">↻ 换一张</button><div class="field"><label class="field-label">验证码（不区分大小写）</label><input class="field-input" type="text" id="captcha-input" autocomplete="off" style="text-align:center;font-size:20px;letter-spacing:.12em;text-transform:uppercase"></div><div style="display:flex;gap:10px;margin-top:12px"><button class="btn btn-secondary" onclick="closeCaptchaModal()">取消</button><button class="btn btn-primary" onclick="submitCaptcha()">确认</button></div></div></div>
+
+<!-- 设备自定义编辑弹窗 -->
+<div class="modal-overlay" id="device-edit-modal"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">✏️ 自定义设备</div><div class="field"><label class="field-label">设备名称</label><input class="field-input" id="device-custom-name" placeholder="例如: 我的路由器, 主力机" maxlength="20"></div><div class="field"><label class="field-label">图标 (Emoji)</label><input class="field-input" id="device-custom-icon" placeholder="📱" maxlength="4" style="font-size:22px;text-align:center"></div><div class="field-label">常用图标</div><div class="emoji-picker" id="device-emoji-picker"></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-secondary" onclick="closeDeviceEditModal()">取消</button><button class="btn btn-primary" onclick="saveDeviceCustom()">保存</button></div></div></div>
+
+<div class="snackbar" id="snackbar"></div>
+
+<script>
+// ======================= 深色模式 =======================
+function initDarkMode() {
+  const btn = document.getElementById('dark-mode-toggle');
+  const stored = localStorage.getItem('aust_darkmode');
+  const dark = stored === 'true' || (stored === null && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (dark) document.documentElement.classList.add('dark');
+  btn.textContent = dark ? '☀️' : '🌙';
+  btn.onclick = () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('aust_darkmode', isDark);
+    btn.textContent = isDark ? '☀️' : '🌙';
+  };
+}
+
+// ======================= 设备自定义存储 =======================
+let deviceCustomMap = {}; // { deviceId: { name, icon } }
+function getDeviceId(dev) { return `${dev.ip || ''}_${dev.mac || dev.sessionId || ''}`.replace(/[^a-zA-Z0-9_-]/g, '_'); }
+async function loadDeviceCustoms() { const data = await Store.get('device_customs'); if(data) deviceCustomMap = data; }
+async function saveDeviceCustomMap() { await Store.set('device_customs', deviceCustomMap); }
+function getCustomDisplay(dev) { const id = getDeviceId(dev); const custom = deviceCustomMap[id]; return { name: custom?.name || null, icon: custom?.icon || null }; }
+
+// 当前编辑的设备引用
+let editingDevice = null;
+let editingDeviceId = null;
+
+function openDeviceEditModal(device, idx) {
+  editingDevice = device;
+  editingDeviceId = getDeviceId(device);
+  const custom = deviceCustomMap[editingDeviceId] || {};
+  document.getElementById('device-custom-name').value = custom.name || '';
+  document.getElementById('device-custom-icon').value = custom.icon || '';
+  // 渲染常用图标选择器
+  const picker = document.getElementById('device-emoji-picker');
+  const icons = ['📱', '💻', '📲', '📡', '💾', '🍏', '🖥️', '🐧', '🎮', '📺', '🖨️', '🔧'];
+  picker.innerHTML = icons.map(ic => `<span class="emoji-opt" onclick="document.getElementById('device-custom-icon').value='${ic}'">${ic}</span>`).join('');
+  document.getElementById('device-edit-modal').classList.add('show');
+}
+function closeDeviceEditModal() { document.getElementById('device-edit-modal').classList.remove('show'); editingDevice = null; }
+async function saveDeviceCustom() {
+  if (!editingDeviceId || !editingDevice) { closeDeviceEditModal(); return; }
+  const newName = document.getElementById('device-custom-name').value.trim();
+  const newIcon = document.getElementById('device-custom-icon').value.trim();
+  if (newName === '' && newIcon === '') delete deviceCustomMap[editingDeviceId];
+  else deviceCustomMap[editingDeviceId] = { name: newName || undefined, icon: newIcon || undefined };
+  await saveDeviceCustomMap();
+  closeDeviceEditModal();
+  renderDevices(); // 刷新列表
+}
+
+// ======================= 原有 Cookie Jar, Http, Store 等 =======================
+const CookieJar = { _jar: {}, ingest(headers, domain) { if (!headers) return; const raw = headers['set-cookie'] || headers['Set-Cookie'] || ''; const entries = Array.isArray(raw) ? raw : (raw ? [raw] : []); entries.forEach(line => { const part = line.split(';')[0].trim(); const eq = part.indexOf('='); if (eq < 0) return; const name = part.slice(0, eq).trim(); const val = part.slice(eq + 1).trim(); if (!this._jar[domain]) this._jar[domain] = {}; this._jar[domain][name] = val; }); }, header(domain) { const d = this._jar[domain]; if (!d) return ''; return Object.entries(d).map(([k, v]) => `${k}=${v}`).join('; '); }, clear(domain) { delete this._jar[domain]; } };
+const Http = { _cap() { return window.Capacitor?.Plugins?.CapacitorHttp; }, _qs(d) { return Object.entries(d).map(([k,v])=>`${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&'); }, _domain(url) { try { return new URL(url).hostname; } catch { return url; } }, _withCookie(url, headers={}) { const domain = this._domain(url); const cookie = CookieJar.header(domain); return cookie ? { ...headers, Cookie: cookie } : headers; }, _saveCookie(url, responseHeaders) { CookieJar.ingest(responseHeaders, this._domain(url)); }, async post(url, data={}, headers={}) { const body = this._qs(data); const h = this._withCookie(url, {'Content-Type':'application/x-www-form-urlencoded', ...headers}); if (this._cap()) { const r = await this._cap().post({ url, headers: h, data: body }); this._saveCookie(url, r.headers); return { status: r.status, data: r.data, headers: r.headers || {} }; } const r = await fetch(url, { method:'POST', headers:h, body, credentials:'include' }); return { status: r.status, data: await r.text(), headers: {} }; }, async get(url, params={}, headers={}, disableRedirects=false) { const qs = this._qs(params); const full = qs ? `${url}?${qs}` : url; const h = this._withCookie(full, headers); if (this._cap()) { const r = await this._cap().get({ url: full, headers: h, disableRedirects }); this._saveCookie(full, r.headers); return { status: r.status, data: r.data, headers: r.headers || {} }; } const r = await fetch(full, { method:'GET', headers:h, credentials:'include', redirect: disableRedirects ? 'manual' : 'follow' }); return { status: r.status, data: await r.text(), headers: {} }; }, async getImageBase64(url) { const h = this._withCookie(url); if (this._cap()) { const r = await this._cap().get({ url, headers: h, responseType: 'arraybuffer' }); this._saveCookie(url, r.headers); return `data:image/png;base64,${r.data}`; } const r = await fetch(url, { credentials:'include' }); const buf = await r.arrayBuffer(); return `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(buf)))}`; } };
+const Store = { async get(k) { if (window.Capacitor?.Plugins?.Preferences) { const { value } = await window.Capacitor.Plugins.Preferences.get({ key: k }); return value ? JSON.parse(value) : null; } try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, async set(k, v) { if (window.Capacitor?.Plugins?.Preferences) { await window.Capacitor.Plugins.Preferences.set({ key: k, value: JSON.stringify(v) }); return; } localStorage.setItem(k, JSON.stringify(v)); } };
+
+// ======================= DrCOM 认证 =======================
+const getDrcomUrl = () => document.getElementById('drcom-url').value.trim() || 'http://10.255.0.19/drcom/login';
+function parseDrcomResponse(text) { const m = text.match(/\((\{.*?\})\)/s); if (!m) return { success: false, error: `无法解析响应: ${text.slice(0,80)}` }; try { const d = JSON.parse(m[1]); if (d.result === 1) return { success: true, note: d.v46ip ? `（IP: ${d.v46ip}）` : '' }; if (d.result === 0) { let msg = d.msg || d.info || d.err || ''; if (!msg) msg = {E2553:'密码错误',E2901:'账号已在线',E2905:'账户欠费'}[String(d.ecode)] || `认证失败(${d.ecode})`; if (msg.includes('已在线')) return { success: true, note: '（已在线）' }; return { success: false, error: msg }; } } catch {} return { success: false, error: `解析失败: ${text.slice(0,80)}` }; }
+async function loginDrcom(username, password, isp, nettype) { const account = `${username}@${isp}`; const params = { callback:'dr1003', DDDDD:account, upass:password, '0MKKey':'123456' }; try { const res = nettype === 'post' ? await Http.post(getDrcomUrl(), params) : await Http.get(getDrcomUrl(), params); return parseDrcomResponse(res.data); } catch (e) { const msg = String(e); if (msg.includes('fetch') || msg.includes('Network')) return { success:false, error:'无法连接认证服务器' }; return { success: false, error: msg }; } }
+
+// ======================= Portal 自助系统 =======================
+const getPortalBase = () => (document.getElementById('portal-url').value.trim() || 'https://xgmm.aust.edu.cn').replace(/\/$/, '');
+function parseDashboard(html) { const re = pat => { const m = html.match(pat); return m ? m[1].trim() : null; }; return { usedTimeMin: re(/(\d+)\s*<small[^>]*>\s*分钟\s*<\/small>/i) || re(/<td[^>]*>\s*(\d+)\s*<\/td>\s*<td[^>]*>[^<]*分钟/i) || re(/已用时长[\s\S]{0,80}?(\d{2,})/i), usedFlowMb: re(/([\d.]+)\s*<small[^>]*>M(?:B)?\s*<\/small>/i) || re(/已用流量[\s\S]{0,80}?([\d.]+)/i), balance: re(/([\d.]+)\s*<small[^>]*>\s*元\s*<\/small>/i) || re(/账户余额[\s\S]{0,80}?([\d.]+)/i), expiryDate:  re(/到期日期[：:]\s*<\/label>\s*<div.*?>\s*<span>\s*(\d{4}-\d{2}-\d{2})/) || re(/过期时间[：:]\s*<\/label>\s*<div.*?>\s*<span>\s*(\d{4}-\d{2}-\d{2})/) || re(/(\d{4}-\d{2}-\d{2})/), realName: re(/<h4[^>]*>(.*?)，\s*您好！/) || re(/欢迎[，,\s]*([\u4e00-\u9fff]{2,6})/), }; }
+async function portalGetCheckcode() { const base = getPortalBase(); const res = await Http.get(`${base}/Self/login/`, {}, { 'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html' }); log(`[调试] login页Cookie保存`, 'info'); const m = res.data.match(/name="checkcode"\s+value="(\d+)"/); return m ? m[1] : null; }
+async function portalFetchCaptchaImage() { return Http.getImageBase64(`${getPortalBase()}/Self/login/randomCode?t=${Date.now()}`); }
+async function portalDoLogin(username, password, captchaCode, checkcode) { const base = getPortalBase(); const res = await Http.post(`${base}/Self/login/verify`, { foo:'', bar:'', checkcode, account:username, password, code:captchaCode.toUpperCase() }, { 'Referer': `${base}/Self/login/`, 'Origin': base }); const loc = res.headers?.location || res.headers?.Location || ''; const html = String(res.data); if (res.status === 302 && loc.includes('dashboard')) return true; if (res.status === 200 && (html.includes('dashboard') || html.includes('用量') || html.includes('余额'))) return true; return false; }
+async function portalGetDashboard() { const base = getPortalBase(); const res = await Http.get(`${base}/Self/dashboard`, {}, { 'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html' }); const html = String(res.data); if (html.includes('name="checkcode"')) return { ok: false, expired: true }; return { ok: true, data: parseDashboard(html) }; }
+async function portalGetDevices() { const base = getPortalBase(); try { const res = await Http.get(`${base}/Self/dashboard/getOnlineList`, { t: Date.now()/1000, order:'asc', _: Date.now() }, { 'X-Requested-With':'XMLHttpRequest', 'Accept':'application/json' }); const parsed = (typeof res.data === 'string') ? JSON.parse(res.data) : res.data; const raw = Array.isArray(parsed) ? parsed : (parsed.data || parsed.list || parsed.rows || []); const seen = new Map(); raw.forEach(d => { const ip = d.ip || d.IP || ''; if (!ip) { seen.set(Math.random(), d); return; } if (!seen.has(ip)) seen.set(ip, { ...d }); else { const ex = seen.get(ip); ex.downFlow = Math.max(parseFloat(ex.downFlow||0), parseFloat(d.downFlow||0)); ex.useTime = Math.max(parseFloat(ex.useTime||0), parseFloat(d.useTime||0)); } }); return { ok: true, devices: [...seen.values()] }; } catch (e) { return { ok: false }; } }
+async function portalOfflineDevice(sessionId, ip, mac) { const base = getPortalBase(); const macC = (mac||'').replace(/[-:]/g,'').toUpperCase(); try { const res = await Http.get(`${base}/Self/dashboard/tooffline`, { sessionid:sessionId, ip, mac:macC }); const d = (typeof res.data === 'string') ? JSON.parse(res.data) : res.data; return { ok: !!d.success }; } catch { return { ok: false }; } }
+
+// ======================= 全局状态 =======================
+const state = { authing: false, portalLoggedIn: false, devices: [], captchaResolve: null, portalCheckcode: null, navData: null, editMode: false, addFormOpen: false };
+// UI 辅助函数
+function switchTab(name) { ['auth','portal','nav'].forEach((t,i) => document.querySelectorAll('.tab-btn')[i].classList.toggle('active', t === name)); document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name)); }
+function toggleCollapse(bodyId, arrowId) { document.getElementById(bodyId).classList.toggle('open'); const a = document.getElementById(arrowId); if (a) a.classList.toggle('open'); }
+function updatePreview() { const uid = document.getElementById('username').value.trim() || '学号'; document.getElementById('preview').textContent = `${uid}@${document.getElementById('isp').value}`; }
+function updatePortalBaseDisplay() { try { const u = new URL(document.getElementById('portal-url').value.trim()); document.getElementById('portal-base-display').textContent = u.hostname; } catch {} }
+let _snackT; function showSnack(msg) { const el = document.getElementById('snackbar'); el.textContent = msg; el.classList.add('show'); clearTimeout(_snackT); _snackT = setTimeout(() => el.classList.remove('show'), 2800); }
+function log(msg, type='') { const box = document.getElementById('log-box'); const span = document.createElement('span'); span.textContent = msg + '\n'; if (type) span.className = 'log-' + type; box.appendChild(span); box.scrollTop = box.scrollHeight; if (!document.getElementById('log-body').classList.contains('open')) toggleCollapse('log-body','log-arrow'); }
+function clearLog() { document.getElementById('log-box').innerHTML = ''; }
+function setNetStatus(t, c) { const el = document.getElementById('net-status'); el.textContent = t; el.className = 'status-badge ' + c; }
+
+// 认证流程
+async function doAuth() { if (state.authing) return; const username = document.getElementById('username').value.trim(); const password = document.getElementById('password').value.trim(); const isp = document.getElementById('isp').value; const nettype = document.getElementById('nettype').value; const doNet = document.getElementById('do-net').checked; const saveCfg = document.getElementById('save-cfg').checked; if (!username || !password) { showSnack('⚠️ 请填写账号和密码'); toggleCollapse('account-body','account-arrow'); return; } if (saveCfg) await Store.set('aust_cfg', { username, password, isp, nettype, doNet, drcomUrl: document.getElementById('drcom-url').value.trim(), portalUrl: document.getElementById('portal-url').value.trim() }); state.authing = true; const btn = document.getElementById('auth-btn'); btn.innerHTML = '<span class="spinner"></span> 认证中…'; btn.disabled = true; if (doNet) { setNetStatus('⏳ 认证中…', 'badge-loading'); log(`→ ${username}@${isp} [${nettype}]`, 'info'); const r = await loginDrcom(username, password, isp, nettype); if (r.success) { setNetStatus(`✅ 成功 ${r.note||''}`.trim(),'badge-success'); log(`✅ 认证成功 ${r.note||''}`.trim(),'success'); showSnack('✅ 校园网认证成功'); } else { setNetStatus('❌ 失败','badge-error'); log(`❌ ${r.error}`,'error'); showSnack('❌ '+r.error); } } else { setNetStatus('⬛ 已跳过','badge-skip'); log('⬛ 校园网认证已跳过'); } btn.innerHTML = 'Σ&gt;―(〃°ω°〃)♡→ 一键认证'; btn.disabled = false; state.authing = false; }
+
+// Portal 登录/刷新
+async function portalLogin() { const user = document.getElementById('portal-user').value.trim() || document.getElementById('username').value.trim(); const pass = document.getElementById('portal-pass').value.trim() || document.getElementById('password').value.trim(); if (!user || !pass) { showSnack('⚠️ 请填写账号和密码'); return; } try { CookieJar.clear(new URL(getPortalBase()).hostname); } catch {} const btn = document.getElementById('portal-login-btn'); btn.innerHTML = '<span class="spinner"></span> 获取验证码…'; btn.disabled = true; try { state.portalCheckcode = await portalGetCheckcode(); if (!state.portalCheckcode) throw new Error('获取checkcode失败'); const imgB64 = await portalFetchCaptchaImage(); showCaptchaImg(imgB64); btn.innerHTML = '⏳ 等待验证码…'; const code = await askCaptcha(); if (!code) { btn.innerHTML = '🔓 登录自助系统'; btn.disabled = false; return; } btn.innerHTML = '<span class="spinner"></span> 登录中…'; const ok = await portalDoLogin(user, pass, code, state.portalCheckcode); if (!ok) throw new Error('登录失败（验证码有误）'); state.portalLoggedIn = true; document.getElementById('portal-login-section').style.display = 'none'; document.getElementById('portal-logged-section').style.display = 'block'; document.getElementById('portal-username-display').textContent = user; document.getElementById('portal-devices-card').style.display = 'block'; log('✅ 自助系统登录成功', 'success'); showSnack('✅ 登录成功'); await refreshPortalData(); } catch (e) { showSnack('❌ '+e.message); log('❌ '+e.message,'error'); } btn.innerHTML = '🔓 登录自助系统'; btn.disabled = false; }
+async function refreshPortalData() { const r = await portalGetDashboard(); if (r.ok) { const d = r.data; document.getElementById('stat-time').textContent = d.usedTimeMin ?? '--'; const mb = parseFloat(d.usedFlowMb); document.getElementById('stat-flow').textContent = isNaN(mb) ? '--' : (mb / 1024).toFixed(2); document.getElementById('portal-expiry').textContent = d.expiryDate ?? '--'; document.getElementById('portal-realname').textContent = d.realName ?? '--'; } else if (r.expired) { showSnack('⚠️ 登录已过期'); portalLogout(); return; } const dr = await portalGetDevices(); if (dr.ok) { state.devices = dr.devices; document.getElementById('stat-devices').textContent = state.devices.length; renderDevices(); } }
+function portalLogout() { state.portalLoggedIn = false; state.devices = []; try { CookieJar.clear(new URL(getPortalBase()).hostname); } catch {} document.getElementById('portal-login-section').style.display = 'block'; document.getElementById('portal-logged-section').style.display = 'none'; document.getElementById('portal-devices-card').style.display = 'none'; showSnack('已退出登录'); }
+function renderDevices() { const list = document.getElementById('device-list'); const cnt = document.getElementById('device-count'); cnt.textContent = `共 ${state.devices.length} 台设备在线`; if (!state.devices.length) { list.innerHTML='<div style="text-align:center;padding:16px;font-size:13px">暂无在线设备</div>'; return; } list.innerHTML = state.devices.map((d,i) => { const custom = getCustomDisplay(d); const displayName = custom.name || (d.terminalType || '设备'); const displayIcon = custom.icon || (() => { const t = (d.terminalType||'').toLowerCase(); if(t.includes('windows')||t.includes('pc')) return '💻'; if(t.includes('android')) return '📱'; if(t.includes('iphone')||t.includes('ios')) return '🍎'; if(t.includes('router')) return '📡'; return '📟'; })(); const flowMB = parseFloat(d.downFlow||d.down_flow||0); const flowStr = flowMB >= 1024 ? (flowMB/1024).toFixed(2) + ' GB' : flowMB.toFixed(1) + ' MB'; return `<div class="device-item" id="ditem-${i}"><div class="device-icon" style="background:var(--surface-2);color:var(--primary)">${displayIcon}</div><div class="device-info"><div class="device-name">${displayName}</div><div class="device-meta">⏱ ${d.useTime||d.use_time||'--'} min · ↓${flowStr}<br><span style="font-size:10px">${d.ip||''}</span></div></div><div class="device-actions"><button class="device-edit-btn" onclick="openDeviceEditModal(state.devices[${i}], ${i})">✏️</button><button class="device-offline-btn" onclick="offlineOne(${i})">下线</button></div></div>`; }).join(''); }
+async function offlineOne(idx) { const d = state.devices[idx]; if (!d) return; const r = await portalOfflineDevice(d.sessionId||d.session_id||d.id||'', d.ip, d.mac||''); if (r.ok) { state.devices.splice(idx,1); renderDevices(); showSnack('✅ 已下线'); } else showSnack('❌ 下线失败'); }
+async function offlineAll() { for (const d of state.devices) await portalOfflineDevice(d.sessionId||d.session_id||d.id||'', d.ip, d.mac||''); state.devices=[]; renderDevices(); showSnack('✅ 已全部下线'); }
+
+// 验证码弹窗
+function showCaptchaImg(src) { document.getElementById('captcha-img').src = src; document.getElementById('captcha-img').style.display = 'block'; document.getElementById('captcha-loading').style.display = 'none'; }
+function askCaptcha() { return new Promise(resolve => { state.captchaResolve = resolve; document.getElementById('captcha-input').value = ''; document.getElementById('captcha-modal').classList.add('show'); setTimeout(() => document.getElementById('captcha-input').focus(), 350); }); }
+async function refreshCaptcha() { document.getElementById('captcha-img').style.display = 'none'; const l = document.getElementById('captcha-loading'); l.style.display=''; l.textContent='加载中…'; try { showCaptchaImg(await portalFetchCaptchaImage()); } catch { l.textContent='加载失败'; } }
+function closeCaptchaModal() { document.getElementById('captcha-modal').classList.remove('show'); if (state.captchaResolve) { state.captchaResolve(null); state.captchaResolve = null; } }
+function submitCaptcha() { const val = document.getElementById('captcha-input').value.trim(); if (!val) { showSnack('⚠️ 请输入验证码'); return; } document.getElementById('captcha-modal').classList.remove('show'); if (state.captchaResolve) { state.captchaResolve(val); state.captchaResolve = null; } }
+
+// ======================= 导航 =======================
+const DEFAULT_NAV = [ { section:'🏫 校园官方', items:[ {name:'AUST 官网',url:'http://www.aust.edu.cn',icon:'🎓',color:'c-blue'},{name:'教务处',url:'http://jwc.aust.edu.cn',icon:'📚',color:'c-green'},{name:'网络自助',url:'https://xgmm.aust.edu.cn',icon:'🌐',color:'c-purple'},{name:'DrCOM',url:'http://10.255.0.19/drcom/login',icon:'📡',color:'c-teal'},{name:'图书馆',url:'http://lib.aust.edu.cn',icon:'📖',color:'c-amber'},{name:'校园邮箱',url:'https://mail.aust.edu.cn',icon:'✉️',color:'c-red'} ] }, { section:'📖 学习科研', items:[ {name:'知网 CNKI',url:'https://www.cnki.net',icon:'🔬',color:'c-blue'},{name:'GitHub',url:'https://github.com',icon:'🐙',color:'c-gray'},{name:'DeepSeek',url:'https://www.deepseek.com',icon:'🤖',color:'c-indigo'},{name:'arXiv',url:'https://arxiv.org',icon:'📰',color:'c-orange'},{name:'Overleaf',url:'https://www.overleaf.com',icon:'📝',color:'c-green'},{name:'力扣',url:'https://leetcode.cn',icon:'💻',color:'c-orange'} ] }, { section:'🍜 生活服务', items:[ {name:'美团外卖',url:'https://www.meituan.com',icon:'🛵',color:'c-amber'},{name:'12306',url:'https://www.12306.cn',icon:'🚄',color:'c-red'},{name:'百度地图',url:'https://map.baidu.com',icon:'🗺️',color:'c-blue'} ] } ];
+function renderNav() { const container = document.getElementById('nav-dynamic'); container.innerHTML = ''; state.navData.forEach((sec, si) => { const titleEl = document.createElement('div'); titleEl.className = 'nav-section-title'; titleEl.textContent = sec.section; container.appendChild(titleEl); const grid = document.createElement('div'); grid.className = 'nav-grid'; sec.items.forEach((item, ii) => { const a = document.createElement('a'); a.className = 'nav-item'; a.href = item.url; a.target = '_blank'; a.dataset.si = si; a.dataset.ii = ii; a.innerHTML = `<button class="nav-delete-btn" data-si="${si}" data-ii="${ii}">✕</button><div class="nav-drag-handle">⠿</div><div class="nav-item-icon ${item.color}">${item.icon}</div><div class="nav-item-name">${item.name}</div>`; a.querySelector('.nav-delete-btn').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); deleteNavItem(parseInt(e.currentTarget.dataset.si), parseInt(e.currentTarget.dataset.ii)); }); a.addEventListener('touchstart', onDragStart, { passive: false }); a.addEventListener('mousedown', onDragStart); grid.appendChild(a); }); container.appendChild(grid); }); }
+const drag = { active: false, srcSec: -1, srcIdx: -1, ovSec: -1, ovIdx: -1, ghost: null };
+function onDragStart(e) { if (!state.editMode || e.target.classList.contains('nav-delete-btn')) return; e.preventDefault(); const el = e.currentTarget; const si = parseInt(el.dataset.si); const ii = parseInt(el.dataset.ii); const item = state.navData[si]?.items[ii]; if (!item) return; const touch = e.touches ? e.touches[0] : e; drag.active = true; drag.srcSec = si; drag.srcIdx = ii; drag.ovSec = si; drag.ovIdx = ii; const ghost = document.getElementById('drag-ghost'); document.getElementById('dg-icon').className = `g-icon ${item.color}`; document.getElementById('dg-icon').textContent = item.icon; document.getElementById('dg-name').textContent = item.name; ghost.style.left = touch.clientX + 'px'; ghost.style.top = touch.clientY + 'px'; ghost.classList.add('active'); drag.ghost = ghost; el.classList.add('dragging'); if (e.touches) { document.addEventListener('touchmove', onDragMove, { passive: false }); document.addEventListener('touchend', onDragEnd); } else { document.addEventListener('mousemove', onDragMove); document.addEventListener('mouseup', onDragEnd); } }
+function onDragMove(e) { if (!drag.active) return; e.preventDefault(); const touch = e.touches ? e.touches[0] : e; drag.ghost.style.left = touch.clientX + 'px'; drag.ghost.style.top = touch.clientY + 'px'; drag.ghost.style.display = 'none'; const el = document.elementFromPoint(touch.clientX, touch.clientY); drag.ghost.style.display = ''; const target = el?.closest('.nav-item'); if (target && (parseInt(target.dataset.si) !== drag.ovSec || parseInt(target.dataset.ii) !== drag.ovIdx)) { document.querySelector(`.nav-item[data-si="${drag.ovSec}"][data-ii="${drag.ovIdx}"]`)?.classList.remove('drag-over'); drag.ovSec = parseInt(target.dataset.si); drag.ovIdx = parseInt(target.dataset.ii); target.classList.add('drag-over'); } }
+async function onDragEnd(e) { if (!drag.active) return; drag.active = false; document.removeEventListener('touchmove', onDragMove); document.removeEventListener('touchend', onDragEnd); document.removeEventListener('mousemove', onDragMove); document.removeEventListener('mouseup', onDragEnd); drag.ghost.classList.remove('active'); document.querySelector(`.nav-item[data-si="${drag.srcSec}"][data-ii="${drag.srcIdx}"]`)?.classList.remove('dragging'); document.querySelector(`.nav-item[data-si="${drag.ovSec}"][data-ii="${drag.ovIdx}"]`)?.classList.remove('drag-over'); if (drag.srcSec !== drag.ovSec || drag.srcIdx !== drag.ovIdx) { const [moved] = state.navData[drag.srcSec].items.splice(drag.srcIdx, 1); state.navData[drag.ovSec].items.splice(drag.ovIdx, 0, moved); state.navData = state.navData.filter(s => s.items.length > 0); await Store.set('aust_nav', state.navData); renderNav(); } }
+function toggleEditMode() { state.editMode = !state.editMode; document.body.classList.toggle('edit-mode', state.editMode); document.getElementById('edit-nav-btn').textContent = state.editMode ? '✅ 完成编辑' : '✏️ 编辑 / 拖拽'; if (state.editMode) showSnack('长按图标可拖拽移动'); }
+function toggleAddForm() { state.addFormOpen = !state.addFormOpen; document.getElementById('nav-add-card').classList.toggle('show', state.addFormOpen); document.getElementById('add-nav-btn').textContent = state.addFormOpen ? '✕ 取消' : '＋ 添加链接'; }
+async function addNavItem() { const name = document.getElementById('new-nav-name').value.trim(); const url = document.getElementById('new-nav-url').value.trim(); const icon = document.getElementById('new-nav-icon').value.trim() || '🔗'; const color = document.getElementById('new-nav-color').value; if (!name || !url) { showSnack('⚠️ 名称和URL不能为空'); return; } const mySection = state.navData.find(s => s.section === '⭐ 我的链接'); if (mySection) mySection.items.push({ name, url, icon, color }); else state.navData.unshift({ section:'⭐ 我的链接', items:[{ name, url, icon, color }] }); await Store.set('aust_nav', state.navData); renderNav(); toggleAddForm(); document.getElementById('new-nav-name').value = ''; document.getElementById('new-nav-url').value = ''; document.getElementById('new-nav-icon').value = '🔗'; showSnack('✅ 已添加'); }
+async function deleteNavItem(si, ii) { state.navData[si].items.splice(ii, 1); state.navData = state.navData.filter(s => s.items.length > 0); await Store.set('aust_nav', state.navData); renderNav(); }
+
+// 初始化
+window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); state.navData = savedNav || JSON.parse(JSON.stringify(DEFAULT_NAV)); renderNav(); });
+window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.toggleAddForm = toggleAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom;
+</script>
+</body>
+</html>

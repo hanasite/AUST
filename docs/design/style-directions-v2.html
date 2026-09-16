@@ -1,0 +1,237 @@
+<h2>A 方向细化：Twitter 清新风 + 线性图标库</h2>
+<p class="subtitle">两种"清新"的做法，配色和图标一致，只差容器形态。图标已全部换成 Lucide 线性图标（开源图标库，正式版离线内联，不用 emoji）。点击选择，或直接在终端说偏好。</p>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ic-wifi" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></symbol>
+  <symbol id="ic-signal" viewBox="0 0 24 24"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></symbol>
+  <symbol id="ic-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="ic-checkcircle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="ic-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="ic-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="ic-chart" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></symbol>
+  <symbol id="ic-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+</svg>
+
+<style>
+  .phT1,.phT2{
+    width:292px;height:620px;border-radius:30px;overflow:hidden;box-sizing:border-box;
+    font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei','Roboto',sans-serif;
+    display:flex;flex-direction:column;flex-shrink:0;text-align:left;
+  }
+  .phT1 *,.phT2 *{box-sizing:border-box}
+  .t-stat{display:flex;justify-content:space-between;align-items:center;padding:8px 18px 0;font-size:11px;font-weight:600;color:#0F1419;flex-shrink:0}
+  .t-bat{display:inline-flex;align-items:center;gap:5px}
+  .t-bat .bat{width:20px;height:10px;border:1.5px solid currentColor;border-radius:3.5px;position:relative;display:inline-block;opacity:.9}
+  .t-bat .bat::after{content:"";position:absolute;right:-3.5px;top:2.5px;width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0}
+  .t-bat .bat::before{content:"";position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:12px;background:currentColor;border-radius:1.5px}
+  .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+  /* ===== A1 · 纯白极简 ===== */
+  .phT1{background:#FFFFFF;color:#0F1419;border:1px solid #EFF3F4}
+  .t1-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px}
+  .t1-title{font-size:19px;font-weight:800;letter-spacing:-.2px}
+  .t1-iconbtn{width:34px;height:34px;border:none;background:none;color:#536471;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+  .t1-iconbtn:hover{background:#E8F5FE;color:#1D9BF0}
+  .t1-status{display:flex;align-items:center;gap:12px;padding:6px 16px 14px}
+  .t1-net-icon{width:44px;height:44px;border-radius:999px;background:#E8F5FE;color:#1D9BF0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .t1-net-icon .ic{width:22px;height:22px}
+  .t1-net-main{flex:1;min-width:0}
+  .t1-net-name{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t1-net-meta{font-size:12.5px;color:#536471;margin-top:2px;display:flex;align-items:center;gap:4px}
+  .t1-pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px}
+  .t1-pill.ok{background:#E8F8F2;color:#068A5F}
+  .t1-pill.ok .ic{width:13px;height:13px}
+  .t1-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 32px);margin:0 16px;border:none;background:#1D9BF0;color:#fff;font-size:15px;font-weight:700;padding:14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s,transform .12s;box-shadow:0 4px 14px rgba(29,155,240,.25)}
+  .t1-btn:hover{background:#1A8CD8}
+  .t1-btn:active{transform:scale(.98)}
+  .t1-btn .ic{width:17px;height:17px}
+  .t1-div{border:none;border-top:1px solid #EFF3F4;margin:16px 0 0}
+  .t1-sechead{display:flex;align-items:baseline;justify-content:space-between;padding:14px 16px 6px}
+  .t1-sechead h4{font-size:15px;font-weight:800;margin:0}
+  .t1-sechead span{font-size:12px;color:#536471}
+  .t1-row{display:flex;align-items:center;gap:12px;padding:11px 16px}
+  .t1-row:hover{background:#F7F9F9}
+  .t1-ric{width:38px;height:38px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .t1-ric.blue{background:#E8F5FE;color:#1D9BF0}
+  .t1-ric.gray{background:#F7F9F9;color:#536471}
+  .t1-rinfo{flex:1;min-width:0}
+  .t1-rname{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t1-rmeta{font-size:12px;color:#536471;margin-top:1px}
+  .t1-act{border:1px solid #1D9BF0;background:#fff;color:#1D9BF0;font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s;flex-shrink:0}
+  .t1-act:hover{background:#E8F5FE}
+  .t1-act.ghost{border-color:#CFD9DE;color:#536471}
+  .t1-act.ghost:hover{background:#F7F9F9}
+  .t1-foot{font-size:11px;color:#8B98A5;padding:4px 16px 10px}
+  .t1-nav{margin-top:auto;display:flex;border-top:1px solid #EFF3F4;background:#fff;flex-shrink:0}
+  .t1-navitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 0 11px;font-size:10px;font-weight:600;color:#536471;cursor:pointer;transition:color .15s}
+  .t1-navitem .ic{width:22px;height:22px}
+  .t1-navitem.on{color:#1D9BF0}
+  .t1-navitem:active{opacity:.6}
+
+  /* ===== A2 · 轻卡片 ===== */
+  .phT2{background:#F7F9F9;color:#0F1419;border:1px solid #EFF3F4}
+  .t2-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px}
+  .t2-title{font-size:19px;font-weight:800;letter-spacing:-.2px}
+  .t2-iconbtn{width:34px;height:34px;border:none;background:#fff;border:1px solid #EFF3F4;color:#536471;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:color .15s}
+  .t2-iconbtn:hover{color:#1D9BF0}
+  .t2-card{background:#fff;border:1px solid #EFF3F4;border-radius:18px;margin:0 12px 10px;overflow:hidden}
+  .t2-pad{padding:14px}
+  .t2-status{display:flex;align-items:center;gap:12px}
+  .t2-net-icon{width:44px;height:44px;border-radius:999px;background:#E8F5FE;color:#1D9BF0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .t2-net-icon .ic{width:22px;height:22px}
+  .t2-net-main{flex:1;min-width:0}
+  .t2-net-name{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t2-net-meta{font-size:12.5px;color:#536471;margin-top:2px}
+  .t2-pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:#E8F8F2;color:#068A5F;flex-shrink:0}
+  .t2-pill .ic{width:13px;height:13px}
+  .t2-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;border:none;background:#1D9BF0;color:#fff;font-size:15px;font-weight:700;padding:13px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s,transform .12s;box-shadow:0 4px 14px rgba(29,155,240,.22)}
+  .t2-btn:hover{background:#1A8CD8}
+  .t2-btn:active{transform:scale(.98)}
+  .t2-btn .ic{width:17px;height:17px}
+  .t2-sechead{display:flex;align-items:baseline;justify-content:space-between;padding:13px 14px 4px}
+  .t2-sechead h4{font-size:15px;font-weight:800;margin:0}
+  .t2-sechead span{font-size:12px;color:#536471}
+  .t2-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid #F2F5F7}
+  .t2-ric{width:38px;height:38px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .t2-ric.blue{background:#E8F5FE;color:#1D9BF0}
+  .t2-ric.gray{background:#F7F9F9;color:#536471}
+  .t2-rinfo{flex:1;min-width:0}
+  .t2-rname{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t2-rmeta{font-size:12px;color:#536471;margin-top:1px}
+  .t2-act{border:1px solid #1D9BF0;background:#fff;color:#1D9BF0;font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s;flex-shrink:0}
+  .t2-act:hover{background:#E8F5FE}
+  .t2-act.ghost{border-color:#CFD9DE;color:#536471}
+  .t2-act.ghost:hover{background:#F7F9F9}
+  .t2-scan{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid #F2F5F7}
+  .t2-scan .t2-ric{background:#F7F9F9;color:#1D9BF0}
+  .t2-scan .ic.spin{animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .t2-shimmer{height:8px;border-radius:4px;margin-top:5px;width:120px;background:linear-gradient(90deg,#EFF3F4 25%,#F7F9F9 37%,#EFF3F4 63%);background-size:400% 100%;animation:shim 1.3s ease infinite}
+  @keyframes shim{0%{background-position:100% 0}100%{background-position:0 0}}
+  .t2-foot{font-size:11px;color:#8B98A5;padding:4px 14px 12px}
+  .t2-nav{margin:auto 12px 12px;display:flex;background:#fff;border:1px solid #EFF3F4;border-radius:999px;padding:5px;box-shadow:0 6px 18px rgba(15,20,25,.06);flex-shrink:0}
+  .t2-navitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 0;font-size:10px;font-weight:600;color:#536471;cursor:pointer;border-radius:999px;transition:color .15s,background .2s}
+  .t2-navitem .ic{width:21px;height:21px}
+  .t2-navitem.on{color:#1D9BF0;background:#E8F5FE}
+  .t2-navitem:active{opacity:.6}
+
+  /* 图标样例条 */
+  .ic-strip{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:6px}
+  .ic-cell{display:flex;flex-direction:column;align-items:center;gap:5px;background:#fff;border:1px solid #EFF3F4;border-radius:12px;padding:10px 14px;font-size:10px;color:#536471;min-width:64px}
+  .ic-cell .ic{width:20px;height:20px;color:#1D9BF0}
+</style>
+
+<div class="cards">
+  <div class="card" data-choice="A1" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phT1">
+        <div class="t-stat"><span>21:16</span><span class="t-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="t1-head">
+          <div class="t1-title">AUST 认证助手</div>
+          <button class="t1-iconbtn"><svg class="ic"><use href="#ic-refresh"/></svg></button>
+        </div>
+        <div class="t1-status">
+          <div class="t1-net-icon"><svg class="ic"><use href="#ic-wifi"/></svg></div>
+          <div class="t1-net-main">
+            <div class="t1-net-name">AUST-Student</div>
+            <div class="t1-net-meta"><span class="t1-pill ok"><svg class="ic"><use href="#ic-check"/></svg>认证有效</span>剩余 2 小时 41 分</div>
+          </div>
+        </div>
+        <button class="t1-btn"><svg class="ic"><use href="#ic-zap"/></svg>一键认证</button>
+        <hr class="t1-div">
+        <div class="t1-sechead"><h4>校园 WiFi</h4><span>已发现 2 个目标</span></div>
+        <div class="t1-row">
+          <div class="t1-ric blue"><svg class="ic"><use href="#ic-signal"/></svg></div>
+          <div class="t1-rinfo"><div class="t1-rname">AUST-Dorm</div><div class="t1-rmeta">信号强 · 已保存</div></div>
+          <button class="t1-act">一键连接</button>
+        </div>
+        <div class="t1-row">
+          <div class="t1-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
+          <div class="t1-rinfo"><div class="t1-rname">AUST-Teacher</div><div class="t1-rmeta">需密码 · 未保存</div></div>
+          <button class="t1-act ghost">连接</button>
+        </div>
+        <div class="t1-foot">每 30 秒自动扫描 · 上次扫描 21:15</div>
+        <div class="t1-nav">
+          <div class="t1-navitem on"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="t1-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="t1-navitem"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A1 · 纯白极简（最像 Twitter）</h3>
+      <p>纯白底、极细分隔线、大留白、无卡片阴影。蓝色 #1D9BF0 单色强调，圆形线性图标（Lucide）。动效：按钮按压回弹、图标按钮悬停染色、导航点击反馈。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="A2" onclick="toggleSelect(this)">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phT2">
+        <div class="t-stat"><span>21:16</span><span class="t-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="t2-head">
+          <div class="t2-title">AUST 认证助手</div>
+          <button class="t2-iconbtn"><svg class="ic"><use href="#ic-refresh"/></svg></button>
+        </div>
+        <div class="t2-card">
+          <div class="t2-pad">
+            <div class="t2-status">
+              <div class="t2-net-icon"><svg class="ic"><use href="#ic-wifi"/></svg></div>
+              <div class="t2-net-main">
+                <div class="t2-net-name">AUST-Student</div>
+                <div class="t2-net-meta">认证有效 · 剩余 2 小时 41 分</div>
+              </div>
+              <span class="t2-pill"><svg class="ic"><use href="#ic-check"/></svg>在线</span>
+            </div>
+            <button class="t2-btn"><svg class="ic"><use href="#ic-zap"/></svg>一键认证</button>
+          </div>
+        </div>
+        <div class="t2-card">
+          <div class="t2-sechead"><h4>校园 WiFi</h4><span>2 个目标</span></div>
+          <div class="t2-row">
+            <div class="t2-ric blue"><svg class="ic"><use href="#ic-signal"/></svg></div>
+            <div class="t2-rinfo"><div class="t2-rname">AUST-Dorm</div><div class="t2-rmeta">信号强 · 已保存</div></div>
+            <button class="t2-act">一键连接</button>
+          </div>
+          <div class="t2-row">
+            <div class="t2-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
+            <div class="t2-rinfo"><div class="t2-rname">AUST-Teacher</div><div class="t2-rmeta">需密码 · 未保存</div></div>
+            <button class="t2-act ghost">连接</button>
+          </div>
+          <div class="t2-scan">
+            <div class="t2-ric"><svg class="ic spin"><use href="#ic-refresh"/></svg></div>
+            <div class="t2-rinfo"><div class="t2-rmeta" style="margin-top:0">正在扫描附近网络…</div><div class="t2-shimmer"></div></div>
+          </div>
+          <div class="t2-foot">每 30 秒自动扫描 · 上次扫描 21:15</div>
+        </div>
+        <div class="t2-nav">
+          <div class="t2-navitem on"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="t2-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="t2-navitem"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A2 · 轻卡片（同配色 + 结构感）</h3>
+      <p>浅灰底 + 白卡片、1px 边框无重阴影。多一个「扫描中」骨架动画示例（转圈 + 流光条）。信息分组更清楚，滚动内容多的时候更稳。</p>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top:18px">
+  <div class="mockup-header">本页用到的图标（Lucide · 开源 ISC · 正式版内联进 HTML，离线可用）</div>
+  <div class="mockup-body">
+    <div class="ic-strip">
+      <div class="ic-cell"><svg class="ic"><use href="#ic-wifi"/></svg>wifi</div>
+      <div class="ic-cell"><svg class="ic"><use href="#ic-signal"/></svg>signal</div>
+      <div class="ic-cell"><svg class="ic"><use href="#ic-lock"/></svg>lock</div>
+      <div class="ic-cell"><svg class="ic"><use href="#ic-checkcircle"/></svg>check</div>
+      <div class="ic-cell"><svg class="ic"><use href="#ic-zap"/></svg>zap</div>
+      <div class="ic-cell"><svg class="ic"><use href="#ic-refresh"/></svg>refresh</div>
+      <div class="ic-cell"><svg class="ic"><use href="#ic-home"/></svg>home</div>
+      <div class="ic-cell"><svg class="ic"><use href="#ic-chart"/></svg>chart</div>
+      <div class="ic-cell"><svg class="ic"><use href="#ic-star"/></svg>star</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+{
+  "name": "aust-connectease",
+  "version": "1.2.0",
+  "description": "安徽理工大学校园网认证助手",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Static HTML, no build step needed'",
+    "cap:add": "npx cap add android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/preferences": "^6.0.0"
+  },
+  "devDependencies": {}
+}

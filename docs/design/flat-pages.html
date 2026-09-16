@@ -1,0 +1,261 @@
+<h2>A1 · 扁平化细化（无阴影，线条分隔）</h2>
+<p class="subtitle">全站去掉阴影：用 1px 发丝线做分隔和容器边界，纯色块扁平化。同一套设计语言的四个页面：首页（浅色）、首页（深色）、自助系统、常用链接。看完这一屏，下一屏出 WiFi 连接流程的三个弹窗状态。</p>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ic-wifi" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></symbol>
+  <symbol id="ic-signal" viewBox="0 0 24 24"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></symbol>
+  <symbol id="ic-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="ic-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="ic-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="ic-chart" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></symbol>
+  <symbol id="ic-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="ic-gradcap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></symbol>
+  <symbol id="ic-book" viewBox="0 0 24 24"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></symbol>
+  <symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+  <symbol id="ic-router" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6.01 18H6"/><path d="M10.01 18H10"/><path d="M15 10v4"/><path d="M17.84 7.17a4 4 0 0 0-5.66 0"/><path d="M20.66 4.34a8 8 0 0 0-11.31 0"/></symbol>
+  <symbol id="ic-library" viewBox="0 0 24 24"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></symbol>
+  <symbol id="ic-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+  <symbol id="ic-pencil" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></symbol>
+  <symbol id="ic-power" viewBox="0 0 24 24"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></symbol>
+  <symbol id="ic-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></symbol>
+  <symbol id="ic-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
+  <symbol id="ic-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="m15 13-.01.01"/><path d="m9 13-.01.01"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+</svg>
+
+<style>
+  /* ============ 扁平版手机基座（CSS 变量控色） ============ */
+  .phF{
+    width:292px;height:620px;border-radius:30px;overflow:hidden;box-sizing:border-box;
+    font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei','Roboto',sans-serif;
+    display:flex;flex-direction:column;flex-shrink:0;text-align:left;
+    --bg:#FFFFFF;--fg:#0F1419;--sub:#536471;--line:#EFF3F4;--blue:#1D9BF0;--blue-d:#1A8CD8;
+    --tint:#E8F5FE;--ok:#068A5F;--okbg:#E8F8F2;--graytint:#F7F9F9;
+    background:var(--bg);color:var(--fg);border:1px solid var(--line);
+  }
+  .phF.phd{--bg:#15202B;--fg:#F7F9F9;--sub:#8B98A5;--line:#38444D;--tint:rgba(29,155,240,.14);--ok:#00BA7C;--okbg:rgba(0,186,124,.16);--graytint:rgba(255,255,255,.06)}
+  .phF *{box-sizing:border-box}
+  .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .f-stat{display:flex;justify-content:space-between;align-items:center;padding:8px 18px 0;font-size:11px;font-weight:600;flex-shrink:0}
+  .f-bat{display:inline-flex;align-items:center;gap:5px}
+  .f-bat .bat{width:20px;height:10px;border:1.5px solid currentColor;border-radius:3.5px;position:relative;display:inline-block;opacity:.9}
+  .f-bat .bat::after{content:"";position:absolute;right:-3.5px;top:2.5px;width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0}
+  .f-bat .bat::before{content:"";position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:12px;background:currentColor;border-radius:1.5px}
+
+  .f-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid var(--line);flex-shrink:0}
+  .f-title{font-size:19px;font-weight:800;letter-spacing:-.2px}
+  .f-iconbtn{width:34px;height:34px;border:none;background:none;color:var(--sub);border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:color .15s}
+  .f-iconbtn:hover{color:var(--blue)}
+  .f-status{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .f-icirc{width:44px;height:44px;border-radius:999px;background:var(--tint);color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .f-icirc .ic{width:22px;height:22px}
+  .f-main{flex:1;min-width:0}
+  .f-name{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .f-meta{font-size:12.5px;color:var(--sub);margin-top:3px;display:flex;align-items:center;gap:6px}
+  .f-pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--okbg);color:var(--ok);flex-shrink:0}
+  .f-pill .ic{width:13px;height:13px}
+  .f-btnwrap{padding:14px 16px;border-bottom:1px solid var(--line)}
+  .f-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;background:var(--blue);color:#fff;font-size:15px;font-weight:700;padding:14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s,transform .12s}
+  .f-btn:hover{background:var(--blue-d)}
+  .f-btn:active{transform:scale(.98)}
+  .f-btn .ic{width:17px;height:17px}
+  .f-sechead{display:flex;align-items:baseline;justify-content:space-between;padding:13px 16px 9px;border-bottom:1px solid var(--line)}
+  .f-sechead h4{font-size:15px;font-weight:800;margin:0}
+  .f-sechead span{font-size:12px;color:var(--sub)}
+  .f-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .f-row:hover{background:var(--graytint)}
+  .f-ric{width:38px;height:38px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--tint);color:var(--blue)}
+  .f-ric.gray{background:var(--graytint);color:var(--sub)}
+  .f-rinfo{flex:1;min-width:0}
+  .f-rname{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .f-rmeta{font-size:12px;color:var(--sub);margin-top:1px}
+  .f-act{border:1px solid var(--blue);background:transparent;color:var(--blue);font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:background .15s;flex-shrink:0}
+  .f-act:hover{background:var(--tint)}
+  .f-act.ghost{border-color:var(--line);color:var(--sub)}
+  .f-act.ghost:hover{background:var(--graytint)}
+  .f-foot{font-size:11px;color:var(--sub);opacity:.8;padding:9px 16px;border-bottom:1px solid var(--line)}
+  .f-nav{margin-top:auto;display:flex;border-top:1px solid var(--line);background:var(--bg);flex-shrink:0}
+  .f-navitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 0 11px;font-size:10px;font-weight:600;color:var(--sub);cursor:pointer;transition:color .15s}
+  .f-navitem .ic{width:22px;height:22px}
+  .f-navitem.on{color:var(--blue)}
+  .f-navitem:active{opacity:.6}
+
+  /* 自助系统 */
+  .f-acct{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .f-avatar{width:36px;height:36px;border-radius:999px;background:var(--tint);color:var(--blue);font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .f-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--line)}
+  .f-cell{padding:14px 6px 12px;text-align:center;border-left:1px solid var(--line)}
+  .f-cell:first-child{border-left:none}
+  .f-statv{font-size:20px;font-weight:800}
+  .f-statu{font-size:10px;font-weight:600;color:var(--sub);margin-left:2px}
+  .f-statl{font-size:11px;color:var(--sub);margin-top:3px}
+  .f-kv{display:flex;justify-content:space-between;padding:12px 16px;font-size:13.5px;border-bottom:1px solid var(--line)}
+  .f-kv .k{color:var(--sub)}
+  .f-kv .v{font-weight:700}
+
+  /* 常用链接 */
+  .f-seclabel{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.04em;padding:14px 16px 8px}
+  .f-tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 16px}
+  .f-tile{border:1px solid var(--line);border-radius:14px;padding:13px 6px 11px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:var(--bg);transition:background .15s,border-color .15s}
+  .f-tile:hover{border-color:var(--blue);background:var(--tint)}
+  .f-tile:active{transform:scale(.97)}
+  .f-tile .ic{width:21px;height:21px;color:var(--blue)}
+  .f-tile span{font-size:11px;font-weight:600;color:var(--fg)}
+  .f-gap{height:12px}
+</style>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phF">
+        <div class="f-stat"><span>21:16</span><span class="f-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="f-head"><div class="f-title">AUST 认证助手</div><button class="f-iconbtn"><svg class="ic"><use href="#ic-refresh"/></svg></button></div>
+        <div class="f-status">
+          <div class="f-icirc"><svg class="ic"><use href="#ic-wifi"/></svg></div>
+          <div class="f-main">
+            <div class="f-name">AUST-Student</div>
+            <div class="f-meta"><span class="f-pill"><svg class="ic"><use href="#ic-check"/></svg>认证有效</span>剩余 2 小时 41 分</div>
+          </div>
+        </div>
+        <div class="f-btnwrap"><button class="f-btn"><svg class="ic"><use href="#ic-zap"/></svg>一键认证</button></div>
+        <div class="f-sechead"><h4>校园 WiFi</h4><span>已发现 2 个目标</span></div>
+        <div class="f-row">
+          <div class="f-ric"><svg class="ic"><use href="#ic-signal"/></svg></div>
+          <div class="f-rinfo"><div class="f-rname">AUST-Dorm</div><div class="f-rmeta">信号强 · 已保存</div></div>
+          <button class="f-act">一键连接</button>
+        </div>
+        <div class="f-row">
+          <div class="f-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
+          <div class="f-rinfo"><div class="f-rname">AUST-Teacher</div><div class="f-rmeta">需密码 · 未保存</div></div>
+          <button class="f-act ghost">连接</button>
+        </div>
+        <div class="f-foot">每 30 秒自动扫描 · 上次扫描 21:15</div>
+        <div class="f-nav">
+          <div class="f-navitem on"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="f-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="f-navitem"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>首页 · 浅色（扁平版）</h3>
+      <p>所有元素去掉阴影，改为 1px 发丝线分区（行与行之间也有分隔线，类似 Twitter 的时间线）。按钮纯色扁平，悬停只做轻微变色，点击回弹。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phF phd">
+        <div class="f-stat"><span>21:16</span><span class="f-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="f-head"><div class="f-title">AUST 认证助手</div><button class="f-iconbtn"><svg class="ic"><use href="#ic-refresh"/></svg></button></div>
+        <div class="f-status">
+          <div class="f-icirc"><svg class="ic"><use href="#ic-wifi"/></svg></div>
+          <div class="f-main">
+            <div class="f-name">AUST-Student</div>
+            <div class="f-meta"><span class="f-pill"><svg class="ic"><use href="#ic-check"/></svg>认证有效</span>剩余 2 小时 41 分</div>
+          </div>
+        </div>
+        <div class="f-btnwrap"><button class="f-btn"><svg class="ic"><use href="#ic-zap"/></svg>一键认证</button></div>
+        <div class="f-sechead"><h4>校园 WiFi</h4><span>已发现 2 个目标</span></div>
+        <div class="f-row">
+          <div class="f-ric"><svg class="ic"><use href="#ic-signal"/></svg></div>
+          <div class="f-rinfo"><div class="f-rname">AUST-Dorm</div><div class="f-rmeta">信号强 · 已保存</div></div>
+          <button class="f-act">一键连接</button>
+        </div>
+        <div class="f-row">
+          <div class="f-ric gray"><svg class="ic"><use href="#ic-lock"/></svg></div>
+          <div class="f-rinfo"><div class="f-rname">AUST-Teacher</div><div class="f-rmeta">需密码 · 未保存</div></div>
+          <button class="f-act ghost">连接</button>
+        </div>
+        <div class="f-foot">每 30 秒自动扫描 · 上次扫描 21:15</div>
+        <div class="f-nav">
+          <div class="f-navitem on"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="f-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="f-navitem"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>首页 · 深色（#15202B，类 Twitter 暗色）</h3>
+      <p>同一套变量换色：底色 #15202B、分隔线 #38444D、次要文字 #8B98A5，强调色仍是 #1D9BF0。扁平规则完全一致，不做任何渐变或发光。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phF">
+        <div class="f-stat"><span>21:16</span><span class="f-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="f-head"><div class="f-title">自助系统</div><button class="f-iconbtn"><svg class="ic"><use href="#ic-refresh"/></svg></button></div>
+        <div class="f-acct">
+          <div class="f-avatar">张</div>
+          <div class="f-main"><div class="f-name" style="font-size:14px">张伟 · 电信</div><div class="f-rmeta">在线设备 2 台</div></div>
+          <button class="f-act ghost">退出</button>
+        </div>
+        <div class="f-stats">
+          <div class="f-cell"><div><span class="f-statv">3.4</span><span class="f-statu">小时</span></div><div class="f-statl">已用时长</div></div>
+          <div class="f-cell"><div><span class="f-statv">1.24</span><span class="f-statu">GB</span></div><div class="f-statl">已用流量</div></div>
+          <div class="f-cell"><div><span class="f-statv">2</span><span class="f-statu">台</span></div><div class="f-statl">在线设备</div></div>
+        </div>
+        <div class="f-kv"><span class="k">到期日期</span><span class="v">2027-06-30</span></div>
+        <div class="f-kv"><span class="k">账户余额</span><span class="v">23.50 元</span></div>
+        <div class="f-sechead"><h4>在线设备</h4><span>2 台</span></div>
+        <div class="f-row">
+          <div class="f-ric"><svg class="ic"><use href="#ic-router"/></svg></div>
+          <div class="f-rinfo"><div class="f-rname">我的路由器</div><div class="f-rmeta">10.24.7.31 · 已用 3.2 GB</div></div>
+          <button class="f-act ghost">下线</button>
+        </div>
+        <div class="f-row">
+          <div class="f-ric gray"><svg class="ic"><use href="#ic-phone"/></svg></div>
+          <div class="f-rinfo"><div class="f-rname">Kakun 的手机</div><div class="f-rmeta">10.24.9.87 · 已用 0.8 GB</div></div>
+          <button class="f-act ghost">下线</button>
+        </div>
+        <div class="f-foot">设备长按可改名 / 换图标</div>
+        <div class="f-nav">
+          <div class="f-navitem"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="f-navitem on"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="f-navitem"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>自助系统（已登录态）</h3>
+      <p>用量数据做成三栏通栏（竖线分隔），账户和设备都是平铺列表行。设备行保留「下线」按钮，长按改名。登录表单与验证码弹窗沿用同一套扁平语言。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-image" style="display:flex;justify-content:center;padding:14px 0;background:transparent">
+      <div class="phF">
+        <div class="f-stat"><span>21:16</span><span class="f-bat"><svg class="ic" style="width:13px;height:13px"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
+        <div class="f-head"><div class="f-title">常用链接</div><button class="f-iconbtn"><svg class="ic"><use href="#ic-pencil"/></svg></button></div>
+        <div class="f-seclabel">校园官方</div>
+        <div class="f-tiles">
+          <div class="f-tile"><svg class="ic"><use href="#ic-gradcap"/></svg><span>AUST 官网</span></div>
+          <div class="f-tile"><svg class="ic"><use href="#ic-book"/></svg><span>教务处</span></div>
+          <div class="f-tile"><svg class="ic"><use href="#ic-globe"/></svg><span>网络自助</span></div>
+          <div class="f-tile"><svg class="ic"><use href="#ic-router"/></svg><span>DrCOM</span></div>
+          <div class="f-tile"><svg class="ic"><use href="#ic-library"/></svg><span>图书馆</span></div>
+          <div class="f-tile"><svg class="ic"><use href="#ic-mail"/></svg><span>校园邮箱</span></div>
+        </div>
+        <div class="f-seclabel">学习科研</div>
+        <div class="f-tiles">
+          <div class="f-tile"><svg class="ic"><use href="#ic-search"/></svg><span>知网 CNKI</span></div>
+          <div class="f-tile"><svg class="ic"><use href="#ic-code"/></svg><span>GitHub</span></div>
+          <div class="f-tile"><svg class="ic"><use href="#ic-bot"/></svg><span>DeepSeek</span></div>
+        </div>
+        <div class="f-foot" style="border-top:1px solid var(--line);margin-top:14px">编辑模式支持长按拖拽排序 · 点击右上角铅笔进入</div>
+        <div class="f-nav">
+          <div class="f-navitem"><svg class="ic"><use href="#ic-home"/></svg>首页</div>
+          <div class="f-navitem"><svg class="ic"><use href="#ic-chart"/></svg>自助系统</div>
+          <div class="f-navitem on"><svg class="ic"><use href="#ic-star"/></svg>常用链接</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>常用链接</h3>
+      <p>链接格改为 1px 边框的扁平卡片（无阴影），图标全部线性化并统一用主题蓝，单色强调更容易维持整体感。悬停时边框变蓝、底色浅蓝。</p>
+    </div>
+  </div>
+</div>

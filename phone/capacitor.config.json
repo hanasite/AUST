@@ -1,0 +1,21 @@
+{
+  "appId": "cn.edu.aust.connectease",
+  "appName": "AUST认证助手",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "Preferences": {
+      "group": "AUSTConnectEase"
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  }
+}

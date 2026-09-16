@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  允许对校园网内网地址使用 HTTP（非 HTTPS）
+  10.255.0.19  = DrCOM 认证服务器
+  10.x.x.x    = 校园网内网段（按需扩展）
+-->
+<network-security-config>
+  <domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="false">10.255.0.19</domain>
+    <domain includeSubdomains="true">aust.edu.cn</domain>
+    <domain includeSubdomains="true">xgmm.aust.edu.cn</domain>
+  </domain-config>
+  <!-- 默认其他域名走 HTTPS -->
+  <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
