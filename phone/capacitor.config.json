@@ -15,7 +15,6 @@
   },
   "android": {
     "allowMixedContent": true,
-    "captureInput": true,
-    "webContentsDebuggingEnabled": false
+    "captureInput": true
   }
 }

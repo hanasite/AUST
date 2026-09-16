@@ -342,7 +342,7 @@
 <div id="page-home" class="tab-panel active">
 <div class="f-page">
 <div class="f-stat"><span>21:16</span><span class="f-bat"><svg class="ic"><use href="#ic-wifi"/></svg><span class="bat"></span>86%</span></div>
-<div class="f-head"><div class="f-title">AUST 认证助手</div><div class="f-headactions"><button class="f-iconbtn" id="dark-mode-toggle" aria-label="切换深色模式"></button><button class="f-iconbtn" aria-label="刷新"><svg class="ic"><use href="#ic-refresh"/></svg></button></div></div>
+<div class="f-head"><div class="f-title">AUST 认证助手</div><div class="f-headactions"><button class="f-iconbtn" id="dark-mode-toggle" aria-label="切换深色模式"></button><button class="f-iconbtn" id="wifi-refresh-btn" aria-label="刷新"><svg class="ic"><use href="#ic-refresh"/></svg></button></div></div>
 <div class="f-status">
   <div class="f-icirc"><svg class="ic"><use href="#ic-wifi"/></svg></div>
   <div class="f-main">
@@ -1187,6 +1187,11 @@ function startWifiAutoScan(){
   wifiScanTimer = setInterval(() => WifiFlow.refresh(), wifiCfg.scanIntervalMs);
 }
 function stopWifiAutoScan(){ if (wifiScanTimer) { clearInterval(wifiScanTimer); wifiScanTimer = null; } }
+// 首页头部刷新按钮：手动重扫一次（refresh 自带 _busy 防重入，连接 run 存活时只刷列表不动状态机）
+function initWifiRefresh(){
+  const btn = document.getElementById('wifi-refresh-btn');
+  if (btn) btn.addEventListener('click', () => { WifiFlow.refresh(); });
+}
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { stopWifiAutoScan(); return; }
   startWifiAutoScan();
@@ -1194,7 +1199,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // 初始化
-window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); try { await loadWifiCfg(); } catch (e) { wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000 }; } await WifiFlow.refresh(); startWifiAutoScan(); });
+window.addEventListener('load', async () => { initDarkMode(); initWifiRefresh(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); try { await loadWifiCfg(); } catch (e) { wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000 }; } await WifiFlow.refresh(); startWifiAutoScan(); });
 window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.openAddForm = openAddForm; window.closeAddForm = closeAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.deleteNavSection = deleteNavSection; window.restoreSection = restoreSection; window.restoreAllSections = restoreAllSections; window.pickNavIcon = pickNavIcon; window.openLink = openLink; window.normalizeUrl = normalizeUrl; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon; window.Wifi = Wifi; window.WifiFlow = WifiFlow; window.NativeProvider = NativeProvider; window.MockProvider = MockProvider;
 </script>
 </body>
