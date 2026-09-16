@@ -287,6 +287,45 @@
   body.v2 .f-icopt:hover{border-color:var(--blue);color:var(--blue)}
   body.v2 .f-icopt.on{border-color:var(--blue);background:var(--tint);color:var(--blue)}
   body.v2 .f-icopt .ic{width:20px;height:20px}
+
+  /* ============ v2 常用链接页（自 docs/design/flat-pages.html 第四台 + wifi-flow.html 第四台移植为 body.v2 作用域） ============ */
+  body.v2 .f-seclabel{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.04em;padding:14px 16px 8px}
+  body.v2 .f-tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 16px}
+  body.v2 .f-tile{position:relative;border:1px solid var(--line);border-radius:14px;padding:13px 6px 11px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:var(--bg);transition:background .15s,border-color .15s;user-select:none}
+  body.v2 .f-tile:hover{border-color:var(--blue);background:var(--tint)}
+  body.v2 .f-tile:active{transform:scale(.97)}
+  body.v2 .f-tile .ic{width:21px;height:21px;color:var(--blue)}
+  body.v2 .f-tile span{font-size:11px;font-weight:600;color:var(--fg);text-align:center;line-height:1.3;overflow-wrap:anywhere}
+  body.v2 .f-tile.dragging{opacity:.35;transform:scale(.95)!important}
+  body.v2 .f-tile.drag-over{box-shadow:0 0 0 2.5px var(--blue);transform:scale(1.04)}
+  body.v2 .f-tiledel{display:none;position:absolute;top:-7px;right:-7px;width:20px;height:20px;align-items:center;justify-content:center;border-radius:999px;background:var(--red);color:#fff;border:2px solid var(--bg);font-size:10px;line-height:1;cursor:pointer;padding:0;font-family:inherit;z-index:5}
+  body.v2.edit-mode .f-tiledel{display:flex}
+  body.v2 .f-tilehandle{display:none;position:absolute;top:-7px;left:-7px;width:20px;height:20px;align-items:center;justify-content:center;border-radius:999px;background:var(--bg);color:var(--sub);border:1px solid var(--line);font-size:11px;line-height:1;cursor:grab;padding:0;font-family:inherit;touch-action:none;z-index:5}
+  body.v2.edit-mode .f-tilehandle{display:flex}
+  body.v2 .f-secdel{display:none;border:none;background:none;color:var(--red);font-size:12px;line-height:1;cursor:pointer;padding:2px 6px;font-family:inherit}
+  body.v2.edit-mode .f-secdel{display:block}
+  body.v2 .f-emptybox{border:1px solid var(--line);border-radius:14px;margin:0 16px;padding:18px 12px;text-align:center}
+  body.v2 .f-emptyic{width:40px;height:40px;border-radius:999px;background:var(--graytint);color:var(--sub);display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+  body.v2 .f-emptyt{font-size:13.5px;font-weight:700}
+  body.v2 .f-emptys{font-size:11.5px;color:var(--sub);margin:4px 0 12px;line-height:1.6}
+  body.v2 .f-emptybox .f-act{padding:8px 16px}
+  body.v2 .f-editrow{display:none;gap:10px;padding:16px}
+  body.v2.edit-mode .f-editrow{display:flex}
+  body.v2 .f-editrow .f-btn{flex:1;padding:12px;font-size:14px}
+  body.v2 .f-starfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px}
+  body.v2 .f-starfoot .f-act{display:inline-flex;align-items:center;gap:5px}
+  body.v2 .f-starfoot .f-act .ic{width:13px;height:13px}
+  body.v2 .f-staracts{display:flex;gap:8px}
+  body.v2 .f-hint-err{display:none;font-size:12px;color:var(--red);padding:0 0 4px;line-height:1.5}
+  body.v2 .f-hint-err.show{display:block}
+  body.v2 .f-iconbtn.on{color:var(--blue)}
+  body.v2 .snackbar{display:flex;align-items:center;gap:12px}
+  body.v2 .snackbar.has-act{pointer-events:auto}
+  body.v2 .snack-act{background:none;border:none;color:var(--blue);font:700 13px/1 'Inter',system-ui,sans-serif;cursor:pointer;padding:2px 4px;flex-shrink:0}
+  body.v2 #drag-ghost{border:1px solid var(--line)}
+  body.v2 #drag-ghost .ic{width:21px;height:21px;color:var(--blue)}
+  body.v2 #drag-ghost #dg-icon{display:flex;align-items:center;justify-content:center}
+  body.v2 #drag-ghost #dg-name{font-size:11px;font-weight:600;color:var(--fg)}
 </style>
 </head>
 <body class="v2">
@@ -430,11 +469,10 @@
 </div>
 
 <div id="page-links" class="tab-panel">
-<div class="page">
-  <div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn btn-secondary btn-sm" id="edit-nav-btn" onclick="toggleEditMode()" style="flex:1">✏️ 编辑 / 拖拽</button><button class="btn btn-secondary btn-sm" id="add-nav-btn" onclick="toggleAddForm()" style="flex:1">＋ 添加链接</button></div>
-  <div class="nav-add-card" id="nav-add-card"><div class="card-body"><div class="field"><label class="field-label">名称（最多8字）</label><input class="field-input" id="new-nav-name" maxlength="8"></div><div class="field"><label class="field-label">URL</label><input class="field-input" type="url" id="new-nav-url"></div><div class="field"><label class="field-label">图标 Emoji</label><input class="field-input" id="new-nav-icon" maxlength="4" style="font-size:22px;text-align:center" value="🔗"></div><div class="field"><label class="field-label">颜色主题</label><select class="field-select" id="new-nav-color"><option value="c-blue">蓝色</option><option value="c-green">绿色</option><option value="c-purple">紫色</option><option value="c-teal">青绿</option><option value="c-orange">橙色</option><option value="c-red">红色</option><option value="c-indigo">靛蓝</option><option value="c-amber">琥珀</option><option value="c-cyan">天蓝</option><option value="c-gray">灰色</option><option value="c-pink">粉色</option></select></div><div style="display:flex;gap:8px"><button class="btn btn-secondary" onclick="toggleAddForm()">取消</button><button class="btn btn-primary" onclick="addNavItem()">添加</button></div></div></div>
+<div class="f-page">
+  <div class="f-head"><div class="f-title">常用链接</div><div class="f-headactions"><button class="f-iconbtn" id="links-edit-btn" onclick="toggleEditMode()" aria-label="编辑常用链接"><svg class="ic"><use href="#ic-pencil"/></svg></button></div></div>
   <div id="nav-dynamic"></div>
-  <div class="star-card"><span class="star-kaomoji">◝(⑅•ᴗ•⑅)◜..°♡<br><span style="font-size:15px;font-weight:600;opacity:.95">star me！</span></span><div class="star-links"><a class="star-link" href="https://github.com/hanasite/AUST" target="_blank">🐙 GitHub</a><a class="star-link" href="https://gitee.com/yosakun/aust" target="_blank">🔴 Gitee</a></div></div>
+  <div class="f-foot f-starfoot"><span>开源不易 · 欢迎 star 支持</span><span class="f-staracts"><button class="f-act" onclick="openLink('https://github.com/hanasite/AUST')"><svg class="ic"><use href="#ic-code"/></svg>GitHub</button><button class="f-act" onclick="openLink('https://gitee.com/yosakun/aust')"><svg class="ic"><use href="#ic-star"/></svg>Gitee</button></span></div>
 </div>
 </div>
 
@@ -467,9 +505,35 @@
   <div class="sheet-btns"><button class="f-btn ghost2" onclick="closeDeviceEditModal()">取消</button><button class="f-btn" onclick="saveDeviceCustom()">保存</button></div>
 </div></div>
 
+<!-- 添加链接弹窗（常用链接页） -->
+<div class="sheet-ol" id="link-add-modal"><div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">添加链接</div>
+  <div class="f-field"><label class="f-label" for="new-nav-name">名称</label><input class="f-input" type="text" id="new-nav-name" maxlength="10" placeholder="例如：校园邮箱"></div>
+  <div class="f-field"><label class="f-label" for="new-nav-url">网址</label><input class="f-input" type="text" id="new-nav-url" placeholder="github.com 或 https://…" inputmode="url" autocomplete="off"></div>
+  <div class="f-field"><div class="f-label">图标</div><input type="hidden" id="new-nav-icon" value="ic-globe"><div class="f-icopts" id="nav-icon-picker"></div></div>
+  <div class="f-hint-err" id="link-add-hint"></div>
+  <div class="sheet-btns"><button class="f-btn ghost2" type="button" onclick="closeAddForm()">取消</button><button class="f-btn" type="button" onclick="addNavItem()">添加</button></div>
+</div></div>
+
 <div class="snackbar" id="snackbar"></div>
 
 <script>
+// ======================= 纯函数（常用链接 URL 规范化 / 转义 / 分类合并；Task 5 接口） =======================
+function normalizeUrl(input){
+  const s=(input||'').trim();
+  if(!s) return null;
+  if(/^https?:\/\//i.test(s)) return s;
+  if(/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(s)) return 'https://'+s;
+  return null;
+}
+function escHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function ensureSections(data, defaults){
+  const names=new Set(data.map(s=>s.section));
+  const missing=defaults.filter(d=>!names.has(d.section)).map(d=>({section:d.section,items:JSON.parse(JSON.stringify(d.items))}));
+  return data.concat(missing);
+}
+
 // ======================= 深色模式 =======================
 function initDarkMode() {
   const btn = document.getElementById('dark-mode-toggle');
@@ -543,13 +607,13 @@ async function portalGetDevices() { const base = getPortalBase(); try { const re
 async function portalOfflineDevice(sessionId, ip, mac) { const base = getPortalBase(); const macC = (mac||'').replace(/[-:]/g,'').toUpperCase(); try { const res = await Http.get(`${base}/Self/dashboard/tooffline`, { sessionid:sessionId, ip, mac:macC }); const d = (typeof res.data === 'string') ? JSON.parse(res.data) : res.data; return { ok: !!d.success }; } catch { return { ok: false }; } }
 
 // ======================= 全局状态 =======================
-const state = { authing: false, portalLoggedIn: false, devices: [], captchaResolve: null, portalCheckcode: null, navData: null, editMode: false, addFormOpen: false };
+const state = { authing: false, portalLoggedIn: false, devices: [], captchaResolve: null, portalCheckcode: null, navData: null, editMode: false };
 // UI 辅助函数
 function switchTab(name) { ['home','portal','links'].forEach((t,i) => document.querySelectorAll('.tabbar button')[i].classList.toggle('on', t === name)); document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'page-' + name)); }
 function toggleCollapse(bodyId, arrowId) { document.getElementById(bodyId).classList.toggle('open'); const a = document.getElementById(arrowId); if (a) a.classList.toggle('open'); }
 function updatePreview() { const uid = document.getElementById('username').value.trim() || '学号'; document.getElementById('preview').textContent = `${uid}@${document.getElementById('isp').value}`; }
 function updatePortalBaseDisplay() { try { const u = new URL(document.getElementById('portal-url').value.trim()); document.getElementById('portal-base-display').textContent = u.hostname; } catch {} }
-let _snackT; function showSnack(msg) { const el = document.getElementById('snackbar'); el.textContent = msg; el.classList.add('show'); clearTimeout(_snackT); _snackT = setTimeout(() => el.classList.remove('show'), 2800); }
+let _snackT; function showSnack(msg, actionLabel, onAction, duration) { const el = document.getElementById('snackbar'); el.textContent = ''; const txt = document.createElement('span'); txt.textContent = msg; el.appendChild(txt); el.classList.toggle('has-act', !!actionLabel); if (actionLabel) { const act = document.createElement('button'); act.type = 'button'; act.className = 'snack-act'; act.textContent = actionLabel; act.addEventListener('click', () => { clearTimeout(_snackT); el.classList.remove('show'); el.classList.remove('has-act'); if (typeof onAction === 'function') onAction(); }); el.appendChild(act); } el.classList.add('show'); clearTimeout(_snackT); _snackT = setTimeout(() => { el.classList.remove('show'); el.classList.remove('has-act'); }, duration || 2800); }
 function log(msg, type='') { const box = document.getElementById('log-box'); const span = document.createElement('span'); span.textContent = msg + '\n'; if (type) span.className = 'log-' + type; box.appendChild(span); box.scrollTop = box.scrollHeight; if (!document.getElementById('log-body').classList.contains('open')) toggleCollapse('log-body','log-arrow'); }
 function clearLog() { document.getElementById('log-box').innerHTML = ''; }
 function setNetStatus(t, c) { const el = document.getElementById('net-status'); el.textContent = t; el.className = 'status-badge ' + c; }
@@ -573,21 +637,243 @@ async function refreshCaptcha() { document.getElementById('captcha-img').style.d
 function closeCaptchaModal() { document.getElementById('captcha-modal').classList.remove('show'); if (state.captchaResolve) { state.captchaResolve(null); state.captchaResolve = null; } }
 function submitCaptcha() { const val = document.getElementById('captcha-input').value.trim(); if (!val) { showSnack('⚠️ 请输入验证码'); return; } document.getElementById('captcha-modal').classList.remove('show'); if (state.captchaResolve) { state.captchaResolve(val); state.captchaResolve = null; } }
 
-// ======================= 导航 =======================
+// ======================= 常用链接（v2 扁平重建） =======================
 const DEFAULT_NAV = [ { section:'🏫 校园官方', items:[ {name:'AUST 官网',url:'http://www.aust.edu.cn',icon:'🎓',color:'c-blue'},{name:'教务处',url:'http://jwc.aust.edu.cn',icon:'📚',color:'c-green'},{name:'网络自助',url:'https://xgmm.aust.edu.cn',icon:'🌐',color:'c-purple'},{name:'DrCOM',url:'http://10.255.0.19/drcom/login',icon:'📡',color:'c-teal'},{name:'图书馆',url:'http://lib.aust.edu.cn',icon:'📖',color:'c-amber'},{name:'校园邮箱',url:'https://mail.aust.edu.cn',icon:'✉️',color:'c-red'} ] }, { section:'📖 学习科研', items:[ {name:'知网 CNKI',url:'https://www.cnki.net',icon:'🔬',color:'c-blue'},{name:'GitHub',url:'https://github.com',icon:'🐙',color:'c-gray'},{name:'DeepSeek',url:'https://www.deepseek.com',icon:'🤖',color:'c-indigo'},{name:'arXiv',url:'https://arxiv.org',icon:'📰',color:'c-orange'},{name:'Overleaf',url:'https://www.overleaf.com',icon:'📝',color:'c-green'},{name:'力扣',url:'https://leetcode.cn',icon:'💻',color:'c-orange'} ] }, { section:'🍜 生活服务', items:[ {name:'美团外卖',url:'https://www.meituan.com',icon:'🛵',color:'c-amber'},{name:'12306',url:'https://www.12306.cn',icon:'🚄',color:'c-red'},{name:'百度地图',url:'https://map.baidu.com',icon:'🗺️',color:'c-blue'} ] } ];
-function renderNav() { const container = document.getElementById('nav-dynamic'); container.innerHTML = ''; state.navData.forEach((sec, si) => { const titleEl = document.createElement('div'); titleEl.className = 'nav-section-title'; titleEl.textContent = sec.section; container.appendChild(titleEl); const grid = document.createElement('div'); grid.className = 'nav-grid'; sec.items.forEach((item, ii) => { const a = document.createElement('a'); a.className = 'nav-item'; a.href = item.url; a.target = '_blank'; a.dataset.si = si; a.dataset.ii = ii; a.innerHTML = `<button class="nav-delete-btn" data-si="${si}" data-ii="${ii}">✕</button><div class="nav-drag-handle">⠿</div><div class="nav-item-icon ${item.color}">${item.icon}</div><div class="nav-item-name">${item.name}</div>`; a.querySelector('.nav-delete-btn').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); deleteNavItem(parseInt(e.currentTarget.dataset.si), parseInt(e.currentTarget.dataset.ii)); }); a.addEventListener('touchstart', onDragStart, { passive: false }); a.addEventListener('mousedown', onDragStart); grid.appendChild(a); }); container.appendChild(grid); }); }
+const MINE_SECTION = '⭐ 我的链接';
+// 图标选择器（lucide sprite id，新增只存这个集合内的 id）与旧 emoji 数据回退映射
+const LUCIDE_NAV_ICONS = ['ic-globe','ic-gradcap','ic-book','ic-library','ic-router','ic-mail','ic-search','ic-code','ic-bot','ic-star','ic-home','ic-chart'];
+const NAV_EMOJI_ICON = { '🎓':'ic-gradcap','📚':'ic-book','🌐':'ic-globe','📡':'ic-router','📖':'ic-library','✉':'ic-mail','🐙':'ic-code','🤖':'ic-bot' };
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function navIconId(v) { const s = String(v == null ? '' : v).trim().split('').filter(c => c.codePointAt(0) !== 0xFE0F).join(''); return LUCIDE_NAV_ICONS.indexOf(s) >= 0 ? s : (NAV_EMOJI_ICON[s] || 'ic-globe'); }
+function secLabel(name) { return String(name).replace(/^[^\p{L}\p{N}_]+/u, '').trim() || String(name); }
+function makeIc(id) { const svg = document.createElementNS(SVG_NS, 'svg'); svg.setAttribute('class', 'ic'); const use = document.createElementNS(SVG_NS, 'use'); use.setAttribute('href', '#' + id); svg.appendChild(use); return svg; }
+async function saveNav() { await Store.set('aust_nav', state.navData); }
+function openLink(raw) {
+  const url = normalizeUrl(raw);
+  if (!url) { showSnack('⚠️ 链接格式不对，请检查'); return; }
+  window.open(url, '_blank');
+}
+function renderNav() {
+  const container = document.getElementById('nav-dynamic');
+  container.textContent = '';
+  state.navData.forEach((sec, si) => {
+    const label = document.createElement('div');
+    label.className = 'f-seclabel';
+    const labelText = document.createElement('span');
+    labelText.textContent = secLabel(sec.section);
+    label.appendChild(labelText);
+    const secDel = document.createElement('button');
+    secDel.type = 'button'; secDel.className = 'f-secdel'; secDel.textContent = '✕';
+    secDel.setAttribute('aria-label', '删除分类 ' + secLabel(sec.section));
+    secDel.addEventListener('click', () => deleteNavSection(si));
+    label.appendChild(secDel);
+    container.appendChild(label);
+    if (!sec.items.length) {
+      // 空分类保留：标题 + 空状态 + 恢复默认链接（不再被 filter 掉）
+      const box = document.createElement('div'); box.className = 'f-emptybox';
+      const circ = document.createElement('div'); circ.className = 'f-emptyic'; circ.appendChild(makeIc('ic-globe'));
+      const t = document.createElement('div'); t.className = 'f-emptyt'; t.textContent = '这个分类还是空的';
+      const s = document.createElement('div'); s.className = 'f-emptys'; s.textContent = '清空后分类不会消失，随时可以恢复';
+      box.appendChild(circ); box.appendChild(t); box.appendChild(s);
+      if (DEFAULT_NAV.some(d => d.section === sec.section)) {
+        const restoreOne = document.createElement('button');
+        restoreOne.type = 'button'; restoreOne.className = 'f-act'; restoreOne.textContent = '恢复默认链接';
+        restoreOne.addEventListener('click', () => restoreSection(sec.section));
+        box.appendChild(restoreOne);
+      }
+      container.appendChild(box);
+      return;
+    }
+    const grid = document.createElement('div');
+    grid.className = 'f-tiles';
+    sec.items.forEach((item, ii) => {
+      const tile = document.createElement('div');
+      tile.className = 'f-tile';
+      tile.dataset.si = si; tile.dataset.ii = ii;
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'f-tiledel'; del.textContent = '✕';
+      del.setAttribute('aria-label', '删除 ' + String(item.name == null ? '' : item.name));
+      del.addEventListener('click', e => { e.stopPropagation(); deleteNavItem(si, ii); });
+      const handle = document.createElement('button');
+      handle.type = 'button'; handle.className = 'f-tilehandle'; handle.textContent = '⠿';
+      handle.setAttribute('aria-label', '拖拽排序 ' + String(item.name == null ? '' : item.name));
+      handle.addEventListener('touchstart', onDragStart, { passive: false });
+      handle.addEventListener('mousedown', onDragStart);
+      const name = document.createElement('span');
+      name.textContent = String(item.name == null ? '' : item.name);
+      tile.appendChild(del); tile.appendChild(handle);
+      tile.appendChild(makeIc(navIconId(item.icon)));
+      tile.appendChild(name);
+      tile.addEventListener('click', () => { if (state.editMode) return; openLink(item.url); });
+      grid.appendChild(tile);
+    });
+    container.appendChild(grid);
+  });
+  // 编辑模式底部工具行（添加 / 恢复全部默认分类）
+  const row = document.createElement('div');
+  row.className = 'f-editrow';
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button'; addBtn.className = 'f-btn'; addBtn.textContent = '添加链接';
+  addBtn.addEventListener('click', openAddForm);
+  const restoreAllBtn = document.createElement('button');
+  restoreAllBtn.type = 'button'; restoreAllBtn.className = 'f-btn ghost2';
+  restoreAllBtn.appendChild(makeIc('ic-refresh'));
+  restoreAllBtn.appendChild(document.createTextNode('恢复全部默认分类'));
+  restoreAllBtn.addEventListener('click', restoreAllSections);
+  row.appendChild(addBtn); row.appendChild(restoreAllBtn);
+  container.appendChild(row);
+}
 const drag = { active: false, srcSec: -1, srcIdx: -1, ovSec: -1, ovIdx: -1, ghost: null };
-function onDragStart(e) { if (!state.editMode || e.target.classList.contains('nav-delete-btn')) return; e.preventDefault(); const el = e.currentTarget; const si = parseInt(el.dataset.si); const ii = parseInt(el.dataset.ii); const item = state.navData[si]?.items[ii]; if (!item) return; const touch = e.touches ? e.touches[0] : e; drag.active = true; drag.srcSec = si; drag.srcIdx = ii; drag.ovSec = si; drag.ovIdx = ii; const ghost = document.getElementById('drag-ghost'); document.getElementById('dg-icon').className = `g-icon ${item.color}`; document.getElementById('dg-icon').textContent = item.icon; document.getElementById('dg-name').textContent = item.name; ghost.style.left = touch.clientX + 'px'; ghost.style.top = touch.clientY + 'px'; ghost.classList.add('active'); drag.ghost = ghost; el.classList.add('dragging'); if (e.touches) { document.addEventListener('touchmove', onDragMove, { passive: false }); document.addEventListener('touchend', onDragEnd); } else { document.addEventListener('mousemove', onDragMove); document.addEventListener('mouseup', onDragEnd); } }
-function onDragMove(e) { if (!drag.active) return; e.preventDefault(); const touch = e.touches ? e.touches[0] : e; drag.ghost.style.left = touch.clientX + 'px'; drag.ghost.style.top = touch.clientY + 'px'; drag.ghost.style.display = 'none'; const el = document.elementFromPoint(touch.clientX, touch.clientY); drag.ghost.style.display = ''; const target = el?.closest('.nav-item'); if (target && (parseInt(target.dataset.si) !== drag.ovSec || parseInt(target.dataset.ii) !== drag.ovIdx)) { document.querySelector(`.nav-item[data-si="${drag.ovSec}"][data-ii="${drag.ovIdx}"]`)?.classList.remove('drag-over'); drag.ovSec = parseInt(target.dataset.si); drag.ovIdx = parseInt(target.dataset.ii); target.classList.add('drag-over'); } }
-async function onDragEnd(e) { if (!drag.active) return; drag.active = false; document.removeEventListener('touchmove', onDragMove); document.removeEventListener('touchend', onDragEnd); document.removeEventListener('mousemove', onDragMove); document.removeEventListener('mouseup', onDragEnd); drag.ghost.classList.remove('active'); document.querySelector(`.nav-item[data-si="${drag.srcSec}"][data-ii="${drag.srcIdx}"]`)?.classList.remove('dragging'); document.querySelector(`.nav-item[data-si="${drag.ovSec}"][data-ii="${drag.ovIdx}"]`)?.classList.remove('drag-over'); if (drag.srcSec !== drag.ovSec || drag.srcIdx !== drag.ovIdx) { const [moved] = state.navData[drag.srcSec].items.splice(drag.srcIdx, 1); state.navData[drag.ovSec].items.splice(drag.ovIdx, 0, moved); state.navData = state.navData.filter(s => s.items.length > 0); await Store.set('aust_nav', state.navData); renderNav(); } }
-function toggleEditMode() { state.editMode = !state.editMode; document.body.classList.toggle('edit-mode', state.editMode); document.getElementById('edit-nav-btn').textContent = state.editMode ? '✅ 完成编辑' : '✏️ 编辑 / 拖拽'; if (state.editMode) showSnack('长按图标可拖拽移动'); }
-function toggleAddForm() { state.addFormOpen = !state.addFormOpen; document.getElementById('nav-add-card').classList.toggle('show', state.addFormOpen); document.getElementById('add-nav-btn').textContent = state.addFormOpen ? '✕ 取消' : '＋ 添加链接'; }
-async function addNavItem() { const name = document.getElementById('new-nav-name').value.trim(); const url = document.getElementById('new-nav-url').value.trim(); const icon = document.getElementById('new-nav-icon').value.trim() || '🔗'; const color = document.getElementById('new-nav-color').value; if (!name || !url) { showSnack('⚠️ 名称和URL不能为空'); return; } const mySection = state.navData.find(s => s.section === '⭐ 我的链接'); if (mySection) mySection.items.push({ name, url, icon, color }); else state.navData.unshift({ section:'⭐ 我的链接', items:[{ name, url, icon, color }] }); await Store.set('aust_nav', state.navData); renderNav(); toggleAddForm(); document.getElementById('new-nav-name').value = ''; document.getElementById('new-nav-url').value = ''; document.getElementById('new-nav-icon').value = '🔗'; showSnack('✅ 已添加'); }
-async function deleteNavItem(si, ii) { state.navData[si].items.splice(ii, 1); state.navData = state.navData.filter(s => s.items.length > 0); await Store.set('aust_nav', state.navData); renderNav(); }
+function onDragStart(e) {
+  if (!state.editMode) return;
+  const el = e.currentTarget.closest('.f-tile');
+  if (!el) return;
+  e.preventDefault();
+  const si = parseInt(el.dataset.si, 10); const ii = parseInt(el.dataset.ii, 10);
+  const item = state.navData[si] && state.navData[si].items[ii];
+  if (!item) return;
+  const touch = e.touches ? e.touches[0] : e;
+  drag.active = true; drag.srcSec = si; drag.srcIdx = ii; drag.ovSec = si; drag.ovIdx = ii;
+  const ghost = document.getElementById('drag-ghost');
+  const gi = document.getElementById('dg-icon'); gi.textContent = ''; gi.appendChild(makeIc(navIconId(item.icon)));
+  document.getElementById('dg-name').textContent = String(item.name == null ? '' : item.name);
+  ghost.style.left = touch.clientX + 'px'; ghost.style.top = touch.clientY + 'px';
+  ghost.classList.add('active'); drag.ghost = ghost; el.classList.add('dragging');
+  if (e.touches) { document.addEventListener('touchmove', onDragMove, { passive: false }); document.addEventListener('touchend', onDragEnd); }
+  else { document.addEventListener('mousemove', onDragMove); document.addEventListener('mouseup', onDragEnd); }
+}
+function onDragMove(e) {
+  if (!drag.active) return;
+  e.preventDefault();
+  const touch = e.touches ? e.touches[0] : e;
+  drag.ghost.style.left = touch.clientX + 'px'; drag.ghost.style.top = touch.clientY + 'px';
+  drag.ghost.style.display = 'none';
+  const under = document.elementFromPoint(touch.clientX, touch.clientY);
+  drag.ghost.style.display = '';
+  const target = under && under.closest ? under.closest('.f-tile') : null;
+  if (target && (parseInt(target.dataset.si, 10) !== drag.ovSec || parseInt(target.dataset.ii, 10) !== drag.ovIdx)) {
+    const prev = document.querySelector(`.f-tile[data-si="${drag.ovSec}"][data-ii="${drag.ovIdx}"]`);
+    if (prev) prev.classList.remove('drag-over');
+    drag.ovSec = parseInt(target.dataset.si, 10); drag.ovIdx = parseInt(target.dataset.ii, 10);
+    target.classList.add('drag-over');
+  }
+}
+async function onDragEnd(e) {
+  if (!drag.active) return;
+  drag.active = false;
+  document.removeEventListener('touchmove', onDragMove); document.removeEventListener('touchend', onDragEnd);
+  document.removeEventListener('mousemove', onDragMove); document.removeEventListener('mouseup', onDragEnd);
+  drag.ghost.classList.remove('active');
+  const src = document.querySelector(`.f-tile[data-si="${drag.srcSec}"][data-ii="${drag.srcIdx}"]`);
+  if (src) src.classList.remove('dragging');
+  const ov = document.querySelector(`.f-tile[data-si="${drag.ovSec}"][data-ii="${drag.ovIdx}"]`);
+  if (ov) ov.classList.remove('drag-over');
+  if (drag.srcSec !== drag.ovSec || drag.srcIdx !== drag.ovIdx) {
+    const [moved] = state.navData[drag.srcSec].items.splice(drag.srcIdx, 1);
+    state.navData[drag.ovSec].items.splice(drag.ovIdx, 0, moved);
+    await saveNav(); renderNav();
+  }
+}
+function toggleEditMode() {
+  state.editMode = !state.editMode;
+  document.body.classList.toggle('edit-mode', state.editMode);
+  const btn = document.getElementById('links-edit-btn');
+  if (btn) {
+    const u = btn.querySelector('use');
+    if (u) u.setAttribute('href', state.editMode ? '#ic-check' : '#ic-pencil');
+    btn.classList.toggle('on', state.editMode);
+    btn.setAttribute('aria-label', state.editMode ? '完成编辑' : '编辑常用链接');
+  }
+  if (!state.editMode) closeAddForm();
+  showSnack(state.editMode ? '编辑模式：拖 ⠿ 手柄排序 · ✕ 删除' : '已退出编辑模式');
+}
+function renderIconPicker() {
+  const picker = document.getElementById('nav-icon-picker');
+  if (!picker) return;
+  picker.textContent = '';
+  LUCIDE_NAV_ICONS.forEach(id => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'f-icopt'; b.dataset.icon = id;
+    b.setAttribute('aria-label', id);
+    b.appendChild(makeIc(id));
+    b.addEventListener('click', () => pickNavIcon(id));
+    picker.appendChild(b);
+  });
+}
+function openAddForm() {
+  document.getElementById('new-nav-name').value = '';
+  document.getElementById('new-nav-url').value = '';
+  const hint = document.getElementById('link-add-hint'); hint.textContent = ''; hint.classList.remove('show');
+  pickNavIcon('ic-globe');
+  document.getElementById('link-add-modal').classList.add('show');
+  setTimeout(() => document.getElementById('new-nav-name').focus(), 350);
+}
+function closeAddForm() { document.getElementById('link-add-modal').classList.remove('show'); }
+function pickNavIcon(id) {
+  if (LUCIDE_NAV_ICONS.indexOf(id) < 0) return;
+  document.getElementById('new-nav-icon').value = id;
+  document.querySelectorAll('#nav-icon-picker .f-icopt').forEach(b => b.classList.toggle('on', b.dataset.icon === id));
+}
+async function addNavItem() {
+  const name = document.getElementById('new-nav-name').value.trim();
+  const urlRaw = document.getElementById('new-nav-url').value.trim();
+  const icon = document.getElementById('new-nav-icon').value || 'ic-globe';
+  const hint = document.getElementById('link-add-hint');
+  const fail = m => { hint.textContent = m; hint.classList.add('show'); };
+  if (!name) { fail('请填写名称'); return; }
+  const url = normalizeUrl(urlRaw);
+  if (!url) { fail('链接格式不对：请输入例如 github.com 或 https://example.com'); return; }
+  const item = { name, url, icon: LUCIDE_NAV_ICONS.indexOf(icon) >= 0 ? icon : 'ic-globe' };
+  let mine = state.navData.find(s => s.section === MINE_SECTION);
+  if (!mine) { mine = { section: MINE_SECTION, items: [] }; state.navData.unshift(mine); }
+  mine.items.push(item);
+  await saveNav(); renderNav(); closeAddForm();
+  showSnack('✅ 已添加');
+}
+async function deleteNavItem(si, ii) {
+  const sec = state.navData[si];
+  if (!sec || !sec.items[ii]) return;
+  const item = sec.items[ii];
+  if (!confirm('删除「' + item.name + '」？')) return;
+  const secName = sec.section;
+  sec.items.splice(ii, 1);
+  await saveNav(); renderNav();
+  showSnack('已删除「' + item.name + '」', '撤销', async () => {
+    let target = state.navData.find(s => s.section === secName);
+    if (!target) { target = { section: secName, items: [] }; state.navData.push(target); }
+    target.items.splice(Math.min(ii, target.items.length), 0, item);
+    await saveNav(); renderNav();
+    showSnack('已恢复「' + item.name + '」');
+  }, 10000);
+}
+async function deleteNavSection(si) {
+  const sec = state.navData[si];
+  if (!sec) return;
+  if (!confirm('删除分类「' + secLabel(sec.section) + '」及其 ' + sec.items.length + ' 个链接？')) return;
+  const label = secLabel(sec.section);
+  state.navData.splice(si, 1);
+  await saveNav(); renderNav();
+  showSnack('已删除分类「' + label + '」· 编辑模式可恢复');
+}
+async function restoreSection(name) {
+  const sec = state.navData.find(s => s.section === name);
+  const def = DEFAULT_NAV.find(d => d.section === name);
+  if (!sec || !def) return;
+  if (sec.items.length && !confirm('「' + secLabel(name) + '」已有 ' + sec.items.length + ' 个链接，仍要恢复默认？')) return;
+  sec.items = JSON.parse(JSON.stringify(def.items));
+  await saveNav(); renderNav();
+  showSnack('✅ 已恢复默认链接');
+}
+async function restoreAllSections() {
+  const before = state.navData.length;
+  state.navData = ensureSections(state.navData, DEFAULT_NAV);
+  await saveNav(); renderNav();
+  showSnack(state.navData.length > before ? '✅ 已补回 ' + (state.navData.length - before) + ' 个默认分类' : '默认分类都在');
+}
 
 // 初始化
-window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); state.navData = savedNav || JSON.parse(JSON.stringify(DEFAULT_NAV)); renderNav(); });
-window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.toggleAddForm = toggleAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon;
+window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); });
+window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.openAddForm = openAddForm; window.closeAddForm = closeAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.deleteNavSection = deleteNavSection; window.restoreSection = restoreSection; window.restoreAllSections = restoreAllSections; window.pickNavIcon = pickNavIcon; window.openLink = openLink; window.normalizeUrl = normalizeUrl; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon;
 </script>
 </body>
 </html>
