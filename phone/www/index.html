@@ -1146,7 +1146,11 @@ const WifiFlow = {
     }
   },
   async success(opts){
-    if (opts.save) { wifiCfg.saved[opts.ssid] = opts.password || ''; await saveWifiCfg(); }
+    if (opts.save) {
+      wifiCfg.saved[opts.ssid] = opts.password || '';
+      // 写存储失败不阻断本次连接，也不吞掉后续收尾（否则 closeSheet 不执行 → run 泄漏，之后所有连接被 onConnect 守卫挡掉）
+      try { await saveWifiCfg(); } catch (e) { /* 内存态已更新，本次连接照常收尾 */ }
+    }
     delete wifiErrors[opts.ssid];
     this.closeSheet();
     showSnack(opts.save ? '✅ 已连接并保存，下次一键即连' : '✅ 已连接');
