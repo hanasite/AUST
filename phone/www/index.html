@@ -246,6 +246,47 @@
   body.v2 .snackbar{bottom:78px}
   body.v2 .f-stat .ic{width:13px;height:13px}
   body.v2 .tabbar button:active{opacity:.6}
+
+  /* ============ v2 自助系统页（自 docs/design/flat-pages.html 第三台手机移植为 body.v2 作用域） ============ */
+  body.v2 .f-acct{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  body.v2 .f-avatar{width:36px;height:36px;border-radius:999px;background:var(--tint);color:var(--blue);font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  body.v2 .f-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--line)}
+  body.v2 .f-cell{padding:14px 6px 12px;text-align:center;border-left:1px solid var(--line)}
+  body.v2 .f-cell:first-child{border-left:none}
+  body.v2 .f-statv{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  body.v2 .f-statu{font-size:10px;font-weight:600;color:var(--sub);margin-left:2px}
+  body.v2 .f-statl{font-size:11px;color:var(--sub);margin-top:3px}
+  body.v2 .f-kv{display:flex;justify-content:space-between;padding:12px 16px;font-size:13.5px;border-bottom:1px solid var(--line)}
+  body.v2 .f-kv .k{color:var(--sub)}
+  body.v2 .f-kv .v{font-weight:700}
+  body.v2 .f-empty{padding:18px 16px;text-align:center;font-size:13px;color:var(--sub)}
+
+  /* ============ v2 表单字段（登录区/弹窗输入；对齐 docs/design/wifi-flow.html .w-input 扁平语言） ============ */
+  body.v2 .f-field{padding:12px 16px;border-bottom:1px solid var(--line)}
+  body.v2 .f-label{display:block;font-size:11.5px;font-weight:700;color:var(--sub);letter-spacing:.04em;margin-bottom:7px}
+  body.v2 .f-input{width:100%;height:46px;padding:0 12px;font-family:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:12px;outline:none;-webkit-appearance:none;transition:border-color .15s}
+  body.v2 .f-input:focus{border-color:var(--blue)}
+  body.v2 .f-input::placeholder{color:var(--sub);opacity:.75}
+
+  /* ============ v2 底部 sheet（自 docs/design/wifi-flow.html .w-sheet 系列；Task 7 WiFi 流程复用 .sheet-ol/.sheet） ============ */
+  body.v2 .sheet-ol{position:fixed;inset:0;background:rgba(15,20,25,.45);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+  body.v2 .sheet-ol.show{opacity:1;pointer-events:all}
+  body.v2 .sheet{width:100%;max-width:480px;max-height:92dvh;overflow-y:auto;background:var(--bg);border-top:1px solid var(--line);border-radius:24px 24px 0 0;padding:10px 16px 18px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+  body.v2 .sheet-ol.show .sheet{transform:translateY(0)}
+  body.v2 .sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+  body.v2 .sheet-title{font-size:17px;font-weight:800;text-align:center;margin-bottom:14px}
+  body.v2 .sheet .f-field{padding:12px 0;border-bottom:none}
+  body.v2 .sheet-btns{display:flex;gap:10px;margin-top:16px}
+  body.v2 .sheet-btns .f-btn{flex:1;padding:12px;font-size:14px}
+  body.v2 .f-btn.ghost2{background:transparent;color:var(--fg);border:1px solid var(--line)}
+  body.v2 .f-btn.ghost2:hover{background:var(--graytint)}
+  body.v2 .f-capbox{height:72px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--graytint);border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
+  body.v2 .f-capbox span{font-size:13px;color:var(--sub)}
+  body.v2 .f-icopts{display:flex;flex-wrap:wrap;gap:8px}
+  body.v2 .f-icopt{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+  body.v2 .f-icopt:hover{border-color:var(--blue);color:var(--blue)}
+  body.v2 .f-icopt.on{border-color:var(--blue);background:var(--tint);color:var(--blue)}
+  body.v2 .f-icopt .ic{width:20px;height:20px}
 </style>
 </head>
 <body class="v2">
@@ -356,10 +397,35 @@
 </div>
 
 <div id="page-portal" class="tab-panel">
-<div class="page">
-  <div class="card"><div class="card-header"><div class="card-header-icon">🔐</div><div class="card-header-text"><div class="card-title">自助系统登录</div><div class="card-subtitle" id="portal-base-display">xgmm.aust.edu.cn</div></div></div><div class="card-body"><div id="portal-login-section"><div class="field"><label class="field-label">账号（留空同认证页）</label><input class="field-input" type="text" id="portal-user" placeholder="留空则使用认证页账号"></div><div class="field"><label class="field-label">密码（留空同认证页）</label><input class="field-input" type="password" id="portal-pass" placeholder="留空则使用认证页密码"></div><div class="field"><label class="field-label">自助系统地址（可修改）</label><input class="field-input" type="url" id="portal-url" value="https://xgmm.aust.edu.cn" oninput="updatePortalBaseDisplay()"></div><button class="btn btn-primary" id="portal-login-btn" onclick="portalLogin()" style="margin-top:4px">🔓 登录自助系统</button></div><div id="portal-logged-section" style="display:none"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span class="status-badge badge-success">✅ 已登录</span><span id="portal-username-display" style="font-size:14px;color:var(--on-surface-medium)"></span><button class="btn btn-secondary btn-sm" onclick="portalLogout()" style="margin-left:auto;width:auto">退出</button></div><div class="stats-row"><div class="stat-item"><div class="stat-value" id="stat-time">--</div><div class="stat-unit">分钟</div><div class="stat-label">已用时长</div></div><div class="stat-item"><div class="stat-value" id="stat-flow">--</div><div class="stat-unit">GB</div><div class="stat-label">已用流量</div></div><div class="stat-item"><div class="stat-value" id="stat-devices">--</div><div class="stat-unit">台</div><div class="stat-label">在线设备</div></div></div><div style="margin-top:12px"><div class="info-row"><span class="info-key">到期日期</span><span class="info-val" id="portal-expiry">--</span></div><div class="info-row"><span class="info-key">姓名</span><span class="info-val" id="portal-realname">--</span></div></div><button class="btn btn-secondary" onclick="refreshPortalData()" style="margin-top:12px">🔄 刷新数据</button></div></div></div>
-  <div class="card" id="portal-devices-card" style="display:none"><div class="card-header"><div class="card-header-icon">📱</div><div class="card-header-text"><div class="card-title">在线设备</div><div class="card-subtitle" id="device-count">加载中…</div></div><button onclick="offlineAll()" style="background:var(--error-bg);color:var(--error);border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">全部下线</button></div><div class="card-body" id="device-list"></div></div>
-  <div class="card"><div class="card-header"><div class="card-header-icon">💡</div><div class="card-header-text"><div class="card-title">说明</div></div></div><div class="card-body" style="font-size:13px;color:var(--on-surface-medium);line-height:1.8">支持设备自定义名称/图标 ✨ 点击设备旁✏️编辑</div></div>
+<div class="f-page">
+  <div class="f-head"><div class="f-title">自助系统</div><div class="f-headactions"><button class="f-iconbtn" onclick="refreshPortalData()" aria-label="刷新数据"><svg class="ic"><use href="#ic-refresh"/></svg></button></div></div>
+  <div id="portal-login-section">
+    <div class="f-sechead"><h4>自助系统登录</h4><span id="portal-base-display">xgmm.aust.edu.cn</span></div>
+    <div class="f-field"><label class="f-label" for="portal-user">账号（留空同认证页）</label><input class="f-input" type="text" id="portal-user" placeholder="留空则使用认证页账号"></div>
+    <div class="f-field"><label class="f-label" for="portal-pass">密码（留空同认证页）</label><input class="f-input" type="password" id="portal-pass" placeholder="留空则使用认证页密码"></div>
+    <div class="f-field"><label class="f-label" for="portal-url">自助系统地址（可修改）</label><input class="f-input" type="url" id="portal-url" value="https://xgmm.aust.edu.cn" oninput="updatePortalBaseDisplay()"></div>
+    <div class="f-btnwrap"><button class="f-btn" id="portal-login-btn" onclick="portalLogin()"><svg class="ic"><use href="#ic-lock"/></svg>登录自助系统</button></div>
+  </div>
+  <div id="portal-logged-section" style="display:none">
+    <div class="f-acct">
+      <div class="f-avatar" id="portal-avatar">?</div>
+      <div class="f-main"><div class="f-name" style="font-size:14px" id="portal-username-display">--</div><div class="f-rmeta" id="portal-acct-meta">在线设备 -- 台</div></div>
+      <button class="f-act ghost" onclick="portalLogout()">退出</button>
+    </div>
+    <div class="f-stats">
+      <div class="f-cell"><div><span class="f-statv" id="stat-time">--</span><span class="f-statu">分钟</span></div><div class="f-statl">已用时长</div></div>
+      <div class="f-cell"><div><span class="f-statv" id="stat-flow">--</span><span class="f-statu">GB</span></div><div class="f-statl">已用流量</div></div>
+      <div class="f-cell"><div><span class="f-statv" id="stat-devices">--</span><span class="f-statu">台</span></div><div class="f-statl">在线设备</div></div>
+    </div>
+    <div class="f-kv"><span class="k">到期日期</span><span class="v" id="portal-expiry">--</span></div>
+    <div class="f-kv"><span class="k">姓名</span><span class="v" id="portal-realname">--</span></div>
+  </div>
+  <div id="portal-devices-card" style="display:none">
+    <div class="f-sechead"><h4>在线设备</h4><span id="device-count">加载中…</span></div>
+    <div id="device-list"></div>
+    <div class="f-btnwrap"><button class="f-btn ghost2" onclick="offlineAll()"><svg class="ic"><use href="#ic-power"/></svg>全部下线</button></div>
+  </div>
+  <div class="f-foot">设备可自定义名称 / 图标 · 点击设备行铅笔按钮编辑</div>
 </div>
 </div>
 
@@ -382,10 +448,24 @@
 <div id="drag-ghost"><div class="g-icon" id="dg-icon"></div><div class="g-name" id="dg-name"></div></div>
 
 <!-- 验证码模态窗 -->
-<div class="modal-overlay" id="captcha-modal"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">🔐 请输入验证码</div><div class="captcha-img-box"><img id="captcha-img" src="" alt="验证码" style="display:none"><span id="captcha-loading" style="font-size:13px;color:var(--on-surface-low)">加载中…</span></div><button class="btn btn-secondary btn-sm" onclick="refreshCaptcha()" style="margin-bottom:16px">↻ 换一张</button><div class="field"><label class="field-label">验证码（不区分大小写）</label><input class="field-input" type="text" id="captcha-input" autocomplete="off" style="text-align:center;font-size:20px;letter-spacing:.12em;text-transform:uppercase"></div><div style="display:flex;gap:10px;margin-top:12px"><button class="btn btn-secondary" onclick="closeCaptchaModal()">取消</button><button class="btn btn-primary" onclick="submitCaptcha()">确认</button></div></div></div>
+<div class="sheet-ol" id="captcha-modal"><div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">请输入验证码</div>
+  <div class="f-capbox"><img id="captcha-img" src="" alt="验证码" style="display:none"><span id="captcha-loading">加载中…</span></div>
+  <div style="text-align:center;margin-bottom:4px"><button class="f-act" onclick="refreshCaptcha()"><svg class="ic"><use href="#ic-refresh"/></svg>换一张</button></div>
+  <div class="f-field"><label class="f-label" for="captcha-input">验证码（不区分大小写）</label><input class="f-input" type="text" id="captcha-input" autocomplete="off" style="text-align:center;font-size:20px;letter-spacing:.12em;text-transform:uppercase"></div>
+  <div class="sheet-btns"><button class="f-btn ghost2" onclick="closeCaptchaModal()">取消</button><button class="f-btn" onclick="submitCaptcha()">确认</button></div>
+</div></div>
 
 <!-- 设备自定义编辑弹窗 -->
-<div class="modal-overlay" id="device-edit-modal"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">✏️ 自定义设备</div><div class="field"><label class="field-label">设备名称</label><input class="field-input" id="device-custom-name" placeholder="例如: 我的路由器, 主力机" maxlength="20"></div><div class="field"><label class="field-label">图标 (Emoji)</label><input class="field-input" id="device-custom-icon" placeholder="📱" maxlength="4" style="font-size:22px;text-align:center"></div><div class="field-label">常用图标</div><div class="emoji-picker" id="device-emoji-picker"></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-secondary" onclick="closeDeviceEditModal()">取消</button><button class="btn btn-primary" onclick="saveDeviceCustom()">保存</button></div></div></div>
+<div class="sheet-ol" id="device-edit-modal"><div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">自定义设备</div>
+  <div class="f-field"><label class="f-label" for="device-custom-name">设备名称</label><input class="f-input" id="device-custom-name" placeholder="例如: 我的路由器, 主力机" maxlength="20"></div>
+  <input type="hidden" id="device-custom-icon">
+  <div class="f-field"><div class="f-label">常用图标</div><div class="f-icopts" id="device-emoji-picker"></div></div>
+  <div class="sheet-btns"><button class="f-btn ghost2" onclick="closeDeviceEditModal()">取消</button><button class="f-btn" onclick="saveDeviceCustom()">保存</button></div>
+</div></div>
 
 <div class="snackbar" id="snackbar"></div>
 
@@ -409,25 +489,28 @@ let deviceCustomMap = {}; // { deviceId: { name, icon } }
 function getDeviceId(dev) { return `${dev.ip || ''}_${dev.mac || dev.sessionId || ''}`.replace(/[^a-zA-Z0-9_-]/g, '_'); }
 async function loadDeviceCustoms() { const data = await Store.get('device_customs'); if(data) deviceCustomMap = data; }
 async function saveDeviceCustomMap() { await Store.set('device_customs', deviceCustomMap); }
-function getCustomDisplay(dev) { const id = getDeviceId(dev); const custom = deviceCustomMap[id]; return { name: custom?.name || null, icon: custom?.icon || null }; }
+function getCustomDisplay(dev) { const id = getDeviceId(dev); const custom = deviceCustomMap[id]; let icon = custom?.icon || null; if (icon && !String(icon).startsWith('ic-')) icon = 'ic-phone'; return { name: custom?.name || null, icon }; }
 
 // 当前编辑的设备引用
 let editingDevice = null;
 let editingDeviceId = null;
+// 设备图标可选集（lucide sprite id）
+const DEVICE_ICONS = ['ic-phone','ic-laptop','ic-router','ic-bot','ic-globe','ic-mail','ic-lock','ic-signal','ic-wifi','ic-star','ic-home','ic-power'];
 
 function openDeviceEditModal(device, idx) {
   editingDevice = device;
   editingDeviceId = getDeviceId(device);
   const custom = deviceCustomMap[editingDeviceId] || {};
   document.getElementById('device-custom-name').value = custom.name || '';
-  document.getElementById('device-custom-icon').value = custom.icon || '';
-  // 渲染常用图标选择器
+  const curIcon = (custom.icon && String(custom.icon).startsWith('ic-')) ? custom.icon : (custom.icon ? 'ic-phone' : '');
+  document.getElementById('device-custom-icon').value = curIcon;
+  // 渲染常用图标选择器（lucide sprite，旧 emoji 数据回退 ic-phone）
   const picker = document.getElementById('device-emoji-picker');
-  const icons = ['📱', '💻', '📲', '📡', '💾', '🍏', '🖥️', '🐧', '🎮', '📺', '🖨️', '🔧'];
-  picker.innerHTML = icons.map(ic => `<span class="emoji-opt" onclick="document.getElementById('device-custom-icon').value='${ic}'">${ic}</span>`).join('');
+  picker.innerHTML = DEVICE_ICONS.map(ic => `<button type="button" class="f-icopt${ic === curIcon ? ' on' : ''}" data-icon="${ic}" onclick="pickDeviceIcon('${ic}')" aria-label="${ic}"><svg class="ic"><use href="#${ic}"/></svg></button>`).join('');
   document.getElementById('device-edit-modal').classList.add('show');
 }
 function closeDeviceEditModal() { document.getElementById('device-edit-modal').classList.remove('show'); editingDevice = null; }
+function pickDeviceIcon(id) { document.getElementById('device-custom-icon').value = id; document.querySelectorAll('#device-emoji-picker .f-icopt').forEach(b => b.classList.toggle('on', b.dataset.icon === id)); }
 async function saveDeviceCustom() {
   if (!editingDeviceId || !editingDevice) { closeDeviceEditModal(); return; }
   const newName = document.getElementById('device-custom-name').value.trim();
@@ -475,10 +558,11 @@ function setNetStatus(t, c) { const el = document.getElementById('net-status'); 
 async function doAuth() { if (state.authing) return; const username = document.getElementById('username').value.trim(); const password = document.getElementById('password').value.trim(); const isp = document.getElementById('isp').value; const nettype = document.getElementById('nettype').value; const doNet = document.getElementById('do-net').checked; const saveCfg = document.getElementById('save-cfg').checked; if (!username || !password) { showSnack('⚠️ 请填写账号和密码'); toggleCollapse('account-body','account-arrow'); return; } if (saveCfg) await Store.set('aust_cfg', { username, password, isp, nettype, doNet, drcomUrl: document.getElementById('drcom-url').value.trim(), portalUrl: document.getElementById('portal-url').value.trim() }); state.authing = true; const btn = document.getElementById('auth-btn'); btn.innerHTML = '<span class="spinner"></span> 认证中…'; btn.disabled = true; if (doNet) { setNetStatus('⏳ 认证中…', 'badge-loading'); log(`→ ${username}@${isp} [${nettype}]`, 'info'); const r = await loginDrcom(username, password, isp, nettype); if (r.success) { setNetStatus(`✅ 成功 ${r.note||''}`.trim(),'badge-success'); log(`✅ 认证成功 ${r.note||''}`.trim(),'success'); showSnack('✅ 校园网认证成功'); } else { setNetStatus('❌ 失败','badge-error'); log(`❌ ${r.error}`,'error'); showSnack('❌ '+r.error); } } else { setNetStatus('⬛ 已跳过','badge-skip'); log('⬛ 校园网认证已跳过'); } btn.innerHTML = 'Σ&gt;―(〃°ω°〃)♡→ 一键认证'; btn.disabled = false; state.authing = false; }
 
 // Portal 登录/刷新
-async function portalLogin() { const user = document.getElementById('portal-user').value.trim() || document.getElementById('username').value.trim(); const pass = document.getElementById('portal-pass').value.trim() || document.getElementById('password').value.trim(); if (!user || !pass) { showSnack('⚠️ 请填写账号和密码'); return; } try { CookieJar.clear(new URL(getPortalBase()).hostname); } catch {} const btn = document.getElementById('portal-login-btn'); btn.innerHTML = '<span class="spinner"></span> 获取验证码…'; btn.disabled = true; try { state.portalCheckcode = await portalGetCheckcode(); if (!state.portalCheckcode) throw new Error('获取checkcode失败'); const imgB64 = await portalFetchCaptchaImage(); showCaptchaImg(imgB64); btn.innerHTML = '⏳ 等待验证码…'; const code = await askCaptcha(); if (!code) { btn.innerHTML = '🔓 登录自助系统'; btn.disabled = false; return; } btn.innerHTML = '<span class="spinner"></span> 登录中…'; const ok = await portalDoLogin(user, pass, code, state.portalCheckcode); if (!ok) throw new Error('登录失败（验证码有误）'); state.portalLoggedIn = true; document.getElementById('portal-login-section').style.display = 'none'; document.getElementById('portal-logged-section').style.display = 'block'; document.getElementById('portal-username-display').textContent = user; document.getElementById('portal-devices-card').style.display = 'block'; log('✅ 自助系统登录成功', 'success'); showSnack('✅ 登录成功'); await refreshPortalData(); } catch (e) { showSnack('❌ '+e.message); log('❌ '+e.message,'error'); } btn.innerHTML = '🔓 登录自助系统'; btn.disabled = false; }
-async function refreshPortalData() { const r = await portalGetDashboard(); if (r.ok) { const d = r.data; document.getElementById('stat-time').textContent = d.usedTimeMin ?? '--'; const mb = parseFloat(d.usedFlowMb); document.getElementById('stat-flow').textContent = isNaN(mb) ? '--' : (mb / 1024).toFixed(2); document.getElementById('portal-expiry').textContent = d.expiryDate ?? '--'; document.getElementById('portal-realname').textContent = d.realName ?? '--'; } else if (r.expired) { showSnack('⚠️ 登录已过期'); portalLogout(); return; } const dr = await portalGetDevices(); if (dr.ok) { state.devices = dr.devices; document.getElementById('stat-devices').textContent = state.devices.length; renderDevices(); } }
+const PORTAL_LOGIN_LABEL = '<svg class="ic"><use href="#ic-lock"/></svg>登录自助系统';
+async function portalLogin() { const user = document.getElementById('portal-user').value.trim() || document.getElementById('username').value.trim(); const pass = document.getElementById('portal-pass').value.trim() || document.getElementById('password').value.trim(); if (!user || !pass) { showSnack('⚠️ 请填写账号和密码'); return; } try { CookieJar.clear(new URL(getPortalBase()).hostname); } catch {} const btn = document.getElementById('portal-login-btn'); btn.innerHTML = '<span class="spinner"></span> 获取验证码…'; btn.disabled = true; try { state.portalCheckcode = await portalGetCheckcode(); if (!state.portalCheckcode) throw new Error('获取checkcode失败'); const imgB64 = await portalFetchCaptchaImage(); showCaptchaImg(imgB64); btn.innerHTML = '⏳ 等待验证码…'; const code = await askCaptcha(); if (!code) { btn.innerHTML = PORTAL_LOGIN_LABEL; btn.disabled = false; return; } btn.innerHTML = '<span class="spinner"></span> 登录中…'; const ok = await portalDoLogin(user, pass, code, state.portalCheckcode); if (!ok) throw new Error('登录失败（验证码有误）'); state.portalLoggedIn = true; document.getElementById('portal-login-section').style.display = 'none'; document.getElementById('portal-logged-section').style.display = 'block'; document.getElementById('portal-username-display').textContent = user; document.getElementById('portal-avatar').textContent = (user[0] || '?').toUpperCase(); document.getElementById('portal-devices-card').style.display = 'block'; log('✅ 自助系统登录成功', 'success'); showSnack('✅ 登录成功'); await refreshPortalData(); } catch (e) { showSnack('❌ '+e.message); log('❌ '+e.message,'error'); } btn.innerHTML = PORTAL_LOGIN_LABEL; btn.disabled = false; }
+async function refreshPortalData() { if (!state.portalLoggedIn) { showSnack('请先登录自助系统'); return; } const r = await portalGetDashboard(); if (r.ok) { const d = r.data; document.getElementById('stat-time').textContent = d.usedTimeMin ?? '--'; const mb = parseFloat(d.usedFlowMb); document.getElementById('stat-flow').textContent = isNaN(mb) ? '--' : (mb / 1024).toFixed(2); document.getElementById('portal-expiry').textContent = d.expiryDate ?? '--'; document.getElementById('portal-realname').textContent = d.realName ?? '--'; if (d.realName) document.getElementById('portal-avatar').textContent = String(d.realName).trim()[0].toUpperCase(); } else if (r.expired) { showSnack('⚠️ 登录已过期'); portalLogout(); return; } const dr = await portalGetDevices(); if (dr.ok) { state.devices = dr.devices; document.getElementById('stat-devices').textContent = state.devices.length; renderDevices(); } }
 function portalLogout() { state.portalLoggedIn = false; state.devices = []; try { CookieJar.clear(new URL(getPortalBase()).hostname); } catch {} document.getElementById('portal-login-section').style.display = 'block'; document.getElementById('portal-logged-section').style.display = 'none'; document.getElementById('portal-devices-card').style.display = 'none'; showSnack('已退出登录'); }
-function renderDevices() { const list = document.getElementById('device-list'); const cnt = document.getElementById('device-count'); cnt.textContent = `共 ${state.devices.length} 台设备在线`; if (!state.devices.length) { list.innerHTML='<div style="text-align:center;padding:16px;font-size:13px">暂无在线设备</div>'; return; } list.innerHTML = state.devices.map((d,i) => { const custom = getCustomDisplay(d); const displayName = custom.name || (d.terminalType || '设备'); const displayIcon = custom.icon || (() => { const t = (d.terminalType||'').toLowerCase(); if(t.includes('windows')||t.includes('pc')) return '💻'; if(t.includes('android')) return '📱'; if(t.includes('iphone')||t.includes('ios')) return '🍎'; if(t.includes('router')) return '📡'; return '📟'; })(); const flowMB = parseFloat(d.downFlow||d.down_flow||0); const flowStr = flowMB >= 1024 ? (flowMB/1024).toFixed(2) + ' GB' : flowMB.toFixed(1) + ' MB'; return `<div class="device-item" id="ditem-${i}"><div class="device-icon" style="background:var(--surface-2);color:var(--primary)">${displayIcon}</div><div class="device-info"><div class="device-name">${displayName}</div><div class="device-meta">⏱ ${d.useTime||d.use_time||'--'} min · ↓${flowStr}<br><span style="font-size:10px">${d.ip||''}</span></div></div><div class="device-actions"><button class="device-edit-btn" onclick="openDeviceEditModal(state.devices[${i}], ${i})">✏️</button><button class="device-offline-btn" onclick="offlineOne(${i})">下线</button></div></div>`; }).join(''); }
+function renderDevices() { const list = document.getElementById('device-list'); const cnt = document.getElementById('device-count'); cnt.textContent = `共 ${state.devices.length} 台设备在线`; const acct = document.getElementById('portal-acct-meta'); if (acct) acct.textContent = `在线设备 ${state.devices.length} 台`; if (!state.devices.length) { list.innerHTML = '<div class="f-empty">暂无在线设备</div>'; return; } list.innerHTML = state.devices.map((d,i) => { const custom = getCustomDisplay(d); const displayName = custom.name || (d.terminalType || '设备'); const displayIcon = custom.icon || (() => { const t = (d.terminalType||'').toLowerCase(); if(t.includes('router')) return 'ic-router'; if(t.includes('windows')||t.includes('pc')) return 'ic-laptop'; return 'ic-phone'; })(); const flowMB = parseFloat(d.downFlow||d.down_flow||0); const flowStr = flowMB >= 1024 ? (flowMB/1024).toFixed(2) + ' GB' : flowMB.toFixed(1) + ' MB'; return `<div class="f-row" id="ditem-${i}"><div class="f-ric"><svg class="ic"><use href="#${displayIcon}"/></svg></div><div class="f-rinfo"><div class="f-rname">${displayName}</div><div class="f-rmeta">${d.ip||''} · ↓${flowStr} · ${d.useTime||d.use_time||'--'} min</div></div><button class="f-iconbtn" onclick="openDeviceEditModal(state.devices[${i}], ${i})" aria-label="编辑设备"><svg class="ic"><use href="#ic-pencil"/></svg></button><button class="f-act ghost" onclick="offlineOne(${i})">下线</button></div>`; }).join(''); }
 async function offlineOne(idx) { const d = state.devices[idx]; if (!d) return; const r = await portalOfflineDevice(d.sessionId||d.session_id||d.id||'', d.ip, d.mac||''); if (r.ok) { state.devices.splice(idx,1); renderDevices(); showSnack('✅ 已下线'); } else showSnack('❌ 下线失败'); }
 async function offlineAll() { for (const d of state.devices) await portalOfflineDevice(d.sessionId||d.session_id||d.id||'', d.ip, d.mac||''); state.devices=[]; renderDevices(); showSnack('✅ 已全部下线'); }
 
@@ -503,7 +587,7 @@ async function deleteNavItem(si, ii) { state.navData[si].items.splice(ii, 1); st
 
 // 初始化
 window.addEventListener('load', async () => { initDarkMode(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); state.navData = savedNav || JSON.parse(JSON.stringify(DEFAULT_NAV)); renderNav(); });
-window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.toggleAddForm = toggleAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom;
+window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.toggleAddForm = toggleAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon;
 </script>
 </body>
 </html>
