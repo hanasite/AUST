@@ -558,8 +558,9 @@ class CaptchaDialog(tk.Toplevel):
                 )
                 self.after(0, lambda: self._load_image(r.content))
             except Exception as e:
+                err = str(e)   # lambda 延后执行，需先取出消息（except 作用域会清空 e）
                 self.after(0, lambda: self._img_label.configure(
-                    text=f"刷新失败: {e}", image=""
+                    text=f"刷新失败: {err}", image=""
                 ))
 
         threading.Thread(target=_fetch, daemon=True).start()
