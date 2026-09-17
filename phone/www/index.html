@@ -264,6 +264,18 @@
   /* GUIDE 引导式连接（系统 sheet 不出现的 ROM 兜底）：安静的文字入口 / 返回（无填充无边框，只用颜色） */
   body.v2 .w-guide-link{display:block;width:100%;margin:10px 0 0;padding:8px;border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue);text-align:center;cursor:pointer;transition:opacity .15s}
   body.v2 .w-guide-link:active{opacity:.6}
+  /* HELP 使用说明 sheet（认证方式 / 连接方式 / 隐私 / 权限 / 反馈）：小节标题 + 正文，沿用 v2 文本层级 */
+  body.v2 .h-sec{padding:12px 0;border-bottom:1px solid var(--line)}
+  body.v2 .h-sec:last-of-type{border-bottom:none}
+  body.v2 .h-t{font-size:13px;font-weight:700;color:var(--fg);margin-bottom:6px}
+  body.v2 .h-p{margin:0;font-size:12.5px;line-height:1.7;color:var(--sub)}
+  body.v2 .h-sec .f-act{margin-top:10px}
+  /* 说明入口（首页「网络类型」/ 目标网络 sheet「连接方式」标签旁）：小号蓝色文字按钮 */
+  body.v2 .lbl-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  body.v2 .lbl-row .field-label,
+  body.v2 .lbl-row .f-label{margin-bottom:5px}
+  body.v2 .w-help-link{padding:0;border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;flex-shrink:0;transition:opacity .15s}
+  body.v2 .w-help-link:active{opacity:.6}
 </style>
 </head>
 <body class="v2">
@@ -365,11 +377,11 @@
 <div class="f-foot" id="wifi-scan-info">每 30 秒自动扫描 · 上次扫描 --:--</div>
 <div class="f-legacy">
   <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('account-body','account-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-lock"/></svg></div><div class="card-header-text"><div class="card-title">账号信息</div><div class="card-subtitle"><span class="preview-chip"><svg class="ic"><use href="#ic-signal"/></svg><span id="preview">学号@aust</span></span></div></div><span class="collapse-arrow" id="account-arrow">▾</span></div><div class="collapsible-body" id="account-body"><div class="card-body"><div class="field"><label class="field-label">学号 / 工号</label><input class="field-input" type="text" id="username" placeholder="请输入学号或工号" inputmode="numeric" autocomplete="username" oninput="updatePreview()"></div><div class="field"><label class="field-label">登录密码</label><input class="field-input" type="password" id="password" placeholder="请输入密码" autocomplete="current-password"></div></div></div></div>
-  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('net-body','net-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-globe"/></svg></div><div class="card-header-text"><div class="card-title">校园网设置</div><div class="card-subtitle">运营商 · 网络类型 · 服务器地址</div></div><span class="collapse-arrow" id="net-arrow">▾</span></div><div class="collapsible-body" id="net-body"><div class="card-body"><div class="field"><label class="field-label">运营商</label><select class="field-select" id="isp" onchange="updatePreview()"><option value="aust">电信 (@aust)</option><option value="unicom">联通 (@unicom)</option><option value="cmcc">移动 (@cmcc)</option><option value="jzg">教职工 (@jzg)</option></select></div><div class="field"><label class="field-label">网络类型</label><select class="field-select" id="nettype"><option value="post">宽带（POST）</option><option value="get" selected>WiFi（GET）</option></select></div><div class="field"><label class="field-label">认证服务器地址</label><input class="field-input" type="url" id="drcom-url" value="http://10.255.0.19/drcom/login"></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('net-body','net-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-globe"/></svg></div><div class="card-header-text"><div class="card-title">校园网设置</div><div class="card-subtitle">运营商 · 网络类型 · 服务器地址</div></div><span class="collapse-arrow" id="net-arrow">▾</span></div><div class="collapsible-body" id="net-body"><div class="card-body"><div class="field"><label class="field-label">运营商</label><select class="field-select" id="isp" onchange="updatePreview()"><option value="aust">电信 (@aust)</option><option value="unicom">联通 (@unicom)</option><option value="cmcc">移动 (@cmcc)</option><option value="jzg">教职工 (@jzg)</option></select></div><div class="field"><div class="lbl-row"><label class="field-label" for="nettype">网络类型</label><button type="button" class="w-help-link" id="nettype-help" onclick="openHelpSheet()">说明</button></div><select class="field-select" id="nettype"><option value="post">宽带（POST）</option><option value="get" selected>WiFi（GET）</option></select></div><div class="field"><label class="field-label">认证服务器地址</label><input class="field-input" type="url" id="drcom-url" value="http://10.255.0.19/drcom/login"></div></div></div></div>
   <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('opt-body','opt-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-power"/></svg></div><div class="card-header-text"><div class="card-title">选项</div></div><span class="collapse-arrow" id="opt-arrow">▾</span></div><div class="collapsible-body" id="opt-body"><div class="card-body"><div class="switch-row"><div><div class="switch-label">校园网认证</div><div class="switch-desc">连接 DrCOM 校园网认证服务</div></div><label class="switch"><input type="checkbox" id="do-net" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div><div class="switch-row"><div><div class="switch-label">记住账号密码</div><div class="switch-desc">存于本机，不上传</div></div><label class="switch"><input type="checkbox" id="save-cfg" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div></div></div></div>
   <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('log-body','log-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-code"/></svg></div><div class="card-header-text"><div class="card-title">运行日志</div></div><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();clearLog()" style="width:auto;margin-right:6px">清空</button><span class="collapse-arrow" id="log-arrow">▾</span></div><div class="collapsible-body" id="log-body"><div class="card-body"><div class="log-box" id="log-box"></div></div></div></div>
 </div>
-<div class="f-foot">安徽理工大学 · v2.0</div>
+<div class="f-foot">安徽理工大学 · v2.0 Beta</div>
 </div>
 </div>
 
@@ -466,7 +478,7 @@
   <div class="sheet-title">目标网络</div>
   <p class="w-hint">目标网络：SSID 包含以下关键字的网络</p>
   <div class="f-field">
-    <div class="f-label" id="wifi-mode-label">连接方式</div>
+    <div class="lbl-row"><div class="f-label" id="wifi-mode-label">连接方式</div><button type="button" class="w-help-link" id="wifi-mode-help" onclick="openHelpSheet()">说明</button></div>
     <div class="w-mode" id="wifi-mode-picker" role="radiogroup" aria-labelledby="wifi-mode-label">
       <button type="button" class="w-modebtn" data-mode="sheet" role="radio" aria-checked="false">系统弹窗（需系统支持）</button>
       <button type="button" class="w-modebtn" data-mode="guide" role="radio" aria-checked="false">引导式（通用）</button>
@@ -481,6 +493,35 @@
   <div class="f-hint-err" id="wifi-target-hint"></div>
   <p class="w-hint">修改后自动重新扫描</p>
   <div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-targets-close">关闭</button></div>
+</div></div>
+
+<!-- 使用说明 sheet（首页「网络类型」旁 / 目标网络 sheet「连接方式」旁 的「说明」入口打开；结构与关法同其他 sheet） -->
+<div class="sheet-ol" id="help-sheet"><div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">使用说明</div>
+  <div class="h-sec">
+    <div class="h-t">认证方式（网络类型）</div>
+    <p class="h-p">宽带（POST）：用于电脑宽带、路由器拨号接入的场景。WiFi（GET）：手机连上校园 WiFi 后再认证——手机推荐用 GET。</p>
+  </div>
+  <div class="h-sec">
+    <div class="h-t">连接方式</div>
+    <p class="h-p">系统弹窗：调用系统「添加网络」确认框，一键保存并连接。部分国产 ROM 不显示这个弹窗，表现为点了连接没反应——换成引导式即可。</p>
+    <p class="h-p">引导式：打开系统 WiFi 设置手动连接一次，之后系统自动重连。所有机型通用。</p>
+  </div>
+  <div class="h-sec">
+    <div class="h-t">密码与隐私</div>
+    <p class="h-p">学号密码与 WiFi 密码仅保存在本机，不参与云备份。</p>
+  </div>
+  <div class="h-sec">
+    <div class="h-t">权限说明</div>
+    <p class="h-p">扫描 WiFi 需要「附近的设备」权限（Android 13+）；部分机型还需要「位置」权限与系统定位开关。</p>
+  </div>
+  <div class="h-sec">
+    <div class="h-t">公测反馈</div>
+    <p class="h-p">这是 v2.0 公测版，欢迎到 GitHub Issues 反馈使用意见。</p>
+    <button type="button" class="f-act" id="help-feedback" onclick="openLink('https://github.com/hanasite/AUST/issues')"><svg class="ic"><use href="#ic-code"/></svg>GitHub Issues</button>
+  </div>
+  <div class="sheet-btns"><button type="button" class="f-btn ghost2" id="help-close">关闭</button></div>
 </div></div>
 
 <div class="snackbar" id="snackbar"></div>
@@ -1153,6 +1194,13 @@ function initWifiTargetsEdit(){
     b.addEventListener('click', () => setWifiConnectMode(b.dataset.mode));
   });
 }
+// 使用说明 sheet：入口 = 首页「网络类型」旁、目标网络 sheet「连接方式」旁的「说明」；关法同其他 sheet（关闭按钮 + 遮罩层同一套 .show）
+function openHelpSheet(){ const el = document.getElementById('help-sheet'); if (el) el.classList.add('show'); }
+function closeHelpSheet(){ const el = document.getElementById('help-sheet'); if (el) el.classList.remove('show'); }
+function initHelpSheet(){
+  const close = document.getElementById('help-close');
+  if (close) close.addEventListener('click', closeHelpSheet);
+}
 function paintWifiStatus(){
   const nameEl = document.getElementById('wifi-current-ssid');
   const metaEl = document.getElementById('wifi-current-meta');
@@ -1455,8 +1503,8 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // 初始化
-window.addEventListener('load', async () => { initDarkMode(); initWifiRefresh(); initWifiTargetsEdit(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); try { await loadWifiCfg(); } catch (e) { wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000, connectMode:'sheet' }; } await WifiFlow.refresh(); startWifiAutoScan(); });
-window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.openAddForm = openAddForm; window.closeAddForm = closeAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.deleteNavSection = deleteNavSection; window.restoreSection = restoreSection; window.restoreAllSections = restoreAllSections; window.pickNavIcon = pickNavIcon; window.openLink = openLink; window.normalizeUrl = normalizeUrl; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon; window.Wifi = Wifi; window.WifiFlow = WifiFlow; window.NativeProvider = NativeProvider; window.MockProvider = MockProvider; window.openWifiTargetsSheet = openWifiTargetsSheet; window.closeWifiTargetsSheet = closeWifiTargetsSheet; window.addWifiTarget = addWifiTarget; window.removeWifiTarget = removeWifiTarget;
+window.addEventListener('load', async () => { initDarkMode(); initWifiRefresh(); initWifiTargetsEdit(); initHelpSheet(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); try { await loadWifiCfg(); } catch (e) { wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000, connectMode:'sheet' }; } await WifiFlow.refresh(); startWifiAutoScan(); });
+window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.openAddForm = openAddForm; window.closeAddForm = closeAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.deleteNavSection = deleteNavSection; window.restoreSection = restoreSection; window.restoreAllSections = restoreAllSections; window.pickNavIcon = pickNavIcon; window.openLink = openLink; window.normalizeUrl = normalizeUrl; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon; window.Wifi = Wifi; window.WifiFlow = WifiFlow; window.NativeProvider = NativeProvider; window.MockProvider = MockProvider; window.openWifiTargetsSheet = openWifiTargetsSheet; window.closeWifiTargetsSheet = closeWifiTargetsSheet; window.addWifiTarget = addWifiTarget; window.removeWifiTarget = removeWifiTarget; window.openHelpSheet = openHelpSheet; window.closeHelpSheet = closeHelpSheet;
 </script>
 </body>
 </html>
