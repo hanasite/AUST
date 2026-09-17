@@ -8,6 +8,17 @@
 
 **Tech Stack:** Java 17 语法（compileSdk 34 / minSdk 22）、Capacitor 6 Plugin API、Python 3 + tkinter + subprocess(netsh)。
 
+## Amendment 2026-09-17（UAT 修正）（第二版）
+
+> 就地修正记录：本段覆盖正文中已过时的权限 / 连接 / 超时描述，正文历史文本保留不动；实现以 `phone/android/app/src/main/java/cn/edu/aust/connectease/WifiPlugin.java` + `phone/www/index.html` 为准。
+
+1. **权限模型变更**：移除 `neverForLocation` 与 `ACCESS_FINE_LOCATION` 的 `maxSdkVersion="32"`（该组合正是 vivo 扫描恒空的根因）；Android 13+ 同时申请「附近的设备」+「位置」权限，且所有版本都检查系统定位开关（未开 → `LOCATION_OFF`）。vivo 扫描兼容修复，2026-09-17。
+2. **首次连接机制**：Android 11+（API 30+）改为系统「添加网络」弹窗 `Settings.ACTION_WIFI_ADD_NETWORKS`（`putParcelableArrayListExtra` 传 `WifiNetworkSuggestion`，返回 `SYSTEM_SHEET`；`putExtra(String,Serializable)` 重载在真机会拿到空列表/抛 parceling 异常）；API 29 仍走建议（suggestion）；API ≤28 直接 `addNetwork`（提交 6bb7f6b / 46d7655）。
+3. **扫描超时**：12s → 20s，并新增 `cached` / `started` / `timedOut` 诊断字段，供 JS 区分「确实没扫到」与「系统未执行/未收到广播」（提交 b7d1f61）。
+4. **新增守卫**：加密网络空密码直接拒绝（`BAD_ARGS`）；suggestion 构造时非法 SSID / 非 ASCII 密码抛出的 `IllegalArgumentException` 捕获后按业务失败返回（避免经 Bridge 升级为主线程崩溃）；新增 `openLocationSettings`（`LOCATION_OFF` 时跳系统定位设置页）。
+
+正文中已被本段取代的位置（保持历史原样）：Task 1 Step 1 的 manifest 权限片段（`maxSdkVersion="32"` + `neverForLocation`）、Task 1 Step 3 的 12s 超时片段与 `locationServiceOn()` 的 API 33 短路写法、Task 2 Step 1 的 connect 片段（suggestion 优先 + 无空密码/IAE 守卫）。
+
 ## Global Constraints
 
 - 设计文档：`docs/superpowers/specs/2026-09-16-aust-v2-design.md` §4 为功能权威

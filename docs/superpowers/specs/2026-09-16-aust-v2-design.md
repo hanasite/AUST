@@ -95,6 +95,8 @@
 - `NEARBY_WIFI_DEVICES`（API 33+，`usesPermissionFlags="neverForLocation"`）——运行时申请
 - `ACCESS_FINE_LOCATION`（`maxSdkVersion="32"`，API ≤32 扫描所需）——运行时申请；API ≤32 还需系统定位服务开启，未开启时引导
 
+> 2026-09-17 UAT 修正：权限模型已变更（移除 `neverForLocation` / `maxSdkVersion="32"`，13+ 同时申请位置权限，所有版本检查定位开关），见 wifi 计划顶部 Amendment 段。
+
 **扫描**
 
 - `WifiManager.startScan()` + `SCAN_RESULTS_AVAILABLE_ACTION` 广播接收结果
