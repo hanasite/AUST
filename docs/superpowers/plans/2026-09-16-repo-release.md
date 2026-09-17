@@ -14,6 +14,19 @@
 - 所有对外发布动作（git push、Release 上传、gitee 同步）**必须先经用户确认**，本计划只准备到"等待发布"状态
 - 手机端 versionName `2.0` / versionCode `2`；PC 端 v1.3
 
+## Amendment 2026-09-17（终审遗留清单 → 显式任务）
+
+以下为终审 + 各任务评审累积的发布前必做项，已并入下方任务步骤：
+
+1. `package.json` version `1.2.0` → `2.0`（Task 1）
+2. 删除 `phone/android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleInstrumentedTest.java`（断言错误包名 `com.getcapacitor.app`，模板遗留；Task 1）
+3. `git update-index --chmod=+x phone/android/gradlew`（Task 1）
+4. 根 `.gitignore` 增加 `__pycache__/`、`*.pyc`（Task 3）
+5. 更新 `phone/打包部署指南.md`：删除「npx cap add android」全流程叙述，改为 clone 后 `npm install → npx cap sync android → gradlew assembleDebug`；补充 Gradle 8.7 / JBR 21 / `android.overridePathCheck`（中文路径）/ 腾讯镜像说明（Task 2）
+6. 提交 `phone/tools/test-pure.mjs`（pure-function node 测试：normalizeUrl/escHtml/ensureSections 等）+ `phone/tools/CDP-SMOKE.md`（headless Edge 冒烟配方），供后续贡献者复跑（Task 3）
+7. 发布检查单追加：a) vivo 重测通过记录；b) LEDGER（`.superpowers/sdd/progress.md`）中 deferred minors 分诊勾选；c) Release 说明中注明「本地保存的密码不参与云备份（allowBackup=false）」与 WPA2-only 限制（Task 3）
+
+
 ---
 
 ### Task 1: 版本号落定 + 构建产物复核
