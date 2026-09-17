@@ -88,7 +88,9 @@ def wifi_status():
     if code != 0:
         return {"connected": False, "ssid": None}
     m = re.search(r"SSID\s*:\s*(.+)", out)
-    state_ok = bool(re.search(r"已连接|Connected", out, re.IGNORECASE))
+    # 中文系统看「已连接」；英文系统避免把 Disconnected 误判为已连接
+    state_ok = bool(re.search(r"已连接", out)
+                    or re.search(r"(?<!Dis)\bConnected\b", out, re.IGNORECASE))
     ssid = m.group(1).strip() if m else None
     return {"connected": state_ok, "ssid": ssid}
 
@@ -109,28 +111,36 @@ def wifi_connect(ssid, password=None, secured=False):
     """返回 (成功?, 信息)。已保存过的 SSID 直接 connect（真一键）。"""
     code, out = _netsh(["wlan", "show", "profiles", "name=" + ssid])
     profiled = code == 0 and ("所有用户配置文件" in out or "All User Profile" in out)
-    if not profiled:
-        if secured and not password:
-            return False, "该网络需要密码"
-        key = (f"<sharedKey><keyType>passPhrase</keyType><protected>false</protected>"
-               f"<keyMaterial>{_xml_escape(password or '')}</keyMaterial></sharedKey>"
-               if secured else "")
-        xml = _PROFILE_XML.format(ssid=_xml_escape(ssid),
-                                  auth="WPA2PSK" if secured else "open",
-                                  enc="AES" if secured else "none", shared_key=key)
-        with tempfile.NamedTemporaryFile("w", suffix=".xml", delete=False,
-                                         encoding="utf-8") as f:
-            f.write(xml)
-            path = f.name
-        code, out = _netsh(["wlan", "add", "profile", "filename=" + path, "user=current"])
+    path = None   # 临时 profile XML（含明文密码），任何返回路径都必须删除
+    try:
+        if not profiled:
+            if secured and not password:
+                return False, "该网络需要密码"
+            key = (f"<sharedKey><keyType>passPhrase</keyType><protected>false</protected>"
+                   f"<keyMaterial>{_xml_escape(password or '')}</keyMaterial></sharedKey>"
+                   if secured else "")
+            xml = _PROFILE_XML.format(ssid=_xml_escape(ssid),
+                                      auth="WPA2PSK" if secured else "open",
+                                      enc="AES" if secured else "none", shared_key=key)
+            with tempfile.NamedTemporaryFile("w", suffix=".xml", delete=False,
+                                             encoding="utf-8") as f:
+                f.write(xml)
+                path = f.name
+            code, out = _netsh(["wlan", "add", "profile", "filename=" + path, "user=current"])
+            if code != 0:
+                return False, "保存网络配置失败"
+        code, out = _netsh(["wlan", "connect", "name=" + ssid])
         if code != 0:
-            return False, "保存网络配置失败"
-    code, out = _netsh(["wlan", "connect", "name=" + ssid])
-    if code != 0:
-        return False, "连接命令失败"
-    time.sleep(3)
-    st = wifi_status()
-    return (st["connected"] and st["ssid"] == ssid), ("已连接 " + ssid if st["ssid"] == ssid else "已发起连接，请稍候")
+            return False, "连接命令失败"
+        time.sleep(3)
+        st = wifi_status()
+        return (st["connected"] and st["ssid"] == ssid), ("已连接 " + ssid if st["ssid"] == ssid else "已发起连接，请稍候")
+    finally:
+        if path:
+            try:
+                os.remove(path)
+            except OSError:
+                pass
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -589,7 +599,8 @@ class App(tk.Tk):
     FONT_T = ("Microsoft YaHei", 8)
 
     WIFI_TARGET_KEY = "AUST"   # SSID 含此关键字（忽略大小写）→ 高亮 + 一键连接
-    WIFI_MAX_ROWS   = 8        # 列表最多展示的网络数
+    WIFI_MAX_ROWS   = 8        # 列表最多展示的网络数（超出列表区高度时滚动查看）
+    WIFI_LIST_H     = 90       # 列表区固定高度（约 3 行）：默认 920x720 下左列须容下底部选项行
 
     def __init__(self):
         super().__init__()
@@ -745,8 +756,33 @@ class App(tk.Tk):
             bg=self.CARD, fg=self.GRAY, font=self.FONT_M, anchor="e")
         self._wifi_status_lbl.pack(side="right")
 
-        self._wifi_list = tk.Frame(card, bg=self.CARD)
-        self._wifi_list.pack(fill="x", pady=(6, 0))
+        # 列表区固定高度（超出滚动）：卡片总高恒定，底部选项行不会被挤出窗口
+        list_outer = tk.Frame(card, bg=self.CARD, height=self.WIFI_LIST_H)
+        list_outer.pack(fill="x", pady=(6, 0))
+        list_outer.pack_propagate(False)
+
+        self._wifi_canvas = tk.Canvas(list_outer, bg=self.CARD, highlightthickness=0)
+        wifi_sb = ttk.Scrollbar(list_outer, orient="vertical",
+                                command=self._wifi_canvas.yview)
+        self._wifi_list = tk.Frame(self._wifi_canvas, bg=self.CARD)
+        self._wifi_list.bind(
+            "<Configure>",
+            lambda e: self._wifi_canvas.configure(
+                scrollregion=self._wifi_canvas.bbox("all"))
+        )
+        self._wifi_win = self._wifi_canvas.create_window(
+            (0, 0), window=self._wifi_list, anchor="nw")
+        self._wifi_canvas.configure(yscrollcommand=wifi_sb.set)
+        self._wifi_canvas.pack(side="left", fill="both", expand=True)
+        wifi_sb.pack(side="right", fill="y")
+        self._wifi_canvas.bind(
+            "<Configure>",
+            lambda e: self._wifi_canvas.itemconfigure(self._wifi_win, width=e.width)
+        )
+        self._wifi_canvas.bind(
+            "<MouseWheel>",
+            lambda e: self._wifi_canvas.yview_scroll(-1 * (e.delta // 120), "units")
+        )
         self._wifi_btns: list = []
         self._wifi_nets: list = []
         self._wifi_last_scan = 0.0
