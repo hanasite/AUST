@@ -870,6 +870,9 @@ const NativeProvider = {
     // 布尔契约（Java 端 {granted:boolean, locationServiceOn:boolean}）与旧字符串状态契约都视为未授权信号
     const vals = Object.values(st).filter(v => typeof v === 'string');
     if (st.granted === false || vals.some(v => v !== 'granted')) { const e = new Error('未授予定位权限'); e.code = 'PERM_DENIED'; throw e; }
+    if (st.locationServiceOn === false) { const e = new Error('需要打开系统定位服务'); e.code = 'LOCATION_OFF'; throw e; }
+    // CN ROM（vivo/MIUI 等）在 API 33+ 上仍要求定位权限才给扫描结果：插件明确报告未授权时同样走「去授权」
+    if (st.locationPermission === false) { const e = new Error('需要定位权限才能扫描 WiFi'); e.code = 'PERM_DENIED'; throw e; }
     if (typeof p.scan !== 'function') { const e = new Error('Wifi 插件不支持扫描'); e.code = 'UNSUPPORTED'; throw e; }
     const r = await p.scan({ targets: o.targets || [] });
     return r || { networks: [], ts: Date.now() };
@@ -896,6 +899,7 @@ let wifiConnected = { connected:false, ssid:null };
 let wifiErrors = {};                      // { ssid: true } 行内失败态（成功连接后清除）
 let wifiScanTimer = null;
 let wifiLastScan = null;
+let wifiLastScanMeta = null;              // 最近一次扫描的 {started,timedOut}（provider 未提供则 undefined=未知）
 
 async function loadWifiCfg(){
   const c = await Store.get('aust_wifi');
@@ -927,7 +931,12 @@ function renderWifiList(networks){
   if (!networks.length) {
     const empty = document.createElement('div');
     empty.className = 'f-empty';
-    empty.textContent = '未发现 WiFi 网络';
+    const meta = wifiLastScanMeta || {};
+    empty.textContent = meta.timedOut === true
+      ? '未发现网络（系统超时未返回结果，请稍后重试；部分机型需打开系统定位服务）'
+      : (meta.started === false
+          ? '未发现网络（系统未执行扫描，可能触发了系统扫描频率限制，请约 1 分钟后重试）'
+          : '未发现网络（系统未报告任何网络）');
     list.appendChild(empty);
     return;
   }
@@ -1117,6 +1126,8 @@ const WifiFlow = {
         // provider 标记 cached（系统扫描节流回退的缓存结果）：列表照常刷新，但不推进「上次扫描」时间戳
         if (!(res && res.cached === true)) wifiLastScan = (res && Number(res.ts)) || Date.now();
         wifiNetworks = (res && Array.isArray(res.networks)) ? res.networks : [];
+        // 诊断用：空列表文案按本次扫描的 started/timedOut 变化（provider 不给这两个字段 → undefined 视为未知）
+        wifiLastScanMeta = { started: res ? res.started : undefined, timedOut: res ? res.timedOut : undefined };
       }
       await this.syncStatus();
       if (this.run) {

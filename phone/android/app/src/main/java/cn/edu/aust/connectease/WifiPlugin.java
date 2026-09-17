@@ -47,11 +47,6 @@ public class WifiPlugin extends Plugin {
         return (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
     }
 
-    /** API 33+ 扫描只需 NEARBY_WIFI_DEVICES；更低版本仍走定位权限 */
-    private String requiredPermissionAlias() {
-        return Build.VERSION.SDK_INT >= 33 ? "nearbyWifi" : "fineLocation";
-    }
-
     private String requiredPermission() {
         return Build.VERSION.SDK_INT >= 33
                 ? Manifest.permission.NEARBY_WIFI_DEVICES
@@ -63,9 +58,29 @@ public class WifiPlugin extends Plugin {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    /** API<33 时扫描需要系统定位开关打开 */
+    private boolean hasLocationPerm() {
+        return ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * API 33+ 时向系统申请的一组权限别名：部分 CN ROM（vivo/MIUI 等）即使只扫 WiFi
+     * 也要求定位权限才会给出扫描结果，所以两个一起申请（系统会合并成一个弹窗）
+     */
+    private String[] requiredPermissionAliases() {
+        return Build.VERSION.SDK_INT >= 33
+                ? new String[] { "nearbyWifi", "fineLocation" }
+                : new String[] { "fineLocation" };
+    }
+
+    /** 主权限 +（33+ 时的）定位权限都拿到了才算齐 */
+    private boolean hasRequiredPerms() {
+        if (!hasPerm()) return false;
+        return Build.VERSION.SDK_INT < 33 || hasLocationPerm();
+    }
+
+    /** 所有 SDK 版本都检查真实定位开关：CN ROM 在 33+ 上不开定位同样不给扫描结果 */
     private boolean locationServiceOn() {
-        if (Build.VERSION.SDK_INT >= 33) return true;
         LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
         try {
             if (lm == null) return false;
@@ -82,25 +97,30 @@ public class WifiPlugin extends Plugin {
         JSObject ret = new JSObject();
         ret.put("granted", hasPerm());
         ret.put("locationServiceOn", locationServiceOn());
+        ret.put("locationPermission", hasLocationPerm());
         call.resolve(ret);
     }
 
     @PluginMethod
     public void requestPermissions(PluginCall call) {
-        if (hasPerm()) {
-            JSObject ret = new JSObject();
-            ret.put("granted", true);
-            call.resolve(ret);
+        if (hasRequiredPerms()) {
+            resolvePermissionState(call);
             return;
         }
         // Capacitor 6：走注解式权限流（@PermissionCallback），调用由 Bridge 保存/回传
-        requestPermissionForAlias(requiredPermissionAlias(), call, "permissionsCallback");
+        requestPermissionForAliases(requiredPermissionAliases(), call, "permissionsCallback");
     }
 
     @PermissionCallback
     private void permissionsCallback(PluginCall call) {
+        resolvePermissionState(call);
+    }
+
+    /** 权限弹窗（或已授权短路）后只结算一次：granted = 主权限结果 */
+    private void resolvePermissionState(PluginCall call) {
         JSObject ret = new JSObject();
         ret.put("granted", hasPerm());
+        ret.put("locationPermission", hasLocationPerm());
         call.resolve(ret);
     }
 
@@ -119,7 +139,7 @@ public class WifiPlugin extends Plugin {
             call.reject("WiFi 服务不可用", "NO_SERVICE");
             return;
         }
-        // 先注册广播，再触发扫描；12 秒超时后回退到缓存的扫描结果
+        // 先注册广播，再触发扫描；广播 / 缓存回退 / 20s 超时三条路径共用 done 标志，保证只结算一次
         final PluginCall pending = call;
         final Context ctx = getContext().getApplicationContext();
         final java.util.concurrent.atomic.AtomicBoolean done = new java.util.concurrent.atomic.AtomicBoolean(false);
@@ -129,7 +149,7 @@ public class WifiPlugin extends Plugin {
             public void onReceive(Context context, Intent intent) {
                 if (done.compareAndSet(false, true)) {
                     try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                    resolveScan(pending, wm, false);
+                    resolveScan(pending, wm, false, true, false); // 广播准时到达
                 }
             }
         };
@@ -138,30 +158,33 @@ public class WifiPlugin extends Plugin {
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION),
                     ContextCompat.RECEIVER_NOT_EXPORTED);
             boolean started = wm.startScan();
-            if (!started) {
-                // 系统节流中：立即用缓存结果返回（带 cached 标记，JS 侧不推进"上次扫描"时间戳）
+            if (!started && hasCachedResults(wm)) {
+                // 系统节流中，但有缓存结果可用：立即返回（cached 标记，JS 侧不推进"上次扫描"时间戳）
                 if (done.compareAndSet(false, true)) {
                     try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                    resolveScan(pending, wm, true);
+                    resolveScan(pending, wm, true, false, false);
                 }
                 return;
             }
-            // 12s 超时兜底走主线程 Handler：decor view 的 postDelayed 在视图脱离窗口时会丢回调，
+            // !started 且缓存也为空：不立即返回空列表（CN ROM 上会误报「未发现网络」），
+            // 继续等广播；20s 超时后才回报空结果（started=false + timedOut=true，JS 侧给对应提示）
+            // 20s 超时兜底走主线程 Handler：decor view 的 postDelayed 在视图脱离窗口时会丢回调，
             // 且 getActivity() 可能为 null（NPE 崩溃）
             if (getBridge() == null || getBridge().getActivity() == null) {
-                // Activity 已销毁：没有可靠的广播兜底窗口，立即回退到缓存结果
+                // Activity 已销毁：没有可靠的广播兜底窗口，立即回退到已有结果
                 if (done.compareAndSet(false, true)) {
                     try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                    resolveScan(pending, wm, true);
+                    resolveScan(pending, wm, true, started, true);
                 }
                 return;
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (done.compareAndSet(false, true)) {
                     try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                    resolveScan(pending, wm, true); // 12s 未收到广播：结果可能是系统缓存，标记 cached
+                    // 20s 未收到广播：结果可能是系统缓存，标记 cached + timedOut
+                    resolveScan(pending, wm, true, started, true);
                 }
-            }, 12000);
+            }, 20000);
         } catch (Exception e) {
             // 任何异常路径：先注销接收器（不留悬挂 receiver），再按类型 reject 且保证只结算一次
             if (done.compareAndSet(false, true)) {
@@ -172,7 +195,17 @@ public class WifiPlugin extends Plugin {
         }
     }
 
-    private void resolveScan(PluginCall call, WifiManager wm, boolean cached) {
+    /** 系统缓存里是否已有扫描结果；取不到或抛异常一律按「无缓存」处理，交给广播/超时路径 */
+    private boolean hasCachedResults(WifiManager wm) {
+        try {
+            List<ScanResult> results = wm.getScanResults();
+            return results != null && !results.isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void resolveScan(PluginCall call, WifiManager wm, boolean cached, boolean started, boolean timedOut) {
         // 调用方（广播/节流/超时/异常路径）均已注销接收器，且 CAS 保证本方法只被调用一次
         try {
             List<ScanResult> results = wm.getScanResults();
@@ -195,6 +228,8 @@ public class WifiPlugin extends Plugin {
             ret.put("networks", arr);
             ret.put("ts", System.currentTimeMillis());
             ret.put("cached", cached);
+            ret.put("started", started);     // 系统是否真的执行了本次扫描
+            ret.put("timedOut", timedOut);   // 是否等到超时才有结果（含一直没收到广播的空结果）
             call.resolve(ret);
         } catch (SecurityException e) {
             call.reject("需要 WiFi 权限", "PERM_DENIED");
