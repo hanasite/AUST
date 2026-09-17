@@ -327,6 +327,9 @@ public class WifiPlugin extends Plugin {
         String ssid = call.getString("ssid");
         String password = call.getString("password", "");
         boolean secured = Boolean.TRUE.equals(call.getBoolean("secured", true));
+        // 连接方式（用户在目标网络 sheet 里选定）：guide = 跳过系统「添加网络」sheet，直接走 suggestion 路径；
+        // 其余/缺省一律 sheet（保持既有行为）
+        String mode = call.getString("mode", "sheet");
         if (ssid == null || ssid.isEmpty()) {
             call.reject("缺少 SSID", "BAD_ARGS");
             return;
@@ -340,7 +343,8 @@ public class WifiPlugin extends Plugin {
         // API 30+：首次连接优先走系统「添加网络」对话框（ACTION_WIFI_ADD_NETWORKS）。
         // API 29 的 suggestion 通知在 CN ROM 上易被忽略/拦截，且 suggestion 无法从用户已连接的网络切换过去；
         // 系统 sheet 由用户直接确认（保存/连接）并立即切换，首次连接更可靠。
-        if (Build.VERSION.SDK_INT >= 30) {
+        // mode=guide（用户选定引导式）：部分 ROM 接受 intent 但不渲染 sheet，整段跳过，直接落到下方 suggestion 路径。
+        if (Build.VERSION.SDK_INT >= 30 && !"guide".equals(mode)) {
             WifiNetworkSuggestion suggestion;
             try {
                 WifiNetworkSuggestion.Builder b = new WifiNetworkSuggestion.Builder().setSsid(ssid);

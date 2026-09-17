@@ -256,6 +256,11 @@
   body.v2 .w-targetadd{display:flex;align-items:center;gap:10px;margin-top:12px}
   body.v2 .w-targetadd .w-input{flex:1;min-width:0}
   body.v2 .w-targetadd .f-btn{width:auto;height:46px;padding:0 18px;font-size:14px;flex-shrink:0}
+  /* 连接方式选择（目标网络 sheet）：互斥二选一，选中态 = 蓝边框 + 蓝底 tint（对齐 .f-icopt.on 语言） */
+  body.v2 .w-mode{display:flex;gap:8px}
+  body.v2 .w-modebtn{flex:1;min-width:0;padding:10px 8px;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:12.5px;font-weight:600;line-height:1.35;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+  body.v2 .w-modebtn:hover{border-color:var(--blue)}
+  body.v2 .w-modebtn.on{border-color:var(--blue);background:var(--tint);color:var(--blue)}
   /* GUIDE 引导式连接（系统 sheet 不出现的 ROM 兜底）：安静的文字入口 / 返回（无填充无边框，只用颜色） */
   body.v2 .w-guide-link{display:block;width:100%;margin:10px 0 0;padding:8px;border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue);text-align:center;cursor:pointer;transition:opacity .15s}
   body.v2 .w-guide-link:active{opacity:.6}
@@ -360,7 +365,7 @@
 <div class="f-foot" id="wifi-scan-info">每 30 秒自动扫描 · 上次扫描 --:--</div>
 <div class="f-legacy">
   <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('account-body','account-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-lock"/></svg></div><div class="card-header-text"><div class="card-title">账号信息</div><div class="card-subtitle"><span class="preview-chip"><svg class="ic"><use href="#ic-signal"/></svg><span id="preview">学号@aust</span></span></div></div><span class="collapse-arrow" id="account-arrow">▾</span></div><div class="collapsible-body" id="account-body"><div class="card-body"><div class="field"><label class="field-label">学号 / 工号</label><input class="field-input" type="text" id="username" placeholder="请输入学号或工号" inputmode="numeric" autocomplete="username" oninput="updatePreview()"></div><div class="field"><label class="field-label">登录密码</label><input class="field-input" type="password" id="password" placeholder="请输入密码" autocomplete="current-password"></div></div></div></div>
-  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('net-body','net-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-globe"/></svg></div><div class="card-header-text"><div class="card-title">校园网设置</div><div class="card-subtitle">运营商 · 网络类型 · 服务器地址</div></div><span class="collapse-arrow" id="net-arrow">▾</span></div><div class="collapsible-body" id="net-body"><div class="card-body"><div class="field"><label class="field-label">运营商</label><select class="field-select" id="isp" onchange="updatePreview()"><option value="aust">电信 (@aust)</option><option value="unicom">联通 (@unicom)</option><option value="cmcc">移动 (@cmcc)</option><option value="jzg">教职工 (@jzg)</option></select></div><div class="field"><label class="field-label">网络类型</label><select class="field-select" id="nettype"><option value="post">宽带（POST）</option><option value="get">WiFi（GET）</option></select></div><div class="field"><label class="field-label">认证服务器地址</label><input class="field-input" type="url" id="drcom-url" value="http://10.255.0.19/drcom/login"></div></div></div></div>
+  <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('net-body','net-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-globe"/></svg></div><div class="card-header-text"><div class="card-title">校园网设置</div><div class="card-subtitle">运营商 · 网络类型 · 服务器地址</div></div><span class="collapse-arrow" id="net-arrow">▾</span></div><div class="collapsible-body" id="net-body"><div class="card-body"><div class="field"><label class="field-label">运营商</label><select class="field-select" id="isp" onchange="updatePreview()"><option value="aust">电信 (@aust)</option><option value="unicom">联通 (@unicom)</option><option value="cmcc">移动 (@cmcc)</option><option value="jzg">教职工 (@jzg)</option></select></div><div class="field"><label class="field-label">网络类型</label><select class="field-select" id="nettype"><option value="post">宽带（POST）</option><option value="get" selected>WiFi（GET）</option></select></div><div class="field"><label class="field-label">认证服务器地址</label><input class="field-input" type="url" id="drcom-url" value="http://10.255.0.19/drcom/login"></div></div></div></div>
   <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('opt-body','opt-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-power"/></svg></div><div class="card-header-text"><div class="card-title">选项</div></div><span class="collapse-arrow" id="opt-arrow">▾</span></div><div class="collapsible-body" id="opt-body"><div class="card-body"><div class="switch-row"><div><div class="switch-label">校园网认证</div><div class="switch-desc">连接 DrCOM 校园网认证服务</div></div><label class="switch"><input type="checkbox" id="do-net" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div><div class="switch-row"><div><div class="switch-label">记住账号密码</div><div class="switch-desc">存于本机，不上传</div></div><label class="switch"><input type="checkbox" id="save-cfg" checked><div class="switch-track"></div><div class="switch-thumb"></div></label></div></div></div></div>
   <div class="card"><div class="card-header collapsible" onclick="toggleCollapse('log-body','log-arrow')"><div class="card-header-icon"><svg class="ic"><use href="#ic-code"/></svg></div><div class="card-header-text"><div class="card-title">运行日志</div></div><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();clearLog()" style="width:auto;margin-right:6px">清空</button><span class="collapse-arrow" id="log-arrow">▾</span></div><div class="collapsible-body" id="log-body"><div class="card-body"><div class="log-box" id="log-box"></div></div></div></div>
 </div>
@@ -460,6 +465,14 @@
   <div class="sheet-handle"></div>
   <div class="sheet-title">目标网络</div>
   <p class="w-hint">目标网络：SSID 包含以下关键字的网络</p>
+  <div class="f-field">
+    <div class="f-label" id="wifi-mode-label">连接方式</div>
+    <div class="w-mode" id="wifi-mode-picker" role="radiogroup" aria-labelledby="wifi-mode-label">
+      <button type="button" class="w-modebtn" data-mode="sheet" role="radio" aria-checked="false">系统弹窗（需系统支持）</button>
+      <button type="button" class="w-modebtn" data-mode="guide" role="radio" aria-checked="false">引导式（通用）</button>
+    </div>
+    <p class="w-hint">系统弹窗更快；如果点了没反应就换成引导式</p>
+  </div>
   <div id="wifi-targets-list"></div>
   <div class="w-targetadd">
     <div class="w-input"><input type="text" id="wifi-target-input" placeholder="输入 SSID 关键字" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="SSID 关键字"></div>
@@ -903,7 +916,7 @@ const WIFI_CONNECT_TIMEOUT_MS = 20000; // 轮询 getStatus 上限（每 2s 一�
 const WIFI_SYSTEM_SHEET_TIMEOUT_MS = 120000;
 // API 30+ 系统「添加网络」sheet 路径：等待用户在系统弹框里点「连接」的超时文案
 const SYSTEM_SHEET_FAIL_TEXT = '连接未完成：系统弹窗可能被取消，或未点击「连接」。可重试';
-let wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000 };
+let wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000, connectMode:'sheet' };
 let wifiNetworks = [];                    // 最近一次扫描结果
 let wifiConnected = { connected:false, ssid:null };
 let wifiErrors = {};                      // { ssid: true } 行内失败态（成功连接后清除）
@@ -919,7 +932,9 @@ async function loadWifiCfg(){
     : (Array.isArray(raw) ? raw.filter(t => typeof t === 'string' && t.trim()).map(t => t.trim()) : []);
   const saved = (c && typeof c.saved === 'object' && c.saved) ? c.saved : {};
   const iv = Number(c?.scanIntervalMs);
-  wifiCfg = { targets, saved, scanIntervalMs: (isFinite(iv) && iv >= 1000) ? iv : 30000 };
+  // 连接方式：只认 'sheet' / 'guide'，未知或缺失一律回落 'sheet'（即既有行为）
+  const connectMode = (c && c.connectMode === 'guide') ? 'guide' : 'sheet';
+  wifiCfg = { targets, saved, scanIntervalMs: (isFinite(iv) && iv >= 1000) ? iv : 30000, connectMode };
 }
 async function saveWifiCfg(){ await Store.set('aust_wifi', wifiCfg); }
 function wifiHasSaved(ssid){ return Object.prototype.hasOwnProperty.call(wifiCfg.saved, ssid); }
@@ -1066,17 +1081,39 @@ function openWifiTargetsSheet(){
   if (hint) { hint.textContent = ''; hint.classList.remove('show'); }
   const input = document.getElementById('wifi-target-input');
   if (input) input.value = '';
+  renderWifiConnectMode();
   renderWifiTargetsSheet();
   document.getElementById('wifi-targets-modal').classList.add('show');
 }
 function closeWifiTargetsSheet(){ document.getElementById('wifi-targets-modal').classList.remove('show'); }
-async function saveWifiTargets(prev){
+// 连接方式选择器：选中态 = .on（蓝边框 + tint），aria-checked 同步
+function renderWifiConnectMode(){
+  const cur = wifiCfg.connectMode === 'guide' ? 'guide' : 'sheet';
+  document.querySelectorAll('#wifi-mode-picker .w-modebtn').forEach(b => {
+    const on = b.dataset.mode === cur;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+}
+async function setWifiConnectMode(mode){
+  if (mode !== 'sheet' && mode !== 'guide') return;
+  if (wifiCfg.connectMode === mode) return;
+  const prev = wifiCfgSnap();     // 写入前快照：Store.set 失败时与 targets 一并回滚
+  wifiCfg.connectMode = mode;
+  renderWifiConnectMode();
+  await saveWifiTargets(prev, '连接方式保存失败');
+}
+// 写入前快照（targets + connectMode）：Store 写入失败时整体回滚，避免内存与持久层分叉
+function wifiCfgSnap(){ return { targets: wifiCfg.targets.slice(), connectMode: wifiCfg.connectMode }; }
+async function saveWifiTargets(prev, failMsg){
   try { await saveWifiCfg(); }
   catch (e) {
-    // 写存储失败：内存回滚到写入前，避免内存与持久层分叉（sheet 保持打开、回到旧列表）
-    wifiCfg.targets = prev;
+    // 写存储失败：内存回滚到写入前，避免内存与持久层分叉（sheet 保持打开、回到旧列表/旧选中态）
+    wifiCfg.targets = prev.targets;
+    wifiCfg.connectMode = prev.connectMode;
+    renderWifiConnectMode();
     renderWifiTargetsSheet();
-    showSnack('目标网络保存失败');
+    showSnack(failMsg || '目标网络保存失败');
     return;
   }
   renderWifiTargetsSheet();
@@ -1090,7 +1127,7 @@ async function addWifiTarget(){
   if (!kw) { fail('请输入关键字'); return; }
   if (wifiCfg.targets.some(t => t.toUpperCase() === kw.toUpperCase())) { fail('该关键字已存在'); return; }
   if (hint) hint.classList.remove('show');
-  const prev = wifiCfg.targets.slice();   // 写入前快照：Store.set 失败时回滚
+  const prev = wifiCfgSnap();   // 写入前快照：Store.set 失败时回滚
   wifiCfg.targets.push(kw);
   if (input) input.value = '';
   await saveWifiTargets(prev);
@@ -1098,7 +1135,7 @@ async function addWifiTarget(){
 async function removeWifiTarget(kw){
   const i = wifiCfg.targets.indexOf(kw);
   if (i < 0) return;
-  const prev = wifiCfg.targets.slice();   // 写入前快照：Store.set 失败时回滚
+  const prev = wifiCfgSnap();   // 写入前快照：Store.set 失败时回滚
   wifiCfg.targets.splice(i, 1);
   await saveWifiTargets(prev);
 }
@@ -1112,6 +1149,9 @@ function initWifiTargetsEdit(){
   if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addWifiTarget(); } });
   const close = document.getElementById('wifi-targets-close');
   if (close) close.addEventListener('click', closeWifiTargetsSheet);
+  document.querySelectorAll('#wifi-mode-picker .w-modebtn').forEach(b => {
+    b.addEventListener('click', () => setWifiConnectMode(b.dataset.mode));
+  });
 }
 function paintWifiStatus(){
   const nameEl = document.getElementById('wifi-current-ssid');
@@ -1226,18 +1266,24 @@ const WifiFlow = {
     const run = this.run = { cancelled: false, ssid: opts.ssid, opts }; // opts 供引导式连接视图收尾复用（password/save）
     this._runStartedAt = Date.now();
     this.state = 'connecting';
-    this.renderConnecting(opts.ssid, 0, !!opts.save);
+    // 引导式模式（用户在目标网络 sheet 里选定）：直接进手动引导页，完全跳过连接步骤视图；
+    // run 不结束，下方 waitConnected 照常轮询，任何时刻连上都经 success 收尾
+    const guided = wifiCfg.connectMode === 'guide';
+    if (guided) this.showGuide();
+    else this.renderConnecting(opts.ssid, 0, !!opts.save);
     this.openSheet();
     let res;
-    try { res = await Wifi.connect({ ssid: opts.ssid, password: opts.password, secured: !!opts.secured, save: !!opts.save }); }
+    try { res = await Wifi.connect({ ssid: opts.ssid, password: opts.password, secured: !!opts.secured, save: !!opts.save, mode: wifiCfg.connectMode }); }
     catch (e) { res = { ok:false, error: (e && e.message) ? String(e.message) : '连接失败' }; }
     if (run.cancelled) return;
     if (!res || !res.ok) { this.failed(opts, (res && res.error) || '连接失败'); return; }
     // API 30+ 首次连接走系统「添加网络」sheet：无「系统已接受建议」这一相位，保持第②步为当前步
     // （spinner），直到轮询出结果（成功收尾 / 超时失败）
     const systemSheet = res.status === 'SYSTEM_SHEET';
-    this.renderConnecting(opts.ssid, systemSheet ? 0 : 1, !!opts.save, systemSheet);
-    const ok = await this.waitConnected(opts.ssid, systemSheet ? WIFI_SYSTEM_SHEET_TIMEOUT_MS : WIFI_CONNECT_TIMEOUT_MS, run);
+    if (!guided) this.renderConnecting(opts.ssid, systemSheet ? 0 : 1, !!opts.save, systemSheet);
+    // 手动路径（系统弹窗 / 引导式）都留够人类操作时间，普通 suggestion 路径仍是 20s
+    const manualWait = systemSheet || guided;
+    const ok = await this.waitConnected(opts.ssid, manualWait ? WIFI_SYSTEM_SHEET_TIMEOUT_MS : WIFI_CONNECT_TIMEOUT_MS, run);
     if (run.cancelled) return;
     if (ok) await this.success(opts);
     else this.failed(opts, systemSheet ? SYSTEM_SHEET_FAIL_TEXT : '未找到网络或系统未确认');
@@ -1286,6 +1332,8 @@ const WifiFlow = {
       '<div class="sheet-title">手动连接引导</div>' +
       '<p class="w-hint">部分手机的系统没有提供预填弹窗。请打开系统 WiFi 设置，点选目标网络连接一次——之后系统会记住它，进出校园自动重连。</p>' +
       '<p class="w-hint">如果通知栏出现「允许连接到 …」提示，点允许也可以。</p>' +
+      // 密码已随 suggestion 提交给系统：补一句说明，避免用户在设置里还去翻密码
+      ((run.opts && run.opts.password) ? '<p class="w-hint">（密码已提交给系统，在 WiFi 设置里点选该网络即可）</p>' : '') +
       '<div class="sheet-btns"><button type="button" class="f-btn" id="wifi-guide-settings"><svg class="ic"><use href="#ic-wifi"/></svg>打开 WiFi 设置</button></div>' +
       '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-guide-check"><svg class="ic"><use href="#ic-check"/></svg>我已连接，检查状态</button></div>' +
       '<button type="button" class="w-guide-link" id="wifi-guide-back">返回</button>';
@@ -1298,7 +1346,8 @@ const WifiFlow = {
     document.getElementById('wifi-guide-back').addEventListener('click', () => {
       if (!this.run || this.run.cancelled) return;
       this.state = 'connecting';
-      this.renderConnecting(run.ssid, 0, !!(run.opts && run.opts.save), true);
+      // 引导式模式下系统 sheet 未被使用，返回时按普通 suggestion 步骤渲染（不再宣称「请在系统弹框中点击」）
+      this.renderConnecting(run.ssid, 0, !!(run.opts && run.opts.save), wifiCfg.connectMode !== 'guide');
     });
   },
   async checkGuideStatus(){
@@ -1406,7 +1455,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // 初始化
-window.addEventListener('load', async () => { initDarkMode(); initWifiRefresh(); initWifiTargetsEdit(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); try { await loadWifiCfg(); } catch (e) { wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000 }; } await WifiFlow.refresh(); startWifiAutoScan(); });
+window.addEventListener('load', async () => { initDarkMode(); initWifiRefresh(); initWifiTargetsEdit(); await loadDeviceCustoms(); const cfg = await Store.get('aust_cfg') || {}; if (cfg.username) document.getElementById('username').value = cfg.username; if (cfg.password) document.getElementById('password').value = cfg.password; if (cfg.isp) document.getElementById('isp').value = cfg.isp; if (cfg.nettype) document.getElementById('nettype').value = cfg.nettype; if (cfg.doNet !== undefined) document.getElementById('do-net').checked = cfg.doNet; if (cfg.drcomUrl) document.getElementById('drcom-url').value = cfg.drcomUrl; if (cfg.portalUrl) document.getElementById('portal-url').value = cfg.portalUrl; updatePreview(); updatePortalBaseDisplay(); if (!cfg.username) toggleCollapse('account-body', 'account-arrow'); const savedNav = await Store.get('aust_nav'); const saved = Array.isArray(savedNav) ? savedNav.filter(s => s && typeof s.section === 'string' && Array.isArray(s.items)) : []; state.navData = ensureSections(saved, DEFAULT_NAV); if (state.navData.length > saved.length) await saveNav(); renderIconPicker(); renderNav(); try { await loadWifiCfg(); } catch (e) { wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000, connectMode:'sheet' }; } await WifiFlow.refresh(); startWifiAutoScan(); });
 window.switchTab = switchTab; window.toggleCollapse = toggleCollapse; window.updatePreview = updatePreview; window.updatePortalBaseDisplay = updatePortalBaseDisplay; window.clearLog = clearLog; window.doAuth = doAuth; window.portalLogin = portalLogin; window.refreshPortalData = refreshPortalData; window.portalLogout = portalLogout; window.offlineOne = offlineOne; window.offlineAll = offlineAll; window.toggleEditMode = toggleEditMode; window.openAddForm = openAddForm; window.closeAddForm = closeAddForm; window.addNavItem = addNavItem; window.deleteNavItem = deleteNavItem; window.deleteNavSection = deleteNavSection; window.restoreSection = restoreSection; window.restoreAllSections = restoreAllSections; window.pickNavIcon = pickNavIcon; window.openLink = openLink; window.normalizeUrl = normalizeUrl; window.closeCaptchaModal = closeCaptchaModal; window.submitCaptcha = submitCaptcha; window.refreshCaptcha = refreshCaptcha; window.openDeviceEditModal = openDeviceEditModal; window.closeDeviceEditModal = closeDeviceEditModal; window.saveDeviceCustom = saveDeviceCustom; window.pickDeviceIcon = pickDeviceIcon; window.Wifi = Wifi; window.WifiFlow = WifiFlow; window.NativeProvider = NativeProvider; window.MockProvider = MockProvider; window.openWifiTargetsSheet = openWifiTargetsSheet; window.closeWifiTargetsSheet = closeWifiTargetsSheet; window.addWifiTarget = addWifiTarget; window.removeWifiTarget = removeWifiTarget;
 </script>
 </body>
