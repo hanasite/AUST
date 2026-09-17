@@ -896,6 +896,8 @@ const Wifi = {
 
 // ======================= WiFi 配置 + 首页卡片 + 连接流程状态机 =======================
 const WIFI_CONNECT_TIMEOUT_MS = 20000; // 轮询 getStatus 上限（每 2s 一次）
+// API 30+ 系统「添加网络」sheet 路径：超时从 sheet 拉起算起，必须留够人类阅读系统弹框的时间（普通路径仍是 20s）
+const WIFI_SYSTEM_SHEET_TIMEOUT_MS = 120000;
 // API 30+ 系统「添加网络」sheet 路径：等待用户在系统弹框里点「连接」的超时文案
 const SYSTEM_SHEET_FAIL_TEXT = '连接未完成：系统弹窗可能被取消，或未点击「连接」。可重试';
 let wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000 };
@@ -1226,7 +1228,7 @@ const WifiFlow = {
     // （spinner），直到轮询出结果（成功收尾 / 超时失败）
     const systemSheet = res.status === 'SYSTEM_SHEET';
     this.renderConnecting(opts.ssid, systemSheet ? 0 : 1, !!opts.save, systemSheet);
-    const ok = await this.waitConnected(opts.ssid, WIFI_CONNECT_TIMEOUT_MS, run);
+    const ok = await this.waitConnected(opts.ssid, systemSheet ? WIFI_SYSTEM_SHEET_TIMEOUT_MS : WIFI_CONNECT_TIMEOUT_MS, run);
     if (run.cancelled) return;
     if (ok) await this.success(opts);
     else this.failed(opts, systemSheet ? SYSTEM_SHEET_FAIL_TEXT : '未找到网络或系统未确认');
@@ -1242,10 +1244,14 @@ const WifiFlow = {
       { t: '获取 IP 地址', s: phase >= 1 ? 'cur' : 'wait' }
     ];
     const body = document.getElementById('wifi-sheet-body');
+    // SYSTEM_SHEET：网络已交由系统弹框处理，提示只说「点连接」；普通路径保持原 suggestion 时代文案不变
+    const hint = systemSheet
+      ? '在系统弹框中点击「连接」即可完成'
+      : '首次连接时，Android 会弹出系统通知或弹窗请你「允许一次」。之后系统会自动重连，无需再确认——这就是"一键连接"的实现方式（Android 10+ 不允许 App 静默连网，所有同类工具都是这个机制）。';
     body.innerHTML =
       '<div class="sheet-title">正在连接 ' + escHtml(ssid) + '</div>' +
       steps.map(st => '<div class="w-step">' + wifiStepIcon(st.s) + '<span class="w-stept' + (st.s === 'cur' ? ' cur' : '') + '">' + st.t + '</span></div>').join('') +
-      '<p class="w-hint">首次连接时，Android 会弹出系统通知或弹窗请你「允许一次」。之后系统会自动重连，无需再确认——这就是"一键连接"的实现方式（Android 10+ 不允许 App 静默连网，所有同类工具都是这个机制）。</p>' +
+      '<p class="w-hint">' + hint + '</p>' +
       '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-connect-cancel">取消</button></div>';
     this.openSheet();
     document.getElementById('wifi-connect-cancel').addEventListener('click', () => {
@@ -1257,7 +1263,7 @@ const WifiFlow = {
   renderFailed(opts, reason){
     const body = document.getElementById('wifi-sheet-body');
     const sub = (reason === '密码错误') ? '密码错误，请重新输入。<br>已保存的配置不会丢失。'
-      : (reason === SYSTEM_SHEET_FAIL_TEXT ? SYSTEM_SHEET_FAIL_TEXT
+      : (reason === SYSTEM_SHEET_FAIL_TEXT ? SYSTEM_SHEET_FAIL_TEXT + '<br>已保存的配置不会丢失。'
       : (reason === '未找到网络或系统未确认' ? '未找到 ' + escHtml(opts.ssid) + '，可能不在信号范围内。<br>已保存的配置不会丢失。'
       : escHtml(reason) + '。<br>已保存的配置不会丢失。'));
     // 系统 WiFi 设置入口：仅当 provider 提供 openSettings 时显示（MockProvider 无此方法）

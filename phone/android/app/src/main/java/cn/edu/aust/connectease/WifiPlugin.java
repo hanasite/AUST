@@ -17,7 +17,6 @@ import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.provider.Settings;
 
 import androidx.core.content.ContextCompat;
@@ -348,10 +347,12 @@ public class WifiPlugin extends Plugin {
                 return;
             }
             try {
-                ArrayList<Parcelable> list = new ArrayList<>();
+                ArrayList<WifiNetworkSuggestion> list = new ArrayList<>();
                 list.add(suggestion);
                 Intent intent = new Intent(Settings.ACTION_WIFI_ADD_NETWORKS);
-                intent.putExtra(Settings.EXTRA_WIFI_NETWORK_LIST, list);
+                // 必须走 Parcelable 重载：putExtra(String, Serializable) 会命中 Serializable 重载，
+                // 而 WifiNetworkSuggestion 只实现 Parcelable —— 设备上 sheet 会拿到空列表或 parceling 抛异常
+                intent.putParcelableArrayListExtra(Settings.EXTRA_WIFI_NETWORK_LIST, list);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getContext().startActivity(intent);
                 ret.put("ok", true);
@@ -360,6 +361,8 @@ public class WifiPlugin extends Plugin {
                 return; // 该路径不再 addNetworkSuggestions（首次连接完全交给系统 sheet）
             } catch (ActivityNotFoundException e) {
                 // ROM 未提供系统 sheet：回落到下方 suggestion 路径
+            } catch (Exception e) {
+                // parceling 等其它失败：同样回落到 suggestion 路径（优雅降级），不让异常冒泡到 Bridge
             }
         }
         if (Build.VERSION.SDK_INT >= 29) {
