@@ -864,15 +864,18 @@ const NativeProvider = {
   async checkPermissions(){ const p = this._p(); return (typeof p.checkPermissions === 'function') ? p.checkPermissions() : null; },
   async requestPermissions(){ const p = this._p(); return (typeof p.requestPermissions === 'function') ? p.requestPermissions() : null; },
   async openSettings(){ const p = this._p(); return (typeof p.openSettings === 'function') ? p.openSettings() : null; },
+  // 定位设置页（LOCATION_OFF 引导）：插件无此方法时回退 openSettings（WiFi 面板），保证动作不落空
+  async openLocationSettings(){ const p = this._p(); return (typeof p.openLocationSettings === 'function') ? p.openLocationSettings() : this.openSettings(); },
   async scan(o = {}){
     const p = this._p();
     const st = (await this.checkPermissions()) || {};
     // 布尔契约（Java 端 {granted:boolean, locationServiceOn:boolean}）与旧字符串状态契约都视为未授权信号
     const vals = Object.values(st).filter(v => typeof v === 'string');
     if (st.granted === false || vals.some(v => v !== 'granted')) { const e = new Error('未授予定位权限'); e.code = 'PERM_DENIED'; throw e; }
-    if (st.locationServiceOn === false) { const e = new Error('需要打开系统定位服务'); e.code = 'LOCATION_OFF'; throw e; }
-    // CN ROM（vivo/MIUI 等）在 API 33+ 上仍要求定位权限才给扫描结果：插件明确报告未授权时同样走「去授权」
+    // CN ROM（vivo/MIUI 等）在 API 33+ 上仍要求定位权限才给扫描结果：插件明确报告未授权时同样走「去授权」。
+    // 权限先于开关（与原生 scan() 的检查顺序一致：先 PERM_DENIED 再 LOCATION_OFF）
     if (st.locationPermission === false) { const e = new Error('需要定位权限才能扫描 WiFi'); e.code = 'PERM_DENIED'; throw e; }
+    if (st.locationServiceOn === false) { const e = new Error('需要打开系统定位服务'); e.code = 'LOCATION_OFF'; throw e; }
     if (typeof p.scan !== 'function') { const e = new Error('Wifi 插件不支持扫描'); e.code = 'UNSUPPORTED'; throw e; }
     const r = await p.scan({ targets: o.targets || [] });
     return r || { networks: [], ts: Date.now() };
@@ -893,6 +896,8 @@ const Wifi = {
 
 // ======================= WiFi 配置 + 首页卡片 + 连接流程状态机 =======================
 const WIFI_CONNECT_TIMEOUT_MS = 20000; // 轮询 getStatus 上限（每 2s 一次）
+// API 30+ 系统「添加网络」sheet 路径：等待用户在系统弹框里点「连接」的超时文案
+const SYSTEM_SHEET_FAIL_TEXT = '连接未完成：系统弹窗可能被取消，或未点击「连接」。可重试';
 let wifiCfg = { targets:['AUST'], saved:{}, scanIntervalMs:30000 };
 let wifiNetworks = [];                    // 最近一次扫描结果
 let wifiConnected = { connected:false, ssid:null };
@@ -1005,7 +1010,12 @@ function renderWifiNotice(err){
   btn.className = 'f-act';
   btn.textContent = kind === 'auth' ? '去授权' : (kind === 'settings' ? '去设置' : '重试');
   btn.addEventListener('click', () => {
-    const act = kind === 'auth' ? Wifi.requestPermissions() : (kind === 'settings' ? Wifi.openSettings() : Promise.resolve(null));
+    const p = Wifi.provider || {};
+    // LOCATION_OFF 打开的是系统「定位」设置页；provider 无 openLocationSettings 时回退 openSettings（WiFi 面板）
+    const act = kind === 'auth' ? Wifi.requestPermissions()
+      : (kind === 'settings'
+        ? (typeof p.openLocationSettings === 'function' ? p.openLocationSettings() : Wifi.openSettings())
+        : Promise.resolve(null));
     Promise.resolve(act).then(() => WifiFlow.refresh()).catch(() => {});
   });
   row.appendChild(ric); row.appendChild(info); row.appendChild(btn);
@@ -1212,14 +1222,21 @@ const WifiFlow = {
     catch (e) { res = { ok:false, error: (e && e.message) ? String(e.message) : '连接失败' }; }
     if (run.cancelled) return;
     if (!res || !res.ok) { this.failed(opts, (res && res.error) || '连接失败'); return; }
-    this.renderConnecting(opts.ssid, 1, !!opts.save);
+    // API 30+ 首次连接走系统「添加网络」sheet：无「系统已接受建议」这一相位，保持第②步为当前步
+    // （spinner），直到轮询出结果（成功收尾 / 超时失败）
+    const systemSheet = res.status === 'SYSTEM_SHEET';
+    this.renderConnecting(opts.ssid, systemSheet ? 0 : 1, !!opts.save, systemSheet);
     const ok = await this.waitConnected(opts.ssid, WIFI_CONNECT_TIMEOUT_MS, run);
     if (run.cancelled) return;
     if (ok) await this.success(opts);
-    else this.failed(opts, '未找到网络或系统未确认');
+    else this.failed(opts, systemSheet ? SYSTEM_SHEET_FAIL_TEXT : '未找到网络或系统未确认');
   },
-  renderConnecting(ssid, phase, save){
-    const steps = [
+  renderConnecting(ssid, phase, save, systemSheet){
+    const steps = systemSheet ? [
+      { t: '已请求系统保存网络', s: 'done' },
+      { t: '请在系统弹框中点击「连接」', s: phase >= 1 ? 'done' : 'cur' },
+      { t: '获取 IP 地址', s: phase >= 1 ? 'cur' : 'wait' }
+    ] : [
       { t: save ? '已保存网络配置' : '读取网络配置', s: 'done' },
       { t: '等待系统确认（首次连接）', s: phase >= 1 ? 'done' : 'cur' },
       { t: '获取 IP 地址', s: phase >= 1 ? 'cur' : 'wait' }
@@ -1240,8 +1257,9 @@ const WifiFlow = {
   renderFailed(opts, reason){
     const body = document.getElementById('wifi-sheet-body');
     const sub = (reason === '密码错误') ? '密码错误，请重新输入。<br>已保存的配置不会丢失。'
+      : (reason === SYSTEM_SHEET_FAIL_TEXT ? SYSTEM_SHEET_FAIL_TEXT
       : (reason === '未找到网络或系统未确认' ? '未找到 ' + escHtml(opts.ssid) + '，可能不在信号范围内。<br>已保存的配置不会丢失。'
-      : escHtml(reason) + '。<br>已保存的配置不会丢失。');
+      : escHtml(reason) + '。<br>已保存的配置不会丢失。'));
     // 系统 WiFi 设置入口：仅当 provider 提供 openSettings 时显示（MockProvider 无此方法）
     const canOpenSettings = typeof Wifi.provider.openSettings === 'function';
     body.innerHTML =

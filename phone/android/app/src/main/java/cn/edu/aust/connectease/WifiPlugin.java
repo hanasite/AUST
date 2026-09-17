@@ -1,6 +1,7 @@
 package cn.edu.aust.connectease;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.provider.Settings;
 
 import androidx.core.content.ContextCompat;
@@ -29,6 +31,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -287,6 +290,21 @@ public class WifiPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void openLocationSettings(PluginCall call) {
+        try {
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        } catch (Exception e) {
+            // 无独立定位设置页的 ROM：回退系统设置根页
+            Intent intent = new Intent(Settings.ACTION_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+        }
+        call.resolve();
+    }
+
+    @PluginMethod
     public void connect(PluginCall call) {
         if (!hasPerm()) {
             call.reject("需要 WiFi 权限", "PERM_DENIED");
@@ -310,6 +328,40 @@ public class WifiPlugin extends Plugin {
             return;
         }
         JSObject ret = new JSObject();
+        // API 30+：首次连接优先走系统「添加网络」对话框（ACTION_WIFI_ADD_NETWORKS）。
+        // API 29 的 suggestion 通知在 CN ROM 上易被忽略/拦截，且 suggestion 无法从用户已连接的网络切换过去；
+        // 系统 sheet 由用户直接确认（保存/连接）并立即切换，首次连接更可靠。
+        if (Build.VERSION.SDK_INT >= 30) {
+            WifiNetworkSuggestion suggestion;
+            try {
+                WifiNetworkSuggestion.Builder b = new WifiNetworkSuggestion.Builder().setSsid(ssid);
+                if (secured && password != null && !password.isEmpty()) {
+                    b.setWpa2Passphrase(password);
+                }
+                suggestion = b.build();
+            } catch (IllegalArgumentException e) {
+                // 与下方 suggestion 路径同口径：非法 ssid / 非 ASCII 密码（CN ROM）按业务失败返回，不让异常冒泡到 Bridge
+                ret.put("ok", false);
+                ret.put("status", "BAD_ARGS");
+                ret.put("error", "网络参数不受系统支持（请检查密码或 SSID 格式）");
+                call.resolve(ret);
+                return;
+            }
+            try {
+                ArrayList<Parcelable> list = new ArrayList<>();
+                list.add(suggestion);
+                Intent intent = new Intent(Settings.ACTION_WIFI_ADD_NETWORKS);
+                intent.putExtra(Settings.EXTRA_WIFI_NETWORK_LIST, list);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+                ret.put("ok", true);
+                ret.put("status", "SYSTEM_SHEET");
+                call.resolve(ret);
+                return; // 该路径不再 addNetworkSuggestions（首次连接完全交给系统 sheet）
+            } catch (ActivityNotFoundException e) {
+                // ROM 未提供系统 sheet：回落到下方 suggestion 路径
+            }
+        }
         if (Build.VERSION.SDK_INT >= 29) {
             int status;
             try {
