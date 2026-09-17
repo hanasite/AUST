@@ -1,6 +1,6 @@
 {
   "name": "aust-connectease",
-  "version": "1.2.0",
+  "version": "2.0",
   "description": "安徽理工大学校园网认证助手",
   "main": "index.js",
   "scripts": {
