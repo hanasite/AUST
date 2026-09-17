@@ -17,3 +17,8 @@ android/.idea/
 
 # 工具
 .superpowers/
+
+# 签名（绝不入库）
+keystore.properties
+*.jks
+*.keystore
