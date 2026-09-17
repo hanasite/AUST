@@ -1,0 +1,63 @@
+name: 问题反馈
+description: 报告使用中遇到的问题（v2.0 公测版）
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！信息填得越全，问题解决得越快。
+        提之前可以先看一眼 README 的「已知问题」部分。
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 使用的版本
+      options:
+        - 手机端 App（Android）
+        - 电脑端程序（Windows）
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: 手机型号 / 系统版本（或电脑系统）
+      placeholder: 例如：iQOO Neo5 / Android 14；Windows 11
+    validations:
+      required: true
+  - type: input
+    id: appver
+    attributes:
+      label: App / 程序版本
+      placeholder: 例如：2.0-beta（设置 → 应用 → AUST 认证助手 → 版本号）
+    validations:
+      required: false
+  - type: textarea
+    id: what
+    attributes:
+      label: 问题描述
+      description: 发生了什么？你原本期望是什么？
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开 App，进入首页
+        2. 点击「一键认证」
+        3. 出现……
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: 截图 / 补充信息
+      description: 截图可直接拖进输入框；如果是 WiFi 连接问题，请注明「连接方式」用的是系统弹窗还是引导式
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已在 Issues 里搜索过，没有相同问题
+        - label: 我试过重启 App / 重新扫描一次

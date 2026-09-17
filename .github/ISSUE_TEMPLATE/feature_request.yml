@@ -1,0 +1,21 @@
+name: 功能建议
+description: 想要的新功能或改进建议（v2.0 公测版）
+title: "[建议] "
+body:
+  - type: markdown
+    attributes:
+      value: 感谢建议！公测版正是用来收集意见的～
+  - type: textarea
+    id: idea
+    attributes:
+      label: 你希望增加 / 改进什么？
+      placeholder: 例如：希望支持课表查询；希望认证成功后自动关闭通知……
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: 使用场景（为什么需要）
+      placeholder: 描述一下你在什么情况下会用到它
+    validations:
+      required: false

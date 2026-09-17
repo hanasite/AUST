@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Gitee 仓库（国内访问更快）
+    url: https://gitee.com/yosakun/aust/issues
+    about: 国内用户也可以在 Gitee 提 Issue，内容要求相同
