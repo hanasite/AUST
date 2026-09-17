@@ -305,7 +305,7 @@ public class WifiPlugin extends Plugin {
 }
 ```
 
-**实现提示**: `bridge.getSavedCall()` 无参版在部分 Capacitor 版本需改为 `getSavedCall("default")`——编译报错时对照 `phone/node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java` 的实际签名调整（Task 1 Step 4 编译时会暴露）。
+**实现提示（2026-09-17 实际采用）**：Capacitor 6 无无参 `getSavedCall()`；已提交实现改用框架推荐的 `@Permission` alias + `@PermissionCallback` 流程（`requestPermissionForAlias`，框架内部配对 `savePermissionCall`/`getPermissionCall`），授权与拒绝路径均 resolve `{granted:boolean}`。Task 2 沿用此模式，勿再引入 `getSavedCall`。
 
 - [ ] **Step 4: 编译验证**
 
