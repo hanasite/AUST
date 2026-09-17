@@ -67,7 +67,7 @@ public class WifiPlugin extends Plugin {
 
     /**
      * API 33+ 时向系统申请的一组权限别名：部分 CN ROM（vivo/MIUI 等）即使只扫 WiFi
-     * 也要求定位权限才会给出扫描结果，所以两个一起申请（系统会合并成一个弹窗）
+     * 也要求定位权限才会给出扫描结果，所以两个一起申请（原生系统会依次弹出两个权限对话框，不会合并）
      */
     private String[] requiredPermissionAliases() {
         return Build.VERSION.SDK_INT >= 33
@@ -280,10 +280,15 @@ public class WifiPlugin extends Plugin {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             getContext().startActivity(intent);
         } catch (Exception e) {
-            // 面板不可用时回退设置页
-            Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            getContext().startActivity(intent);
+            // 面板不可用时回退设置页；回退本身再失败则按业务失败 reject（异常冒泡会被 Bridge 升级为崩溃）
+            try {
+                Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+            } catch (Exception e2) {
+                call.reject("无法打开 WiFi 设置");
+                return;
+            }
         }
         call.resolve();
     }
@@ -295,10 +300,15 @@ public class WifiPlugin extends Plugin {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             getContext().startActivity(intent);
         } catch (Exception e) {
-            // 无独立定位设置页的 ROM：回退系统设置根页
-            Intent intent = new Intent(Settings.ACTION_SETTINGS);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            getContext().startActivity(intent);
+            // 无独立定位设置页的 ROM：回退系统设置根页；回退本身再失败则按业务失败 reject
+            try {
+                Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+            } catch (Exception e2) {
+                call.reject("无法打开定位设置");
+                return;
+            }
         }
         call.resolve();
     }

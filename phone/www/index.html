@@ -256,6 +256,9 @@
   body.v2 .w-targetadd{display:flex;align-items:center;gap:10px;margin-top:12px}
   body.v2 .w-targetadd .w-input{flex:1;min-width:0}
   body.v2 .w-targetadd .f-btn{width:auto;height:46px;padding:0 18px;font-size:14px;flex-shrink:0}
+  /* GUIDE 引导式连接（系统 sheet 不出现的 ROM 兜底）：安静的文字入口 / 返回（无填充无边框，只用颜色） */
+  body.v2 .w-guide-link{display:block;width:100%;margin:10px 0 0;padding:8px;border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue);text-align:center;cursor:pointer;transition:opacity .15s}
+  body.v2 .w-guide-link:active{opacity:.6}
 </style>
 </head>
 <body class="v2">
@@ -984,7 +987,9 @@ function renderWifiCount(){
 function renderWifiFoot(){
   const el = document.getElementById('wifi-scan-info');
   if (!el) return;
-  el.textContent = '每 ' + Math.round(wifiCfg.scanIntervalMs / 1000) + ' 秒自动扫描 · 上次扫描 ' + fmtClock(wifiLastScan);
+  // wifiLastScan 为 null（尚无一次真正的扫描结果，如首次扫描即命中系统缓存）时必须显示 --:--，
+  // 不能让 fmtClock 的 null→Date.now() 兜底把当前时间冒充成"上次扫描"
+  el.textContent = '每 ' + Math.round(wifiCfg.scanIntervalMs / 1000) + ' 秒自动扫描 · 上次扫描 ' + (wifiLastScan === null ? '--:--' : fmtClock(wifiLastScan));
 }
 // 扫描失败（权限/定位关闭等）：卡内一行提示 + 对应动作（Plan 2 的 PERM_DENIED / LOCATION_OFF 码）
 function renderWifiNotice(err){
@@ -1160,11 +1165,15 @@ const WifiFlow = {
     let st = null;
     try { st = await Wifi.getStatus(); } catch (e) { st = null; }
     wifiConnected = { connected: !!(st && st.connected), ssid: (st && st.ssid) || null };
+    // 系统侧已连上某 SSID：清掉该行的「连接失败」残留（如连接超时后系统才确认、或在系统设置里手动连上）
+    if (wifiConnected.connected && wifiConnected.ssid) delete wifiErrors[wifiConnected.ssid];
     paintWifiStatus();
   },
   find(ssid){ return wifiNetworks.find(n => n.ssid === ssid) || null; },
   async onConnect(ssid){
     if (this.run) return;   // 连接 run 是权威守卫（state 会被 refresh 改写，不能只靠 state）
+    // 已连接行：不弹任何 sheet、不发起 connect，只提示 + 刷新（按钮此时是一键连接/连接，重复连接无意义）
+    if (wifiIsConnected(ssid)) { showSnack('已连接'); await this.refresh(); return; }
     const n = this.find(ssid);
     if (!n) { showSnack('⚠️ 网络已不在列表中'); await this.refresh(); return; }
     if (n.secured && !wifiHasSaved(ssid)) return this.showPasswordSheet(n);
@@ -1214,7 +1223,7 @@ const WifiFlow = {
   },
   async doConnect(opts){
     if (this.run) return;   // 已有连接 run 进行中：忽略重复发起（双击 / 竞态）
-    const run = this.run = { cancelled: false, ssid: opts.ssid };
+    const run = this.run = { cancelled: false, ssid: opts.ssid, opts }; // opts 供引导式连接视图收尾复用（password/save）
     this._runStartedAt = Date.now();
     this.state = 'connecting';
     this.renderConnecting(opts.ssid, 0, !!opts.save);
@@ -1252,13 +1261,55 @@ const WifiFlow = {
       '<div class="sheet-title">正在连接 ' + escHtml(ssid) + '</div>' +
       steps.map(st => '<div class="w-step">' + wifiStepIcon(st.s) + '<span class="w-stept' + (st.s === 'cur' ? ' cur' : '') + '">' + st.t + '</span></div>').join('') +
       '<p class="w-hint">' + hint + '</p>' +
-      '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-connect-cancel">取消</button></div>';
+      '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-connect-cancel">取消</button></div>' +
+      (systemSheet ? '<button type="button" class="w-guide-link" id="wifi-guide-open">没弹出系统弹窗？改用引导式连接</button>' : '');
     this.openSheet();
     document.getElementById('wifi-connect-cancel').addEventListener('click', () => {
       // 防「保存并连接」双击：第二下会落在同一坐标的全宽取消按钮上，run 刚开始 400ms 内的取消一律忽略
       if (Date.now() - (this._runStartedAt || 0) < 400) return;
       this.cancel();
     });
+    // 仅 SYSTEM_SHEET 路径设引导兜底入口（部分 ROM 接受 intent 但不渲染 sheet，用户干等 120s）；
+    // 普通路径（suggestion/ADDED/DUPLICATE）不渲染任何新增节点，行为与从前逐字节一致
+    if (systemSheet) {
+      document.getElementById('wifi-guide-open').addEventListener('click', () => this.showGuide());
+    }
+  },
+  // 引导式连接：SYSTEM_SHEET 只作为"系统已受理"信号，切到手动引导页。
+  // 不结束 connect run：轮询照跑，任何时刻连上都会经 waitConnected → success 收尾（closeSheet 关掉当前展示的内容）
+  showGuide(){
+    const run = this.run;
+    if (!run || run.cancelled) return;
+    this.state = 'guide';
+    const body = document.getElementById('wifi-sheet-body');
+    body.innerHTML =
+      '<div class="sheet-title">手动连接引导</div>' +
+      '<p class="w-hint">部分手机的系统没有提供预填弹窗。请打开系统 WiFi 设置，点选目标网络连接一次——之后系统会记住它，进出校园自动重连。</p>' +
+      '<p class="w-hint">如果通知栏出现「允许连接到 …」提示，点允许也可以。</p>' +
+      '<div class="sheet-btns"><button type="button" class="f-btn" id="wifi-guide-settings"><svg class="ic"><use href="#ic-wifi"/></svg>打开 WiFi 设置</button></div>' +
+      '<div class="sheet-btns"><button type="button" class="f-btn ghost2" id="wifi-guide-check"><svg class="ic"><use href="#ic-check"/></svg>我已连接，检查状态</button></div>' +
+      '<button type="button" class="w-guide-link" id="wifi-guide-back">返回</button>';
+    this.openSheet();
+    document.getElementById('wifi-guide-settings').addEventListener('click', () => {
+      // 与其他 provider 调用同口径：可能 reject / 无此方法，一律吞掉（按钮是"去系统设置"，非数据动作）
+      Promise.resolve(Wifi.provider.openSettings?.()).catch(() => {});
+    });
+    document.getElementById('wifi-guide-check').addEventListener('click', () => this.checkGuideStatus());
+    document.getElementById('wifi-guide-back').addEventListener('click', () => {
+      if (!this.run || this.run.cancelled) return;
+      this.state = 'connecting';
+      this.renderConnecting(run.ssid, 0, !!(run.opts && run.opts.save), true);
+    });
+  },
+  async checkGuideStatus(){
+    const run = this.run;
+    if (!run || run.cancelled) return;
+    const opts = run.opts || { ssid: run.ssid };
+    let st = null;
+    try { st = await Wifi.getStatus(); } catch (e) { st = null; }
+    // 判定条件与 waitConnected 完全一致（Android 13+ neverForLocation 下 getSSID 可能脱敏为 null，以 connected 为准）
+    if (st && st.connected && (!st.ssid || st.ssid === opts.ssid)) { await this.success(opts); return; }
+    showSnack('还没检测到连接，请稍后重试');
   },
   renderFailed(opts, reason){
     const body = document.getElementById('wifi-sheet-body');
