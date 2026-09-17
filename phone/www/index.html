@@ -899,10 +899,13 @@ let wifiLastScan = null;
 
 async function loadWifiCfg(){
   const c = await Store.get('aust_wifi');
-  const targets = Array.isArray(c?.targets) ? c.targets.filter(t => typeof t === 'string' && t.trim()).map(t => t.trim()) : [];
+  // 空数组是有效状态（用户在编辑 sheet 里删光了关键字）；只有 targets 字段缺失才回落默认 ['AUST']
+  const raw = c ? c.targets : undefined;
+  const targets = raw === undefined ? ['AUST']
+    : (Array.isArray(raw) ? raw.filter(t => typeof t === 'string' && t.trim()).map(t => t.trim()) : []);
   const saved = (c && typeof c.saved === 'object' && c.saved) ? c.saved : {};
   const iv = Number(c?.scanIntervalMs);
-  wifiCfg = { targets: targets.length ? targets : ['AUST'], saved, scanIntervalMs: (isFinite(iv) && iv >= 1000) ? iv : 30000 };
+  wifiCfg = { targets, saved, scanIntervalMs: (isFinite(iv) && iv >= 1000) ? iv : 30000 };
 }
 async function saveWifiCfg(){ await Store.set('aust_wifi', wifiCfg); }
 function wifiHasSaved(ssid){ return Object.prototype.hasOwnProperty.call(wifiCfg.saved, ssid); }
@@ -1041,8 +1044,15 @@ function openWifiTargetsSheet(){
   document.getElementById('wifi-targets-modal').classList.add('show');
 }
 function closeWifiTargetsSheet(){ document.getElementById('wifi-targets-modal').classList.remove('show'); }
-async function saveWifiTargets(){
-  try { await saveWifiCfg(); } catch (e) { showSnack('目标网络保存失败'); }
+async function saveWifiTargets(prev){
+  try { await saveWifiCfg(); }
+  catch (e) {
+    // 写存储失败：内存回滚到写入前，避免内存与持久层分叉（sheet 保持打开、回到旧列表）
+    wifiCfg.targets = prev;
+    renderWifiTargetsSheet();
+    showSnack('目标网络保存失败');
+    return;
+  }
   renderWifiTargetsSheet();
   await WifiFlow.refresh();   // 立即按新关键字重扫（sheet 保持打开）
 }
@@ -1054,15 +1064,17 @@ async function addWifiTarget(){
   if (!kw) { fail('请输入关键字'); return; }
   if (wifiCfg.targets.some(t => t.toUpperCase() === kw.toUpperCase())) { fail('该关键字已存在'); return; }
   if (hint) hint.classList.remove('show');
+  const prev = wifiCfg.targets.slice();   // 写入前快照：Store.set 失败时回滚
   wifiCfg.targets.push(kw);
   if (input) input.value = '';
-  await saveWifiTargets();
+  await saveWifiTargets(prev);
 }
 async function removeWifiTarget(kw){
   const i = wifiCfg.targets.indexOf(kw);
   if (i < 0) return;
+  const prev = wifiCfg.targets.slice();   // 写入前快照：Store.set 失败时回滚
   wifiCfg.targets.splice(i, 1);
-  await saveWifiTargets();
+  await saveWifiTargets(prev);
 }
 // 首页 WiFi 卡计数点按 → 打开目标网络编辑 sheet
 function initWifiTargetsEdit(){
@@ -1146,6 +1158,7 @@ const WifiFlow = {
       '<div class="f-rmeta">' + (n.secured ? 'WPA2 加密 · 首次连接需输入密码' : '开放网络 · 无需密码') + '</div></div></div>' +
       '<div class="w-input"><input type="password" id="wifi-pass-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="输入 WiFi 密码" aria-label="WiFi 密码">' +
       '<button type="button" class="w-eye" id="wifi-pass-eye" aria-label="显示密码"><svg class="ic"><use href="#ic-eye"/></svg></button></div>' +
+      '<div class="f-hint-err" id="wifi-pass-hint"></div>' +
       '<label class="w-check"><input type="checkbox" id="wifi-save-check"' + ((pre.save === undefined || pre.save) ? ' checked' : '') + '>' +
       '<span class="box"><svg class="ic"><use href="#ic-check"/></svg></span>保存此网络，下次一键连接</label>' +
       '<p class="w-hint">密码只保存在本机。首次连接时系统会弹出一次确认，之后自动重连。</p>' +
@@ -1156,6 +1169,7 @@ const WifiFlow = {
     const eye = document.getElementById('wifi-pass-eye');
     const chk = document.getElementById('wifi-save-check');
     const ok = document.getElementById('wifi-pass-ok');
+    const hint = document.getElementById('wifi-pass-hint');
     inp.value = pre.password || '';
     const syncOk = () => { ok.textContent = chk.checked ? '保存并连接' : '直接连接'; };
     syncOk();
@@ -1166,7 +1180,13 @@ const WifiFlow = {
       eye.setAttribute('aria-label', show ? '隐藏密码' : '显示密码');
     });
     document.getElementById('wifi-pass-cancel').addEventListener('click', () => this.cancel());
-    ok.addEventListener('click', () => this.doConnect({ ssid: n.ssid, password: inp.value, secured: !!n.secured, save: chk.checked }));
+    ok.addEventListener('click', () => {
+      // 加密网络空密码会把网络当开放网络注册：就地提示，保持 sheet 打开，不进入连接流程（与 Java 端 guard 对齐）
+      if (n.secured && !inp.value) { if (hint) { hint.textContent = '请输入密码'; hint.classList.add('show'); } return; }
+      if (hint) hint.classList.remove('show');
+      this.doConnect({ ssid: n.ssid, password: inp.value, secured: !!n.secured, save: chk.checked });
+    });
+    if (inp && hint) inp.addEventListener('input', () => hint.classList.remove('show'));
     setTimeout(() => inp.focus(), 320);
   },
   async doConnect(opts){

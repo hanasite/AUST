@@ -269,6 +269,11 @@ public class WifiPlugin extends Plugin {
             call.reject("缺少 SSID", "BAD_ARGS");
             return;
         }
+        // 加密网络空密码会把网络当开放网络注册进系统，必须在构造 suggestion 之前拦下
+        if (secured && (password == null || password.isEmpty())) {
+            call.reject("该网络需要密码", "BAD_ARGS");
+            return;
+        }
         JSObject ret = new JSObject();
         if (Build.VERSION.SDK_INT >= 29) {
             int status;
@@ -284,7 +289,7 @@ public class WifiPlugin extends Plugin {
                 // RuntimeException 直接崩溃 App（Bridge.callPluginMethod 的 catch(Exception) 分支），故按业务失败返回
                 ret.put("ok", false);
                 ret.put("status", "BAD_ARGS");
-                ret.put("error", "网络参数不受系统支持（密码需为 8-63 位 ASCII 字符）");
+                ret.put("error", "网络参数不受系统支持（请检查密码或 SSID 格式）");
                 call.resolve(ret);
                 return;
             } catch (SecurityException e) {
@@ -294,7 +299,7 @@ public class WifiPlugin extends Plugin {
             if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
                 ret.put("ok", true);
                 ret.put("status", "ADDED");
-            } else if (status == 2 /* STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE */) {
+            } else if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE) {
                 ret.put("ok", true);
                 ret.put("status", "DUPLICATE");
             } else {

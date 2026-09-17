@@ -372,7 +372,7 @@ git commit -m "feat(phone,wifi): native plugin — scan, permissions, status, se
             if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
                 ret.put("ok", true);
                 ret.put("status", "ADDED");
-            } else if (status == 2 /* STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE */) {
+            } else if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE) {
                 ret.put("ok", true);
                 ret.put("status", "DUPLICATE");
             } else {
