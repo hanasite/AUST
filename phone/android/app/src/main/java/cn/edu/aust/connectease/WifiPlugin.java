@@ -10,8 +10,12 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 
 import androidx.core.content.ContextCompat;
@@ -25,6 +29,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,54 +133,75 @@ public class WifiPlugin extends Plugin {
                 }
             }
         };
-        ContextCompat.registerReceiver(ctx, holder[0],
-                new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION),
-                ContextCompat.RECEIVER_NOT_EXPORTED);
-        boolean started = wm.startScan();
-        if (!started) {
-            // 系统节流中：立即用缓存结果返回（带 cached 标记，JS 侧不推进"上次扫描"时间戳）
+        try {
+            ContextCompat.registerReceiver(ctx, holder[0],
+                    new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION),
+                    ContextCompat.RECEIVER_NOT_EXPORTED);
+            boolean started = wm.startScan();
+            if (!started) {
+                // 系统节流中：立即用缓存结果返回（带 cached 标记，JS 侧不推进"上次扫描"时间戳）
+                if (done.compareAndSet(false, true)) {
+                    try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
+                    resolveScan(pending, wm, true);
+                }
+                return;
+            }
+            // 12s 超时兜底走主线程 Handler：decor view 的 postDelayed 在视图脱离窗口时会丢回调，
+            // 且 getActivity() 可能为 null（NPE 崩溃）
+            if (getBridge() == null || getBridge().getActivity() == null) {
+                // Activity 已销毁：没有可靠的广播兜底窗口，立即回退到缓存结果
+                if (done.compareAndSet(false, true)) {
+                    try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
+                    resolveScan(pending, wm, true);
+                }
+                return;
+            }
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (done.compareAndSet(false, true)) {
+                    try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
+                    resolveScan(pending, wm, true); // 12s 未收到广播：结果可能是系统缓存，标记 cached
+                }
+            }, 12000);
+        } catch (Exception e) {
+            // 任何异常路径：先注销接收器（不留悬挂 receiver），再按类型 reject 且保证只结算一次
             if (done.compareAndSet(false, true)) {
                 try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                resolveScan(pending, wm, true);
+                if (e instanceof SecurityException) call.reject("需要 WiFi 权限", "PERM_DENIED");
+                else call.reject("扫描失败", "SCAN_FAILED");
             }
-            return;
         }
-        getBridge().getActivity().getWindow().getDecorView().postDelayed(() -> {
-            if (done.compareAndSet(false, true)) {
-                try { ctx.unregisterReceiver(holder[0]); } catch (Exception ignored) {}
-                resolveScan(pending, wm, true); // 12s 未收到广播：结果可能是系统缓存，标记 cached
-            }
-        }, 12000);
     }
 
     private void resolveScan(PluginCall call, WifiManager wm, boolean cached) {
-        List<ScanResult> results;
+        // 调用方（广播/节流/超时/异常路径）均已注销接收器，且 CAS 保证本方法只被调用一次
         try {
-            results = wm.getScanResults();
+            List<ScanResult> results = wm.getScanResults();
+            Map<String, ScanResult> best = new LinkedHashMap<>();
+            for (ScanResult r : results) {
+                if (r.SSID == null || r.SSID.isEmpty()) continue; // 隐藏网络
+                ScanResult cur = best.get(r.SSID);
+                if (cur == null || r.level > cur.level) best.put(r.SSID, r);
+            }
+            JSArray arr = new JSArray();
+            for (ScanResult r : best.values()) {
+                JSObject n = new JSObject();
+                n.put("ssid", r.SSID);
+                n.put("level", WifiManager.calculateSignalLevel(r.level, 5)); // 0-4
+                String cap = r.capabilities == null ? "" : r.capabilities;
+                n.put("secured", cap.contains("WPA") || cap.contains("WEP") || cap.contains("SAE") || cap.contains("PSK"));
+                arr.put(n);
+            }
+            JSObject ret = new JSObject();
+            ret.put("networks", arr);
+            ret.put("ts", System.currentTimeMillis());
+            ret.put("cached", cached);
+            call.resolve(ret);
         } catch (SecurityException e) {
             call.reject("需要 WiFi 权限", "PERM_DENIED");
-            return;
+        } catch (Exception e) {
+            // 其它异常（部分 OEM ROM 的 getScanResults 抛出、结果构造异常等）统一归为 SCAN_FAILED
+            call.reject("扫描失败", "SCAN_FAILED");
         }
-        Map<String, ScanResult> best = new LinkedHashMap<>();
-        for (ScanResult r : results) {
-            if (r.SSID == null || r.SSID.isEmpty()) continue; // 隐藏网络
-            ScanResult cur = best.get(r.SSID);
-            if (cur == null || r.level > cur.level) best.put(r.SSID, r);
-        }
-        JSArray arr = new JSArray();
-        for (ScanResult r : best.values()) {
-            JSObject n = new JSObject();
-            n.put("ssid", r.SSID);
-            n.put("level", WifiManager.calculateSignalLevel(r.level, 5)); // 0-4
-            String cap = r.capabilities == null ? "" : r.capabilities;
-            n.put("secured", cap.contains("WPA") || cap.contains("WEP") || cap.contains("SAE") || cap.contains("PSK"));
-            arr.put(n);
-        }
-        JSObject ret = new JSObject();
-        ret.put("networks", arr);
-        ret.put("ts", System.currentTimeMillis());
-        ret.put("cached", cached);
-        call.resolve(ret);
     }
 
     @PluginMethod
@@ -227,6 +253,83 @@ public class WifiPlugin extends Plugin {
 
     @PluginMethod
     public void connect(PluginCall call) {
-        call.reject("not implemented", "NOT_IMPL"); // Task 2 实现
+        if (!hasPerm()) {
+            call.reject("需要 WiFi 权限", "PERM_DENIED");
+            return;
+        }
+        final WifiManager wm = wifi();
+        if (wm == null) {
+            call.reject("WiFi 服务不可用", "NO_SERVICE");
+            return;
+        }
+        String ssid = call.getString("ssid");
+        String password = call.getString("password", "");
+        boolean secured = Boolean.TRUE.equals(call.getBoolean("secured", true));
+        if (ssid == null || ssid.isEmpty()) {
+            call.reject("缺少 SSID", "BAD_ARGS");
+            return;
+        }
+        JSObject ret = new JSObject();
+        if (Build.VERSION.SDK_INT >= 29) {
+            int status;
+            try {
+                WifiNetworkSuggestion.Builder b = new WifiNetworkSuggestion.Builder().setSsid(ssid);
+                if (secured && password != null && !password.isEmpty()) {
+                    b.setWpa2Passphrase(password);
+                }
+                status = wm.addNetworkSuggestions(Collections.singletonList(b.build()));
+            } catch (IllegalArgumentException e) {
+                // Builder 对非法参数抛 IllegalArgumentException（setSsid 非法 unicode / setWpa2Passphrase 非 ASCII，
+                // 系统服务校验失败也经 Binder 回抛）。若任其冒泡，Capacitor Bridge 会把它升级为主线程
+                // RuntimeException 直接崩溃 App（Bridge.callPluginMethod 的 catch(Exception) 分支），故按业务失败返回
+                ret.put("ok", false);
+                ret.put("status", "BAD_ARGS");
+                ret.put("error", "网络参数不受系统支持（密码需为 8-63 位 ASCII 字符）");
+                call.resolve(ret);
+                return;
+            } catch (SecurityException e) {
+                call.reject("需要更改 WiFi 状态的权限", "PERM_DENIED");
+                return;
+            }
+            if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+                ret.put("ok", true);
+                ret.put("status", "ADDED");
+            } else if (status == 2 /* STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE */) {
+                ret.put("ok", true);
+                ret.put("status", "DUPLICATE");
+            } else {
+                ret.put("ok", false);
+                ret.put("status", "ERROR_" + status);
+                ret.put("error", "系统拒绝添加网络建议（code " + status + "）");
+            }
+            call.resolve(ret);
+            return;
+        }
+        // API < 29 回退：直接配置并连接（该版本允许第三方 App 操作）
+        try {
+            WifiConfiguration conf = new WifiConfiguration();
+            conf.SSID = "\"" + ssid + "\"";
+            if (secured && password != null && !password.isEmpty()) {
+                conf.preSharedKey = "\"" + password + "\"";
+            } else {
+                conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            }
+            int netId = wm.addNetwork(conf);
+            if (netId == -1) {
+                ret.put("ok", false);
+                ret.put("status", "ADD_FAILED");
+                ret.put("error", "保存网络配置失败（密码可能不正确）");
+            } else {
+                wm.disconnect();
+                wm.enableNetwork(netId, true);
+                wm.reconnect();
+                ret.put("ok", true);
+                ret.put("status", "ADDED");
+            }
+        } catch (SecurityException e) {
+            call.reject("需要更改 WiFi 状态的权限", "PERM_DENIED");
+            return;
+        }
+        call.resolve(ret);
     }
 }
