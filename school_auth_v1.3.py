@@ -37,7 +37,7 @@ CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".school_auth_config.json")
 # ══════════════════════════════════════════════════════════════════════════════
 #  WiFi 扫描 / 连接（netsh，仅 Windows）
 # ══════════════════════════════════════════════════════════════════════════════
-import subprocess, re, tempfile
+import subprocess
 from xml.sax.saxutils import escape as _xml_escape
 
 _CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
@@ -73,8 +73,11 @@ def wifi_scan():
         ssid = m.group(1).strip()
         if not ssid:
             continue  # 隐藏网络
-        sig = re.search(r":\s*(\d+)%", block)
-        secured = not re.search(r"开放|Open", block, re.IGNORECASE)
+        # SSID 自身可能含「Open」「50%」等字样，信号/加密只从 SSID 行以外判定
+        rest = "\n".join(l for l in block.splitlines()
+                         if not re.match(r"SSID \d+\s*:", l))
+        sig = re.search(r":\s*(\d+)%", rest)
+        secured = not re.search(r"开放|Open", rest, re.IGNORECASE)
         nets.append({"ssid": ssid, "signal": int(sig.group(1)) if sig else 0, "secured": secured})
     # 同名去重取最强
     best = {}
@@ -124,8 +127,8 @@ def wifi_connect(ssid, password=None, secured=False):
                                       enc="AES" if secured else "none", shared_key=key)
             with tempfile.NamedTemporaryFile("w", suffix=".xml", delete=False,
                                              encoding="utf-8") as f:
+                path = f.name   # 先记录路径：write 失败也要走 finally 删除
                 f.write(xml)
-                path = f.name
             code, out = _netsh(["wlan", "add", "profile", "filename=" + path, "user=current"])
             if code != 0:
                 return False, "保存网络配置失败"
@@ -843,11 +846,23 @@ class App(tk.Tk):
         self._wifi_status_var.set("⏳ 扫描中…")
 
         def worker():
-            nets = wifi_scan()
-            st   = wifi_status()
+            try:
+                nets = wifi_scan()
+                st   = wifi_status()
+            except Exception as e:
+                err = str(e)   # lambda 延后执行，需先取出消息（except 作用域会清空 e）
+                self.after(0, lambda: self._wifi_after_fail(err, "扫描"))
+                return
             self.after(0, lambda: self._wifi_after_scan(nets, st))
 
         threading.Thread(target=worker, daemon=True).start()
+
+    def _wifi_after_fail(self, err, action="操作"):
+        """worker 异常兜底：恢复按钮可用，保证 UI 不会卡在「扫描中…」"""
+        self._wifi_scan_btn.config(state="normal", text="扫描")
+        self._wifi_busy(False, f"❌ {action}失败：{err}")
+        self._wifi_status_lbl.config(fg=self.DANGER)
+        self._log_msg(f"📶 WiFi {action}失败：{err}")
 
     def _wifi_after_scan(self, nets, st):
         self._wifi_scan_btn.config(state="normal", text="扫描")
@@ -864,7 +879,12 @@ class App(tk.Tk):
         self._wifi_busy(True, f"⏳ 连接 {ssid} …")
 
         def worker(pwd, sec):
-            ok, msg = wifi_connect(ssid, pwd, sec)
+            try:
+                ok, msg = wifi_connect(ssid, pwd, sec)
+            except Exception as e:
+                err = str(e)
+                self.after(0, lambda: self._wifi_after_fail(err, f"连接 {ssid} "))
+                return
             self.after(0, lambda: self._wifi_after_connect(ssid, sec, pwd, ok, msg))
 
         threading.Thread(target=worker, args=(None, secured), daemon=True).start()
@@ -880,7 +900,12 @@ class App(tk.Tk):
             self._wifi_busy(True, f"⏳ 连接 {ssid} …")
 
             def worker():
-                ok2, msg2 = wifi_connect(ssid, pwd, True)
+                try:
+                    ok2, msg2 = wifi_connect(ssid, pwd, True)
+                except Exception as e:
+                    err = str(e)
+                    self.after(0, lambda: self._wifi_after_fail(err, f"连接 {ssid} "))
+                    return
                 self.after(0, lambda: self._wifi_after_connect(ssid, True, pwd, ok2, msg2))
 
             threading.Thread(target=worker, daemon=True).start()
